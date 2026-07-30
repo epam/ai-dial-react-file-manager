@@ -9,6 +9,7 @@ import { FileManagerProvider } from './FileManagerProvider';
 import { itemsMock } from './__mocks__/files';
 import { useDialFileManagerTabs } from './hooks/use-file-manager-tabs';
 import {
+  DialDateCellRenderer,
   DialPrimaryButton,
   DialPopup,
   PopupSize,
@@ -41,7 +42,6 @@ import {
 } from '@tabler/icons-react';
 import type { FileManagerGridRow } from './FileManagerContext';
 import type { ColDef } from 'ag-grid-community';
-import { DialDateCellRenderer } from '@/components/Grid/renderers/DateCellRenderer';
 import { GridSelectionMode } from '@/models/selection-mode.ts';
 
 const meta = {

@@ -40,11 +40,8 @@ export default defineConfig({
     lib: {
       entry: './src/index.ts',
       name: 'aiDialReactFileManager',
-      fileName: (format) =>
-        format === 'es'
-          ? 'ai-dial-react-file-manager.es.js'
-          : 'ai-dial-react-file-manager.cjs',
-      formats: ['es', 'cjs'],
+      fileName: 'ai-dial-react-file-manager.es',
+      formats: ['es'],
     },
     rollupOptions: {
       external: (id) =>
@@ -52,17 +49,6 @@ export default defineConfig({
           (packageName) =>
             id === packageName || id.startsWith(`${packageName}/`),
         ),
-      output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-          '@epam/ai-dial-ui-kit': 'AiDialUiKit',
-          '@tabler/icons-react': 'TablerIcons',
-          'ag-grid-community': 'AgGridCommunity',
-          'ag-grid-react': 'AgGridReact',
-          classnames: 'classNames',
-        },
-      },
     },
   },
 });

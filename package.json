@@ -17,7 +17,6 @@
     "file-manager",
     "react"
   ],
-  "main": "dist/ai-dial-react-file-manager.cjs",
   "module": "dist/ai-dial-react-file-manager.es.js",
   "types": "dist/src/index.d.ts",
   "engines": {
@@ -28,10 +27,9 @@
     ".": {
       "types": "./dist/src/index.d.ts",
       "import": "./dist/ai-dial-react-file-manager.es.js",
-      "require": "./dist/ai-dial-react-file-manager.cjs"
+      "default": "./dist/ai-dial-react-file-manager.es.js"
     },
     "./styles.css": {
-      "require": "./dist/index.css",
       "default": "./dist/index.css"
     }
   },

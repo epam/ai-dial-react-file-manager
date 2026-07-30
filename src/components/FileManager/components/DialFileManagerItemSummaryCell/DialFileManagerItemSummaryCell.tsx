@@ -2,8 +2,7 @@ import type { FC, ReactNode } from 'react';
 import { DialFileManagerItemName } from '@/components/FileManager/components/FileManagerItemName/FileManagerItemName';
 import { BASE_FILE_MANAGER_ICON_SIZE } from '@/components/FileManager/constants';
 import { DialFileNodeType } from '@/models/file';
-import { DialItemType } from '@epam/ai-dial-ui-kit';
-import { DialDateCellRenderer } from '@/components/Grid/renderers/DateCellRenderer';
+import { DialDateCellRenderer, DialItemType } from '@epam/ai-dial-ui-kit';
 import { IconCircleFilled } from '@tabler/icons-react';
 import { formatBytes } from '@/components/FileManager/utils';
 

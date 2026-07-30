@@ -1,14 +1,15 @@
 import {
+  convertGridDateToDate,
+  DEFAULT_GRID_DATE_FORMAT_OPTIONS,
+  DEFAULT_GRID_DATE_LOCALE,
+  DialDateCellRenderer,
   mergeClasses,
   DialFileName,
   DialFolderName,
   DialItemType,
+  type DialDateCellRendererProps,
 } from '@epam/ai-dial-ui-kit';
 import { DialFileNodeType } from '@/models/file';
-import {
-  DialDateCellRenderer,
-  type DialDateCellRendererProps,
-} from '@/components/Grid/renderers/DateCellRenderer';
 import {
   FileManagerRenameTriggerView,
   FileManagerColumnKey,
@@ -24,11 +25,6 @@ import {
   getForbiddenSymbolsTooltip,
 } from '@/components/FileManager/utils';
 import type { ColDef } from 'ag-grid-community';
-import { convertToDate } from '@/components/Grid/renderers/utils';
-import {
-  DEFAULT_DATE_FORMAT_OPTIONS,
-  DEFAULT_LOCALE,
-} from '@/components/Grid/renderers/constants';
 
 type GridRow = FileManagerGridRow;
 
@@ -212,12 +208,12 @@ export const UPDATED_AT_COLUMN =
     },
     filterValueGetter: (params) => {
       const value = params.data[params.colDef.field || ''];
-      const date = convertToDate(value);
+      const date = convertGridDateToDate(value);
       if (!date) return '';
 
       const formatted = new Intl.DateTimeFormat(
-        dateLocale || DEFAULT_LOCALE,
-        dateOptions || DEFAULT_DATE_FORMAT_OPTIONS,
+        dateLocale || DEFAULT_GRID_DATE_LOCALE,
+        dateOptions || DEFAULT_GRID_DATE_FORMAT_OPTIONS,
       );
 
       return formatted.format(date);
