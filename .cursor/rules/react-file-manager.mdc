@@ -1,0 +1,27 @@
+---
+description: React/TypeScript file-manager conventions - components, hooks, tests, exports
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# AI DIAL React File Manager - TS/React
+
+- **TypeScript**: After edits in this repo, run `npm run typecheck` when the
+  script exists. Fix all reported errors before finishing, including in stories
+  and specs you touched. Prefer strict typings over `any`.
+- **Exports**: Public API lives in the package entry point defined by this
+  repository. Export public components, hooks, utilities, and prop/model types
+  consumers need.
+- **Components**: Follow the existing component directory layout once source
+  files are present; colocate stories/examples and specs where the repo already
+  does so.
+- **File flows**: Handle loading, empty, error, disabled, permission, selection,
+  drag-and-drop, upload/download, cancellation, and stale async responses.
+- **Tests**: Use Vitest + Testing Library when available; test visible behavior,
+  callbacks, keyboard interaction, selection state, and async/error flows.
+- **Styles**: Use the repository's existing styling system and class merge
+  utilities. Avoid inline styles, hardcoded colors, and raw sizes that bypass
+  tokens.
+- **Accessibility**: Prefer semantic elements and role-based queries; maintain
+  keyboard access and focus management for lists, menus, dialogs, and upload
+  controls.
