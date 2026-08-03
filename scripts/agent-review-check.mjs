@@ -254,8 +254,7 @@ function checkInlineStylesAndRiskyPatterns(file) {
     }
   }
 
-  const hexMatches =
-    sourceWithoutComments.match(/#[0-9a-fA-F]{3,8}\b/g) || [];
+  const hexMatches = sourceWithoutComments.match(/#[0-9a-fA-F]{3,8}\b/g) || [];
   if (hexMatches.length > 0 && /\.(tsx|ts)$/.test(file)) {
     pushNice(
       `${file} - ${hexMatches.length} hex literal(s) (${hexMatches.slice(0, 3).join(', ')}${hexMatches.length > 3 ? ', ...' : ''}); prefer design tokens.`,

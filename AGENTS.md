@@ -34,13 +34,13 @@ This file is read by Cursor, Codex, and other agent harnesses alongside project 
 
 ## Commands reference
 
-| Script              | Use                                                                   |
-| ------------------- | --------------------------------------------------------------------- |
-| `npm run typecheck` | Full TypeScript check; does not replace ESLint                        |
-| `npm run lint`      | ESLint                                                                |
-| `npm run test`      | Unit/component tests                                                  |
-| `npm run build`     | Package build                                                         |
-| `npm run storybook` | Local docs and visual QA, if configured                               |
+| Script              | Use                                            |
+| ------------------- | ---------------------------------------------- |
+| `npm run typecheck` | Full TypeScript check; does not replace ESLint |
+| `npm run lint`      | ESLint                                         |
+| `npm run test`      | Unit/component tests                           |
+| `npm run build`     | Package build                                  |
+| `npm run storybook` | Local docs and visual QA, if configured        |
 
 If a script is not present in `package.json`, do not invent it; use the closest existing script and mention what could not be run.
 
@@ -63,15 +63,15 @@ If a script is not present in `package.json`, do not invent it; use the closest 
 - **`.cursor/rules/`** — Always-on and file-scoped rules.
 - **`.cursor/commands/`** — Slash-style prompts, including a **plan → implement → review → fix** pipeline:
 
-| Command               | Role                                             |
-| --------------------- | ------------------------------------------------ |
-| `plan-component`      | Plan only; no code until approved                |
-| `implement-from-plan` | Code only; follow the agreed plan                |
-| `review-changes`      | Review only; no edits (alias of `code-review`)   |
-| `code-review`         | Review only; no edits (cross-harness command)    |
-| `apply-review`        | Fixes only; address listed feedback              |
-| `feature-pipeline`    | Run all four phases in order in one thread       |
-| `story-and-test`      | Align stories/examples + Vitest for scope        |
+| Command               | Role                                           |
+| --------------------- | ---------------------------------------------- |
+| `plan-component`      | Plan only; no code until approved              |
+| `implement-from-plan` | Code only; follow the agreed plan              |
+| `review-changes`      | Review only; no edits (alias of `code-review`) |
+| `code-review`         | Review only; no edits (cross-harness command)  |
+| `apply-review`        | Fixes only; address listed feedback            |
+| `feature-pipeline`    | Run all four phases in order in one thread     |
+| `story-and-test`      | Align stories/examples + Vitest for scope      |
 
 ## Cross-harness code-review agent
 

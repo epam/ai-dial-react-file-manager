@@ -115,13 +115,16 @@ Produce exactly three sections, in this order:
 
 ```md
 ### Summary
+
 <2-4 sentences: what changed, overall verdict, biggest risks.>
 
 ### Must-fix
+
 1. <file:line> - <issue> - <suggested change in 1 sentence>
 2. ...
 
 ### Nice-to-have
+
 1. <file:line> - <issue> - <suggested change in 1 sentence>
 2. ...
 ```

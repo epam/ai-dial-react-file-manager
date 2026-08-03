@@ -1,0 +1,46 @@
+name: PR Workflow
+
+on:
+  pull_request:
+    branches: [development, release-*]
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  run_tests:
+    uses: epam/ai-dial-ci/.github/workflows/node_pr.yml@4.8.0
+    secrets: inherit
+    with:
+      docker-build-enabled: false
+      node-version: '24'
+
+  package_check:
+    name: package
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Prepare Node.js
+        uses: epam/ai-dial-ci/actions/node_prepare@4.8.0
+        with:
+          clean-install: true
+          node-version: '24'
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build package
+        run: npm run build
+
+      - name: Verify npm archive
+        run: npm run publish:dry
+
+      - name: Test packed package in a clean consumer
+        run: npm run test:package

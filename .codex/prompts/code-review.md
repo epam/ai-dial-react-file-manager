@@ -35,7 +35,9 @@ Before responding:
 
 ```md
 ### Summary
+
 ### Must-fix
+
 ### Nice-to-have
 ```
 

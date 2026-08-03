@@ -53,6 +53,7 @@
     "lint:check": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test:run": "vitest run",
+    "test:package": "node tools/package-smoke.mjs",
     "verify:agent-hook": "npm run typecheck && npm run lint:check && npm run test:run",
     "test": "vitest --coverage",
     "format": "prettier --check .",
