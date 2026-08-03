@@ -76,31 +76,28 @@ describe('useFlexibleActions', () => {
     );
     vi.stubGlobal('cancelAnimationFrame', vi.fn());
 
-    vi.spyOn(
-      HTMLElement.prototype,
-      'getBoundingClientRect',
-    ).mockImplementation(function (this: HTMLElement) {
-      const width = Number(this.dataset.width ?? 0);
-      return {
-        bottom: 0,
-        height: 0,
-        left: 0,
-        right: width,
-        top: 0,
-        width,
-        x: 0,
-        y: 0,
-        toJSON: () => ({}),
-      };
-    });
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: HTMLElement) {
+        const width = Number(this.dataset.width ?? 0);
+        return {
+          bottom: 0,
+          height: 0,
+          left: 0,
+          right: width,
+          top: 0,
+          width,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        };
+      },
+    );
 
-    vi.spyOn(
-      HTMLElement.prototype,
-      'offsetWidth',
-      'get',
-    ).mockImplementation(function (this: HTMLElement) {
-      return Number(this.dataset.width ?? 0);
-    });
+    vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(
+      function (this: HTMLElement) {
+        return Number(this.dataset.width ?? 0);
+      },
+    );
   });
 
   afterEach(() => {

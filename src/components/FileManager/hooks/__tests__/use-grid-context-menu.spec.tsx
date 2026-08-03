@@ -197,10 +197,12 @@ describe('Dial UI Kit :: useGridContextMenu', () => {
       }),
     );
     const click = (items: ReturnType<typeof result.current>, key: string) =>
-      items.find((item) => item.key === key)?.onClick?.({
-        key,
-        domEvent: mockMouseEvent,
-      });
+      items
+        .find((item) => item.key === key)
+        ?.onClick?.({
+          key,
+          domEvent: mockMouseEvent,
+        });
 
     const folderItems = result.current(testFolder);
     click(folderItems, DialFileManagerActions.AddSibling);

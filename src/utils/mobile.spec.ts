@@ -20,15 +20,12 @@ describe('mobile utilities', () => {
     { width: 500, medium: true, small: true },
     { width: 900, medium: true, small: false },
     { width: 1400, medium: false, small: false },
-  ])(
-    'detects breakpoints at $width px',
-    ({ width, medium, small }) => {
-      setInnerWidth(width);
+  ])('detects breakpoints at $width px', ({ width, medium, small }) => {
+    setInnerWidth(width);
 
-      expect(isMediumScreen()).toBe(medium);
-      expect(isSmallScreen()).toBe(small);
-    },
-  );
+    expect(isMediumScreen()).toBe(medium);
+    expect(isSmallScreen()).toBe(small);
+  });
 
   it.each([
     { width: 500, expected: ScreenType.Mobile },

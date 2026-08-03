@@ -30,7 +30,11 @@ describe('FileManagerTooltip', () => {
 
     fireEvent.mouseMove(screen.getByText('Blocked row'));
 
-    expect(getRowDisabledTooltip).toHaveBeenCalledWith(row, undefined, undefined);
+    expect(getRowDisabledTooltip).toHaveBeenCalledWith(
+      row,
+      undefined,
+      undefined,
+    );
     expect(screen.getByText('File type is not allowed')).toBeInTheDocument();
 
     fireEvent.mouseLeave(
