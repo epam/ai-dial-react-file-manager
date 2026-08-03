@@ -20,5 +20,5 @@ jobs:
       docker-build-enabled: false
       node-version: '24'
       promote: false
-      publish-enabled: false
+      publish-enabled: true
     secrets: inherit
