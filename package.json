@@ -12,6 +12,11 @@
   "bugs": {
     "url": "https://github.com/epam/ai-dial-react-file-manager/issues"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
   "keywords": [
     "ai-dial",
     "file-manager",
@@ -57,10 +62,9 @@
     "storybook:css": "tailwindcss -w -i ./src/styles/tailwind-entry.scss -o ./src/index.css",
     "build-storybook": "concurrently \"npm run build-storybook:css\" \"storybook build\"",
     "build-storybook:css": "tailwindcss -m -i ./src/styles/tailwind-entry.scss -o ./src/index.css",
-    "prepare": "husky",
-    "prepublishOnly": "npm run build",
-    "release": "node tools/publish-lib.mjs",
-    "release:dry": "node tools/publish-lib.mjs --dry",
+    "prepare": "node tools/setup-husky.mjs",
+    "publish:npm": "npm publish --access public",
+    "publish:dry": "npm publish --access public --dry-run --provenance=false",
     "storybook-docs": "storybook dev --docs",
     "build-storybook-docs": "storybook build --docs",
     "review:check": "node scripts/agent-review-check.mjs",
@@ -118,7 +122,6 @@
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.2",
-    "minimist": "^1.2.8",
     "postcss": "^8.5.6",
     "postcss-import": "^16.1.1",
     "prettier": "^3.8.3",

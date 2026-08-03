@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest an improvement for AI DIAL React File Manager
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for helping improve AI DIAL React File Manager.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the problem and the proposed behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: Explain who benefits from this change and how it would be used.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe any alternatives or workarounds you considered.
+  - type: checkboxes
+    id: confidentiality
+    attributes:
+      label: Confidential information
+      options:
+        - label: I confirm that this report contains no confidential information.
+          required: true

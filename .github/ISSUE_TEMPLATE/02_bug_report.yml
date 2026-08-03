@@ -1,0 +1,51 @@
+name: Bug report
+description: Report a reproducible problem in AI DIAL React File Manager
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: Please do not report security vulnerabilities here. Use the private security advisory form instead.
+  - type: input
+    id: package-version
+    attributes:
+      label: File manager version
+      description: The installed @epam/ai-dial-react-file-manager version.
+      placeholder: 0.1.0-dev.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: React, AI DIAL UI Kit, AG Grid, browser, and operating system versions.
+      placeholder: React 19.2, UI Kit 0.13.0-dev.25, Chrome, macOS
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How to reproduce
+      description: Provide minimal steps and, when possible, a reproduction repository or Storybook example.
+    validations:
+      required: true
+  - type: textarea
+    id: actual-result
+    attributes:
+      label: Actual result
+      description: Describe what happened and include relevant logs or screenshots.
+    validations:
+      required: true
+  - type: textarea
+    id: expected-result
+    attributes:
+      label: Expected result
+      description: Describe what you expected to happen.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confidentiality
+    attributes:
+      label: Confidential information
+      options:
+        - label: I confirm that this report contains no confidential information.
+          required: true

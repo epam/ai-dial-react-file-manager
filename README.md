@@ -5,6 +5,23 @@ AI DIAL interfaces. Shared controls and design tokens come from
 `@epam/ai-dial-ui-kit`; the file tree, file operations, upload flows, selection,
 conflict resolution, and file-manager-specific styles live in this package.
 
+The package is ESM-only and is intended for React applications that supply
+their own persistence and backend integration through callbacks.
+
+## Features
+
+- File and folder navigation with tree, breadcrumb, and grid views
+- Upload, download, copy, move, rename, delete, and conflict-resolution flows
+- Controlled and uncontrolled navigation and selection state
+- Configurable actions, validation, metadata, and permission-management hooks
+- Responsive layouts and reusable standalone file-manager components
+
+## Compatibility
+
+| File manager               | AI DIAL UI Kit  | React     | AG Grid   | Module format |
+| -------------------------- | --------------- | --------- | --------- | ------------- |
+| Current development branch | `0.13.0-dev.25` | `^19.2.5` | `^35.2.1` | ESM           |
+
 ## Installation
 
 Install the package together with its peer dependencies:
@@ -50,31 +67,78 @@ export const Files = () => (
 );
 ```
 
-The package also exports the provider/context API, destination-folder popup,
-folders tree, file models, file-manager enums, column definitions, and the
-public option and prop types used by `DialFileManager`.
+`DialFileManager` manages the interaction state and calls consumer-provided
+handlers for persistence. The consuming application remains responsible for
+loading items, calling backend APIs, handling errors, and updating the `items`
+prop after an operation completes.
+
+Common integration callbacks include:
+
+- `onPathChange` and `onSelectedPathsChange`
+- `onUploadFiles`, `onUploadArchive`, and `onValidateUpload`
+- `onCopyFiles`, `onMoveToFiles`, and `onDeleteFiles`
+- `onDownloadFiles`, `onUnshareFiles`, and `onRemoveFilesAccess`
+- `onManagePermissions`, `onPreview`, and `onOpenInNewTab`
+
+## Public API
+
+The primary export is `DialFileManager`. The package also exports:
+
+- `FileManagerProvider` and `useFileManagerContext`
+- `DialDestinationFolderPopup` and `DialFoldersTree`
+- File models, permissions, resource types, and selection modes
+- File-manager actions, tabs, trigger views, and column definitions
+- Public option and prop types used by the exported components
+
+All supported public exports are declared in `src/index.ts`.
 
 ## Local development
 
-The development dependency on `@epam/ai-dial-ui-kit` points to the sibling
-`../ai-dial-ui-kit` checkout. Build that checkout after changing its public
-exports, then install and verify this package:
+Install the npm dependencies and run the complete local verification:
 
 ```bash
-npm install
+npm ci
 npm run typecheck
 npm run lint
 npm run test
 npm run build
 ```
 
-Storybook is available through `npm run storybook`.
+Run the interactive component examples with:
+
+```bash
+npm run storybook
+```
 
 ## Publishing
 
-Use the dry run first, then publish an explicit version and npm tag:
+Publishing is restricted to project maintainers. Build the package and inspect
+the npm archive before starting a release:
 
 ```bash
-npm run release:dry
-npm run release -- --version <version> --tag <tag>
+npm run build
+npm run publish:dry
 ```
+
+Release automation is responsible for assigning the version and npm dist-tag.
+Do not publish directly from feature branches.
+
+## Versioning
+
+The package follows [Semantic Versioning](https://semver.org/). Changes to
+exported components, types, behavior, or styles that require consumer changes
+are treated as breaking changes and must be documented in `CHANGELOG.md`.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development and pull request
+guidelines.
+
+## Security
+
+Please report vulnerabilities privately as described in
+[SECURITY.md](SECURITY.md).
+
+## License
+
+Licensed under the [Apache License 2.0](LICENSE).
