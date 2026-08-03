@@ -165,6 +165,59 @@ describe('Dial UI Kit :: useGridContextMenu', () => {
     ]);
   });
 
+  test('runs folder and file callbacks for optional context actions', () => {
+    const onGridCreateSiblingFolder = vi.fn();
+    const onGridCreateChildFolder = vi.fn();
+    const onManagePermissions = vi.fn();
+    const onOpenInNewTab = vi.fn();
+    const onPreview = vi.fn();
+    const { result } = renderHook(() =>
+      useGridContextMenu({
+        actionLabels: {
+          [DialFileManagerActions.AddSibling]: 'Add sibling',
+          [DialFileManagerActions.AddChild]: 'Add child',
+          [DialFileManagerActions.ManagePermissions]: 'Manage permissions',
+          [DialFileManagerActions.OpenInNewTab]: 'Open in new tab',
+          [DialFileManagerActions.Preview]: 'Preview',
+        },
+        onDuplicate: vi.fn(),
+        onCopy: vi.fn(),
+        onMove: vi.fn(),
+        onDownload: vi.fn(),
+        onRename: vi.fn(),
+        onDelete: vi.fn(),
+        onInfo: vi.fn(),
+        onUnshare: vi.fn(),
+        onGridCreateSiblingFolder,
+        onGridCreateChildFolder,
+        onManagePermissions,
+        onOpenInNewTab,
+        onPreview,
+        previewExtensions: ['.txt'],
+      }),
+    );
+    const click = (items: ReturnType<typeof result.current>, key: string) =>
+      items.find((item) => item.key === key)?.onClick?.({
+        key,
+        domEvent: mockMouseEvent,
+      });
+
+    const folderItems = result.current(testFolder);
+    click(folderItems, DialFileManagerActions.AddSibling);
+    click(folderItems, DialFileManagerActions.AddChild);
+    click(folderItems, DialFileManagerActions.ManagePermissions);
+
+    const fileItems = result.current(testFile);
+    click(fileItems, DialFileManagerActions.OpenInNewTab);
+    click(fileItems, DialFileManagerActions.Preview);
+
+    expect(onGridCreateSiblingFolder).toHaveBeenCalledWith([testFolder]);
+    expect(onGridCreateChildFolder).toHaveBeenCalledWith([testFolder]);
+    expect(onManagePermissions).toHaveBeenCalledWith(testFolder.path);
+    expect(onOpenInNewTab).toHaveBeenCalledWith(testFile);
+    expect(onPreview).toHaveBeenCalledWith(testFile.path);
+  });
+
   test('returns function that returns only actions with provided labels', () => {
     const partialLabels = {
       [DialFileManagerActions.Copy]: 'Copy to',

@@ -160,6 +160,23 @@ describe('Dial UI Kit :: FileManager :: useNewActions', () => {
     expect(result.current.isNewButtonVisible).toBe(true);
   });
 
+  it('calls onCreateNewItem when the new item action is clicked', () => {
+    const onCreateNewItem = vi.fn();
+    const { result } = renderHook(() =>
+      useNewActions({
+        newActions: { newItem: { label: 'New item' } },
+        onCreateNewItem,
+      }),
+    );
+
+    result.current.newActions[0].onClick?.({
+      key: 'new-item',
+      domEvent: mockMouseEvent,
+    });
+
+    expect(onCreateNewItem).toHaveBeenCalledTimes(1);
+  });
+
   it('maintains correct order: newFolder, uploadFiles, uploadArchive', () => {
     const { result } = renderHook(() =>
       useNewActions({
