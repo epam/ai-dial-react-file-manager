@@ -1,35 +1,36 @@
 import {
-  BASE_ICON_PROPS,
-  ButtonAppearance,
-  DialButton,
-  DialDropdown,
-  DialNeutralButton,
-  DialNotification,
-  type DialNotificationProps,
-  DialPopup,
-  DialPrimaryButton,
-  DialSwitch,
-  DialTooltip,
-  type DropdownItem,
-  mergeClasses,
-  PopupSize,
-} from '@epam/ai-dial-ui-kit';
-import {
   DialFileManager,
   type DialFileManagerProps,
 } from '@/components/FileManager/FileManager';
-import { IconFolderPlus, IconDotsVertical, IconEye } from '@tabler/icons-react';
-import {
-  useState,
-  useCallback,
-  type FC,
-  useRef,
-  type ReactNode,
-  useMemo,
-} from 'react';
-import { DestinationFolderMode } from '@/types/file-manager';
-import type { DialFileManagerActionsRef } from '@/models/file-manager';
 import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
+import type { DialFileManagerActionsRef } from '@/models/file-manager';
+import { DestinationFolderMode } from '@/types/file-manager';
+import {
+  BASE_ICON_PROPS,
+  ButtonAppearance,
+  DialDropdown,
+  type DialNotificationProps,
+  DialPopup,
+  DialSwitch,
+  DialTooltip,
+  type DropdownItem,
+  ElementSize,
+  GhostIconButton,
+  mergeClasses,
+  NeutralButton,
+  Notification,
+  PopupSize,
+  PrimaryButton,
+} from '@epam/ai-dial-ui-kit';
+import { IconDotsVertical, IconEye, IconFolderPlus } from '@tabler/icons-react';
+import {
+  type FC,
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 export interface DestinationFolderPopupProps extends DialFileManagerProps {
   onClose: () => void;
@@ -204,7 +205,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
       size={PopupSize.Lg}
       dividerFooter
       dividers={false}
-      className="md:!h-[800px] !bg-layer-2"
+      className="md:!h-[800px] !bg-layer-sunken"
       footer={
         <div className="flex justify-between items-center gap-2 p-4 md:px-6">
           <div className="flex items-center gap-4 min-w-0">
@@ -214,21 +215,16 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
                 open={mobileMenuOpen}
                 onOpenChange={setMobileMenuOpen}
               >
-                <DialButton
-                  className="size-9 shrink-0"
+                <GhostIconButton
+                  size={ElementSize.Large}
                   aria-label="More options"
-                  iconBefore={
-                    <IconDotsVertical
-                      {...BASE_ICON_PROPS}
-                      className="text-secondary"
-                    />
-                  }
+                  icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
                 />
               </DialDropdown>
             ) : (
               <>
                 {showCreateFolderButton && (
-                  <DialPrimaryButton
+                  <PrimaryButton
                     label={addFolderLabel}
                     appearance={ButtonAppearance.Ghost}
                     iconBefore={<IconFolderPlus {...BASE_ICON_PROPS} />}
@@ -256,10 +252,10 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
             )}
           </div>
           <div className="flex space-x-4 items-center">
-            <DialNeutralButton onClick={onClose} label="Cancel" />
+            <NeutralButton onClick={onClose} label="Cancel" />
             {isDestinationDisabled ? (
               <DialTooltip tooltip={disabledPathTooltip}>
-                <DialPrimaryButton
+                <PrimaryButton
                   onClick={onConfirm}
                   label={mode === 'copy' ? copyLabel : moveLabel}
                   disabled={isDestinationDisabled}
@@ -267,7 +263,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
                 />
               </DialTooltip>
             ) : (
-              <DialPrimaryButton
+              <PrimaryButton
                 onClick={onConfirm}
                 label={mode === 'copy' ? copyLabel : moveLabel}
               />
@@ -277,10 +273,10 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
       }
       header={header ?? defaultTitle}
     >
-      <div className="bg-layer-2 h-full flex flex-col">
+      <div className="bg-layer-sunken h-full flex flex-col">
         {alertProps && (
           <div className="px-6 mb-4 pt-4">
-            <DialNotification {...alertProps} />
+            <Notification {...alertProps} />
           </div>
         )}
         <div className="flex-1 min-h-0">
@@ -289,7 +285,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
             gridClassName="size-full"
             className={mergeClasses(
               restProps.className,
-              'bg-layer-2 h-full flex pt-0',
+              'bg-layer-sunken h-full flex pt-0',
             )}
             actionsRef={fileManagerActionRef}
             path={path}

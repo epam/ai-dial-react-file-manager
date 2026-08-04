@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DialItemType, DialNeutralButton } from '@epam/ai-dial-ui-kit';
+import { DialItemType, NeutralButton } from '@epam/ai-dial-ui-kit';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DialFileManagerItemName } from './FileManagerItemName';
 
@@ -40,10 +40,7 @@ const EditableWrapper = (props: Story['args']) => {
         onCancel={() => setEditing(false)}
       />
 
-      <DialNeutralButton
-        className="Edit name"
-        onClick={() => setEditing(true)}
-      />
+      <NeutralButton className="Edit name" onClick={() => setEditing(true)} />
     </div>
   );
 };

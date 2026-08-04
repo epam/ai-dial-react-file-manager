@@ -1,133 +1,100 @@
+// Default color palette is light when no themes presented
+
 const backgroundsColors = {
   transparent: 'transparent',
-  'layer-0': 'var(--bg-layer-0, #000000)',
-  'layer-1': 'var(--bg-layer-1, #0C101D)',
-  'layer-2': 'var(--bg-layer-2, #161B2D)',
-  'layer-3': 'var(--bg-layer-3, #1D2439)',
-  'layer-4': 'var(--bg-layer-4, #242C42)',
-  blackout: 'var(--bg-blackout, #0C101DB3)',
-  error: 'var(--bg-error, #402027)',
-  warning: 'var(--bg-warning, #3F3D25)',
-  info: 'var(--bg-info, #1C2C47)',
-  success: 'var(--bg-success, #1D3841)',
+  // COLORS 2.0
+  'layer-sunken': 'var(--bg-layer-sunken, #EEF1F7)', // grey-300
+  'layer-base': 'var(--bg-layer-base, #F5F7FA)', // grey-200
+  'layer-raised': 'var(--bg-layer-raised, #FCFCFC)', // grey-100
+  error: 'var(--bg-error, #F3D6D8)', // red-100
+  warning: 'var(--bg-warning, #FAF0CF)', // yellow-100
+  info: 'var(--bg-info, #E1EAF9)', // blue-100
+  success: 'var(--bg-success, #DBF1EB)', // green-100
+  backdrop: 'var(--bg-backdrop, #161B2D4D)', // grey-1000 with 70% opacity
+
+  // shadow colors
+  'shadow-blue': 'var(--shadow-blue-500, #2764D924)',
+  'shadow-grey': 'var(--shadow-grey-1000, #161B2D08)',
+
+  // REMOVED: old names, need to remove
+  'layer-1': 'var(--bg-layer-1, #E0E6F0)',
+  'layer-4': 'var(--bg-layer-4, #D1DBEA)',
   'accent-primary-alpha': 'var(--bg-accent-primary-alpha, #7DA4FF26)',
-  'accent-secondary-alpha': 'var(--bg-accent-secondary-alpha, #37BABC2E)',
-  'accent-tertiary-alpha': 'var(--bg-accent-tertiary-alpha, #A972FF2E)',
-
-  'model-icon': 'var(--bg-model-icon, #FFFFFF)', // TODO: use?
-
-  // TODO: need review
-  'accent-primary': 'var(--bg-accent-primary, #5C8DEA)',
-  'accent-secondary': 'var(--bg-accent-secondary, #37BABC)',
-  'accent-tertiary': 'var(--bg-accent-tertiary, #A972FF)',
-
-  // TODO: need review and change names
-  'red-400': 'var(--bg-red-400, #F76464)',
-  'orange-400': 'var(--bg-orange-400, #D97C27)',
-  'orange-800': 'var(--bg-orange-800, #B25500)',
 };
 
 const controlsBgColors = {
-  'controls-accent-primary': 'var(--controls-bg-accent-primary, #3664E2)',
-  'controls-accent-primary-hover':
-    'var(--controls-bg-accent-primary-hover, #2656D9)',
-  'controls-accent-primary-active':
-    'var(--controls-bg-accent-primary-active, #124ACE)',
-  'controls-accent-primary-alpha-active':
-    'var(--controls-bg-accent-primary-alpha-active, #7DA4FF4D)',
+  // COLORS 2.0
+  'control-accent-alpha': 'var(--bg-control-accent-alpha, #2764D90F)', // blue-500 alpha-6
+  'control-accent-alpha-hover':
+    'var(--bg-control-accent-alpha-hover, #2764D924)', // blue-500 alpha-14
+  'control-accent-alpha-active':
+    'var(--bg-control-accent-alpha-active, #2764D933)', // blue-500 alpha-20
 
-  'controls-accent-secondary-alpha-active':
-    'var(--controls-bg-accent-secondary-alpha-active, #37BABC5C)',
+  'control-accent': 'var(--bg-control-accent, #124ACE)', // blue-500
 
-  'controls-accent-tertiary-alpha-active':
-    'var(--controls-bg-accent-tertiary-alpha-active, #A972FF5C)',
+  'control-neutral': 'var(--bg-control-neutral, #FCFCFC)', // grey-100
+  'control-neutral-hover': 'var(--bg-control-neutral-hover, #E0E6F0)', // grey-500
+  'control-neutral-active': 'var(--bg-control-neutral-active, #D1DBEA)', // grey-600
 
-  'controls-error': 'var(--controls-bg-error, #CC4545)',
-  'controls-error-hover': 'var(--controls-bg-error-hover, #BF3939)',
-  'controls-error-active': 'var(--controls-bg-error-active, #AE2F2F)',
-  'controls-error-alpha-hover': 'var(--controls-bg-alpha-hover, #F764642E)',
-  'controls-error-alpha-active':
-    'var(--controls-bg-error-alpha-active, #F764645C)',
+  'control-error': 'var(--bg-control-error, #AE2F2F)', // red-800
+  'control-error-hover': 'var(--bg-control-error-hover, #BF3939)', // red-700
+  'control-error-active': 'var(--bg-control-error-active, #CC4545)', // red-600
+  'control-error-alpha-hover': 'var(--bg-control-error-alpha-hover, #F764641A)', // red-800 alpha-10
+  'control-error-alpha-active':
+    'var(--bg-control-error-alpha-active, #F7646433)', // red-800 alpha-20
 
-  'controls-disable-accent': 'var(--controls-bg-disable-accent, #696E7C)',
-  'controls-disable': 'var(--controls-bg-disable, #242C42)',
+  'control-disable': 'var(--bg-control-disable, #C7CBD4)', // grey-700
 
-  'controls-neutral-hover': 'var(--controls-bg-neutral-hover, #242C42)',
-  'controls-neutral-active': 'var(--controls-bg-neutral-active, #575F73)',
-
-  'controls-accent-success-alpha-hover':
-    'var(--controls-bg-accent-success-alpha-hover, #37BABC2E)',
-  'controls-accent-success-alpha-active':
-    'var(--controls-bg-accent-success-alpha-active, #37BABC5C)',
-
-  // TODO: old names, need to remove
-  'controls-accent': 'var(--controls-bg-accent, #5C8DEA)',
-  'controls-accent-hover': 'var(--controls-bg-accent-hover, #4878D2)',
-  'controls-accent-alpha': 'var(--controls-bg-accent-alpha, #5C8DEA2B)',
-  'controls-enable-primary': 'var(--controls-enable-primary, #FCFCFC)',
+  // REMOVED: old names, need to remove
+  'controls-disable-accent': 'var(--controls-bg-disable-accent, #7C8293)',
 };
 
 const borderColors = {
   transparent: 'transparent',
-  primary: 'var(--stroke-primary, #696E7C)',
-  secondary: 'var(--stroke-secondary, #242C42)',
-  tertiary: 'var(--stroke-tertiary, #0C101D)',
-  focus: 'var(--stroke-focus, #EEF1F7)',
-  error: 'var(--stroke-error, #F76464)',
-  warning: 'var(--stroke-warning, #EEC840)',
-  info: 'var(--stroke-info, #7DA4FF)',
-  success: 'var(--stroke-success, #37BABC)',
-  'accent-primary': 'var(--stroke-accent-primary, #7DA4FF)',
-  'accent-secondary': 'var(--stroke-accent-secondary, #37BABC)',
-  'accent-tertiary': 'var(--stroke-accent-tertiary, #A972FF)',
+  primary: 'var(--stroke-primary, #6B7280)', // grey-800
+  secondary: 'var(--stroke-secondary, #D1DBEA)', // grey-600
+  tertiary: 'var(--stroke-tertiary, #E0E6F0)', // grey-500
+  error: 'var(--stroke-error, #AE2F2F)', // red-800
+  warning: 'var(--stroke-warning, #EEC840)', // yellow-500
+  info: 'var(--stroke-info, #124ACE)', // blue-500
+  success: 'var(--stroke-success, #007274)', // green-800
+  // controls
+  focus: 'var(--stroke-focus, #161B2D)', // grey-1000
+  'accent-alpha': 'var(--stroke-accent-alpha, #2764D933)', // blue-500 alpha-20
+  'error-alpha': 'var(--stroke-error-alpha, #AE2F2F73)', // red-800 alpha-45
+};
 
-  // TODO: need review
-  'controls-accent': 'var(--controls-bg-accent, #5C8DEA)',
-  'accent-primary-hover': 'var(--stroke-accent-primary-hover, #4878d2)',
-  hover: 'var(--stroke-hover, #EEF1F7)',
-  'red-900': 'var(--red-900, #402027)',
+const controlsBorderColors = {
+  'controls-focus': 'var(--controls-stroke-focus, #EEF1F7)',
 };
 
 const textColors = {
+  // COLORS 2.0
   transparent: 'transparent',
-  primary: 'var(--text-primary, #EEF1F7)',
-  secondary: 'var(--text-secondary, #9FA6BD)',
-  error: 'var(--text-error, #F76464)',
-  warning: 'var(--text-warning, #EEC840)',
-  'warning-icon': 'var(--text-warning-icon, #EEC840)',
-  info: 'var(--text-info, #7DA4FF)',
-  success: 'var(--text-success, #37BABC)',
-  'accent-primary': 'var(--text-accent-primary, #7DA4FF)',
+  primary: 'var(--text-primary, #161B2D)', // grey-1000
+  secondary: 'var(--text-secondary, #6B7280)', // grey-800
+  tertiary: 'var(--text-tertiary, #C7CBD4)', // grey-700
+  accent: 'var(--text-accent, #1D4ED8)', // blue-500
+  error: 'var(--text-error, #AE2F2F)', // red-500
+  warning: 'var(--text-warning, #7F6300)', // yellow-700
+  'warning-icon': 'var(--text-warning-icon, #EEC840)', // yellow-500
+  info: 'var(--text-info, #1D4ED8)', // blue-500
+  success: 'var(--text-success, #007274)', // green-800
+
+  // REMOVED: old names, need to remove
   'accent-secondary': 'var(--text-accent-secondary, #37BABC)',
   'accent-tertiary': 'var(--text-accent-tertiary, #A972FF)',
-
-  // TODO: need review
-  'controls-disable': 'var(--controls-text-disable, #0C101D)',
 };
 
 const placeholderColor = {
-  primary: 'var(--text-primary, #EEF1F7)',
-  secondary: 'var(--controls-text-secondary-disable, #575F73)',
+  primary: 'var(--text-primary, #161B2D)', // grey-1000
 };
 
 const controlsTextColors = {
-  'controls-permanent': 'var(--controls-text-permanent, #FCFCFC)',
-
-  'controls-accent-disable': 'var(--controls-text-accent-disable, #242C42)',
-  'controls-primary-disable': 'var(--controls-text-primary-disable, #7C8293)',
-  'controls-secondary-disable':
-    'var(--controls-text-secondary-disable, #575F73)',
-
-  'controls-neutral': 'var(--controls-text-neutral, #FCFCFC)',
-
-  'controls-accent-primary-hover':
-    'var(--controls-text-accent-primary-hover, #3664E2)',
-  'controls-accent-primary-active':
-    'var(--controls-text-accent-primary-active, #124ACE)',
-
-  // TODO: old names, need to remove
-  'controls-primary': 'var(--controls-primary, #FCFCFC)',
-  'controls-disable': 'var(--controls-text-disable, #575F73)',
+  'control-permanent': 'var(--text-control-permanent, #FCFCFC)', // grey-100
+  'control-disable': 'var(--text-control-disable, #6B7280)', // grey-800
+  'control-blue-hover': 'var(--text-control-blue-hover, #5976E9)', // blue-300
+  'control-blue-active': 'var(--text-control-blue-active, #6785FB)', // blue-200
 };
 
 /** @type {import('tailwindcss').Config} */
@@ -135,9 +102,9 @@ export default {
   content: ['./src/**/*.{ts,tsx}', './src/**/*.scss'],
   theme: {
     backgroundColor: { ...backgroundsColors, ...controlsBgColors },
-    borderColor: borderColors,
-    stroke: borderColors,
-    divideColor: borderColors,
+    borderColor: { ...borderColors, ...controlsBorderColors },
+    stroke: { ...borderColors, ...controlsBorderColors },
+    divideColor: { ...borderColors, ...controlsBorderColors },
     placeholderColor: placeholderColor,
     textColor: { ...textColors, ...controlsTextColors },
     gradientColorStops: backgroundsColors,
@@ -147,7 +114,10 @@ export default {
         'spin-steps': 'spin 0.75s steps(8, end) infinite',
       },
       boxShadow: {
-        DEFAULT: '0 0 4px 0 var(--bg-blackout, #0C101DB3)',
+        xs: '0 1px 4px 0 var(--shadow-grey-1000, #161B2D08), 0 1px 2px 0 var(--shadow-blue-500, #2764D924)',
+        sm: '0 2px 12px 0 var(--shadow-grey-1000, #161B2D08), 0 2px 6px 0 var(--shadow-blue-500, #2764D924)',
+        md: '0 6px 24px 0 var(--shadow-grey-1000, #161B2D08), 0 6px 16px 0 var(--shadow-blue-500, #2764D924)',
+        lg: '0 10px 36px 0 var(--shadow-grey-1000, #161B2D08), 0 10px 24px 0 var(--shadow-blue-500, #2764D924)',
       },
       borderRadius: {
         DEFAULT: '4px',
@@ -167,9 +137,9 @@ export default {
       typography: {
         DEFAULT: {
           css: {
-            color: 'var(--text-primary, #EEF1F7)',
+            color: 'var(--text-primary, #161B2D)',
             a: {
-              color: 'var(--text-accent-primary, #7DA4FF)',
+              color: 'var(--text-accent, #1D4ED8)',
             },
             pre: {
               border: 'none',

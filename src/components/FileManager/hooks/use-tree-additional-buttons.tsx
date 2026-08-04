@@ -1,8 +1,7 @@
 import {
-  DialIconButton,
-  mergeClasses,
-  ElementSize,
   DIAL_ICON_SIZE,
+  ElementSize,
+  GhostIconButton,
 } from '@epam/ai-dial-ui-kit';
 import { IconCopyMinus } from '@tabler/icons-react';
 import { useMemo, type ReactNode } from 'react';
@@ -33,18 +32,11 @@ export const useTreeAdditionalButtons = ({
   const isCollapseAllDisabled = expandedPathsLength === 0;
 
   const buttons = useMemo(() => {
-    const buttonClass = mergeClasses([
-      'hover:text-accent-primary',
-      isCollapseAllDisabled &&
-        'controls-secondary-disable hover:controls-secondary-disable disabled:hover:cursor-default',
-    ]);
-
     return (
       <>
         {additionalButtons}
-        <DialIconButton
+        <GhostIconButton
           disabled={isCollapseAllDisabled}
-          className={buttonClass}
           size={ElementSize.Small}
           onClick={collapseAll}
           icon={<IconCopyMinus size={DIAL_ICON_SIZE.LG} stroke={1.5} />}

@@ -1,6 +1,6 @@
 import {
-  DialNeutralButton,
-  DialPrimaryButton,
+  NeutralButton,
+  PrimaryButton,
   DialDropdown,
   DialFileName,
   DialFolderName,
@@ -452,8 +452,8 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
       preventKeyboardOnOpen
       footer={
         <div className="flex justify-end gap-3 py-4 px-6 border-t border-tertiary">
-          <DialNeutralButton onClick={handleClose} label={cancelLabel} />
-          <DialPrimaryButton onClick={handleConfirm} label={confirmLabel} />
+          <NeutralButton onClick={handleClose} label={cancelLabel} />
+          <PrimaryButton onClick={handleConfirm} label={confirmLabel} />
         </div>
       }
     >

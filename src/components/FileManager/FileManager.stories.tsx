@@ -1,21 +1,3 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useCallback, useMemo, useState } from 'react';
-import {
-  DialFileManager,
-  type DialFileManagerProps,
-  DialFileManagerView,
-} from './FileManager';
-import { FileManagerProvider } from './FileManagerProvider';
-import { itemsMock } from './__mocks__/files';
-import { useDialFileManagerTabs } from './hooks/use-file-manager-tabs';
-import {
-  DialDateCellRenderer,
-  DialPrimaryButton,
-  DialPopup,
-  PopupSize,
-  DialCheckbox,
-  DialSwitch,
-} from '@epam/ai-dial-ui-kit';
 import {
   type DialFile,
   DialFileNodeType,
@@ -23,11 +5,12 @@ import {
   type DialRootFolder,
 } from '@/models/file';
 import type {
-  DialFileAcceptType,
-  DialUploadFileItem,
   DialCopiedItem,
   DialDeletedItem,
+  DialFileAcceptType,
+  DialUploadFileItem,
 } from '@/models/file-manager';
+import { GridSelectionMode } from '@/models/selection-mode.ts';
 import {
   DialFileManagerActions,
   DialFileManagerConflictActions,
@@ -36,13 +19,30 @@ import {
   FileManagerColumnKey,
 } from '@/types/file-manager';
 import {
+  DialCheckbox,
+  DialDateCellRenderer,
+  DialPopup,
+  DialSwitch,
+  PopupSize,
+  PrimaryButton,
+} from '@epam/ai-dial-ui-kit';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import {
   IconBuildingCommunity,
   IconFileDescription,
   IconUsers,
 } from '@tabler/icons-react';
-import type { FileManagerGridRow } from './FileManagerContext';
 import type { ColDef } from 'ag-grid-community';
-import { GridSelectionMode } from '@/models/selection-mode.ts';
+import { useCallback, useMemo, useState } from 'react';
+import {
+  DialFileManager,
+  type DialFileManagerProps,
+  DialFileManagerView,
+} from './FileManager';
+import type { FileManagerGridRow } from './FileManagerContext';
+import { FileManagerProvider } from './FileManagerProvider';
+import { itemsMock } from './__mocks__/files';
+import { useDialFileManagerTabs } from './hooks/use-file-manager-tabs';
 
 const meta = {
   title: 'FileManager/FileManager',
@@ -382,7 +382,7 @@ const PopupComponent = (args: DialFileManagerProps) => {
 
   return (
     <div className="h-[640px] w-full flex items-center justify-center">
-      <DialPrimaryButton
+      <PrimaryButton
         label="Toggle File Manager"
         onClick={() => setIsOpen(!isOpen)}
       />
@@ -558,11 +558,11 @@ export const WithCustomProvider: Story = {
   render: (args) => (
     <div className="h-[640px] flex flex-col gap-3">
       <FileManagerProvider {...args} items={itemsMock}>
-        <div className="bg-layer-3 px-4 py-2 text-secondary">
+        <div className="bg-layer-raised px-4 py-2 text-secondary">
           My app wants to show its own toolbar here (uses same context)
         </div>
         <DialFileManagerView />
-        <div className="bg-layer-3 px-4 py-2 text-secondary">
+        <div className="bg-layer-raised px-4 py-2 text-secondary">
           Footer actions / secondary info
         </div>
       </FileManagerProvider>
@@ -576,7 +576,7 @@ const TreeCollapsedControlledComponent = (args: DialFileManagerProps) => {
   return (
     <div className="h-[640px] flex flex-col gap-4">
       <div className="flex gap-2 items-center p-4">
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsCollapsed(!isCollapsed)}
           label={isCollapsed ? 'Expand Tree' : 'Collapse Tree'}
         />
@@ -626,10 +626,10 @@ const TreeExpandedControlledComponent = (args: DialFileManagerProps) => {
   return (
     <div className="h-[640px] flex flex-col gap-3">
       <div className="flex gap-2 px-2">
-        <DialPrimaryButton label="Expand Design" onClick={expandDesign} />
-        <DialPrimaryButton label="Expand Icons" onClick={expandIcons} />
-        <DialPrimaryButton label="Expand Deep" onClick={expandDeep} />
-        <DialPrimaryButton label="Collapse All" onClick={collapseAll} />
+        <PrimaryButton label="Expand Design" onClick={expandDesign} />
+        <PrimaryButton label="Expand Icons" onClick={expandIcons} />
+        <PrimaryButton label="Expand Deep" onClick={expandDeep} />
+        <PrimaryButton label="Collapse All" onClick={collapseAll} />
       </div>
       <DialFileManager
         {...args}
@@ -1134,7 +1134,7 @@ const WithFileMetadataInPopupComponent = (args: DialFileManagerProps) => {
 
   return (
     <div className="h-[640px] w-full flex items-center justify-center">
-      <DialPrimaryButton
+      <PrimaryButton
         label="Toggle File Manager"
         onClick={() => setIsOpen(!isOpen)}
       />
@@ -1439,7 +1439,7 @@ const WithSearchInPopupComponent = (args: DialFileManagerProps) => {
 
   return (
     <div className="h-[640px] w-full flex items-center justify-center">
-      <DialPrimaryButton
+      <PrimaryButton
         label="Toggle File Manager with Search"
         onClick={() => setIsOpen(!isOpen)}
       />
@@ -1874,9 +1874,9 @@ const ControlledSelectionComponent = (args: DialFileManagerProps) => {
   return (
     <div className="h-[640px] flex flex-col gap-3">
       <div className="flex gap-2 px-2">
-        <DialPrimaryButton label="Select logo.svg" onClick={selectLogo} />
-        <DialPrimaryButton label="Select multiple" onClick={selectMultiple} />
-        <DialPrimaryButton label="Clear selection" onClick={clearSelection} />
+        <PrimaryButton label="Select logo.svg" onClick={selectLogo} />
+        <PrimaryButton label="Select multiple" onClick={selectMultiple} />
+        <PrimaryButton label="Clear selection" onClick={clearSelection} />
       </div>
       <DialFileManager
         {...args}
