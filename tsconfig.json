@@ -11,12 +11,7 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "ag-grid-community": ["node_modules/ag-grid-community"],
-      "ag-grid-react": ["node_modules/ag-grid-react"],
-      "react": ["node_modules/@types/react/index.d.ts"],
-      "react-dom": ["node_modules/@types/react-dom/index.d.ts"],
-      "react/jsx-runtime": ["node_modules/@types/react/jsx-runtime.d.ts"]
+      "@/*": ["src/*"]
     },
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

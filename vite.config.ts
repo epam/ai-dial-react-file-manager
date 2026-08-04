@@ -22,6 +22,7 @@ export default defineConfig({
         '**/*.spec.tsx',
         '**/*.test.tsx',
       ],
+      aliasesExclude: ['react', 'react-dom', '@floating-ui/react'],
     }),
   ],
   resolve: {
