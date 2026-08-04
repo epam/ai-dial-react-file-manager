@@ -1,4 +1,4 @@
-import { DialPrimaryButton } from '@epam/ai-dial-ui-kit';
+import { PrimaryButton } from '@epam/ai-dial-ui-kit';
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
 import {
@@ -100,7 +100,7 @@ const StoryWrapper = ({
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsOpen(true)}
           label="Show Conflict Resolution Popup"
         />

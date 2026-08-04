@@ -6,7 +6,7 @@ import {
   DialDestinationFolderPopup,
   type DestinationFolderPopupProps,
 } from './DestinationFolderPopup';
-import { DialPrimaryButton, NotificationVariant } from '@epam/ai-dial-ui-kit';
+import { PrimaryButton, NotificationVariant } from '@epam/ai-dial-ui-kit';
 
 const StoryWrapper = (args: DestinationFolderPopupProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +19,7 @@ const StoryWrapper = (args: DestinationFolderPopupProps) => {
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsOpen(true)}
           label="Open Destination Folder Popup"
         />

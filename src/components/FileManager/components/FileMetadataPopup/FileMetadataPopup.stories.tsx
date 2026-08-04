@@ -1,4 +1,4 @@
-import { DialPrimaryButton } from '@epam/ai-dial-ui-kit';
+import { PrimaryButton } from '@epam/ai-dial-ui-kit';
 import { DialFileNodeType, type DialFile } from '@/models/file';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState, type FC, type ReactNode } from 'react';
@@ -43,7 +43,7 @@ const StoryWrapper: FC<{
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsOpen(true)}
           label="Show File Information"
         />
@@ -98,7 +98,7 @@ const LoadingThenDataComponent: FC = () => {
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton onClick={handleOpen} label="Show File Information" />
+        <PrimaryButton onClick={handleOpen} label="Show File Information" />
       )}
       <FileMetadataPopup
         open={isOpen}
@@ -140,7 +140,7 @@ const SmallFileComponent: FC = () => {
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsOpen(true)}
           label="Show Small File Info"
         />
@@ -184,7 +184,7 @@ const LargeFileComponent: FC = () => {
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsOpen(true)}
           label="Show Large File Info"
         />
@@ -227,7 +227,7 @@ const NoAuthorComponent: FC = () => {
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsOpen(true)}
           label="Show File Without Author"
         />
@@ -271,7 +271,7 @@ const EncodedPathComponent: FC = () => {
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsOpen(true)}
           label="Show File with Encoded Path"
         />
@@ -315,7 +315,7 @@ const SpecialCharactersPathComponent: FC = () => {
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsOpen(true)}
           label="Show File with Special Characters"
         />
@@ -347,7 +347,7 @@ const CustomLabelsComponent: FC = () => {
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsOpen(true)}
           label="Show Custom Labels"
         />
@@ -384,7 +384,7 @@ const NoFileDataComponent: FC = () => {
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={() => setIsOpen(true)}
           label="Show Empty Popup"
         />
@@ -431,7 +431,7 @@ const RealisticLoadingComponent: FC = () => {
   return (
     <div className="w-full h-[100px] flex items-center justify-center">
       {!isOpen && (
-        <DialPrimaryButton
+        <PrimaryButton
           onClick={simulateFileLoad}
           label="Load File Information"
         />

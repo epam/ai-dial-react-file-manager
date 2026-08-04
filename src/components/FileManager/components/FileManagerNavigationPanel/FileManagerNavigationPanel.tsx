@@ -11,7 +11,7 @@ import {
   DialBreadcrumb,
   type DialBreadcrumbProps,
   type DialBreadcrumbPathItem,
-  DialNeutralButton,
+  NeutralButton,
   DialSearch,
   type DialSearchProps,
   mergeClasses,
@@ -236,7 +236,7 @@ export const DialFileManagerNavigationPanel: FC<
   const renderNavigation = useCallback(() => {
     if (isCompactView && isSearchExpanded) {
       return (
-        <DialNeutralButton
+        <NeutralButton
           className="!p-[9px]"
           iconBefore={<IconArrowLeft {...BASE_ICON_PROPS} />}
           onClick={() => {

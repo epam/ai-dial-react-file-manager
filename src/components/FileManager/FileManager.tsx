@@ -1323,7 +1323,7 @@ export const DialFileManagerView: FC = () => {
         title={emptyStateTitle}
         description={emptyStateDescription}
         descriptionClassName="text-sm"
-        containerClassName="gap-3 size-full bg-layer-2 border rounded-[4px] border-primary"
+        containerClassName="gap-3 size-full bg-layer-sunken border rounded-[4px] border-primary"
         titleClassName="mt-2 !text-lg"
         icon={
           emptyStateIcon || (
@@ -1347,7 +1347,7 @@ export const DialFileManagerView: FC = () => {
     () =>
       classNames(
         'min-h-[248px] overflow-auto md:min-h-[266px]',
-        isDragging ? 'border border-dashed border-accent-primary' : '',
+        isDragging ? 'border border-dashed border-info' : '',
         isDraggingOverWindow && !isDragging
           ? 'border border-dashed border-primary'
           : '',

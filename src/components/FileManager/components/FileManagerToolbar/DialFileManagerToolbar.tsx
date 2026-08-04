@@ -9,7 +9,7 @@ import {
   ButtonVariant,
   ScreenResolution,
   ElementSize,
-  DialGhostIconButton,
+  GhostIconButton,
 } from '@epam/ai-dial-ui-kit';
 import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import type { DropdownItem, TabModel } from '@epam/ai-dial-ui-kit';
@@ -84,7 +84,7 @@ export interface DialFileManagerToolbarProps {
  * @remarks
  * - Tabs are rendered via `DialTabs`.
  * - The hidden files toggle uses `DialSwitch`.
- * - The refresh and new actions use `DialButton` or dropdown variants for consistency.
+ * - The refresh and new actions use `GhostIconButton` or dropdown variants for consistency.
  * - The toolbar automatically adapts its layout for different screen sizes.
  * - When `newButtonDropdownItems` is provided, the new button becomes a dropdown menu.
  */
@@ -183,7 +183,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
         items={dropdownItems}
         allowedPlacements={['bottom', 'bottom-start']}
       >
-        <DialGhostIconButton
+        <GhostIconButton
           size={ElementSize.Small}
           icon={<IconDotsVertical stroke={2} size={DIAL_ICON_SIZE.SM} />}
         />

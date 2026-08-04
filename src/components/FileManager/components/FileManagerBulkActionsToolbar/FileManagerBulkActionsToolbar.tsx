@@ -1,18 +1,17 @@
-import type { FC } from 'react';
+import { useFlexibleActions } from '@/hooks/use-flexible-actions';
+import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import {
   BASE_ICON_PROPS,
   ButtonAppearance,
-  DialButton,
   DialDropdown,
-  DialNeutralButton,
-  DialPrimaryButton,
-  type DropdownItem,
   FlexibleActionsDirection,
+  NeutralButton,
+  PrimaryButton,
+  type DropdownItem,
 } from '@epam/ai-dial-ui-kit';
-import { IconX, IconDotsVertical } from '@tabler/icons-react';
+import { IconDotsVertical, IconX } from '@tabler/icons-react';
+import type { FC } from 'react';
 import { ACTIONS_GAP, CONTAINER_PADDING } from './constants';
-import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
-import { useFlexibleActions } from '@/hooks/use-flexible-actions';
 
 export interface DialActionDropdownItem extends DropdownItem {
   title: string;
@@ -95,30 +94,23 @@ export const DialFileManagerBulkActionsToolbar: FC<
         className="absolute top-0 left-0 invisible pointer-events-none overflow-hidden whitespace-nowrap flex gap-3"
       >
         {actions.map(({ key, icon, title }) => (
-          <DialNeutralButton
-            key={key}
-            iconBefore={icon}
-            label={title}
-            hideTitleOnMobile
-          />
+          <NeutralButton key={key} iconBefore={icon} label={title} />
         ))}
       </div>
 
       <div
         ref={containerRef}
-        className="rounded bg-layer-0 p-2 flex justify-between items-center w-full"
+        className="rounded bg-layer-raised p-2 flex justify-between items-center w-full"
         role="toolbar"
         aria-label="File bulk actions"
       >
         <div ref={leftSectionRef}>
-          <DialPrimaryButton
+          <PrimaryButton
             label={selectionLabel}
             onClick={onClearSelection}
-            textClassName="text-accent-primary whitespace-nowrap"
+            textClassName="text-accent whitespace-nowrap"
             appearance={ButtonAppearance.Ghost}
-            iconBefore={
-              <IconX {...BASE_ICON_PROPS} className="text-accent-primary" />
-            }
+            iconBefore={<IconX {...BASE_ICON_PROPS} />}
           />
         </div>
 
@@ -128,26 +120,20 @@ export const DialFileManagerBulkActionsToolbar: FC<
               items={hiddenActions}
               allowedPlacements={['bottom', 'bottom-start']}
             >
-              <DialButton
+              <GhostIconButton
                 className="h-[38px]"
-                iconBefore={
-                  <IconDotsVertical
-                    {...BASE_ICON_PROPS}
-                    className="text-secondary hover:text-accent-primary"
-                  />
-                }
+                icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
               />
             </DialDropdown>
           )}
 
           {visibleActions.map(
             ({ key, icon, tooltip, title, onClick, disabled }) => (
-              <DialNeutralButton
+              <NeutralButton
                 className="!p-[9px]"
                 key={key}
                 iconBefore={icon}
                 label={title}
-                hideTitleOnMobile
                 disabled={disabled}
                 tooltipProps={{ tooltip }}
                 onClick={(domEvent) => onClick?.({ key, domEvent })}

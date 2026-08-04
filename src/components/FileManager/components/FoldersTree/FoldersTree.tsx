@@ -328,7 +328,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       className="sticky right-0"
                     >
                       <DialIcon
-                        className="invisible group-hover/item:visible text-secondary mx-2 flex flex-row gap-2 hover:text-accent-primary"
+                        className="invisible group-hover/item:visible text-secondary mx-2 flex flex-row gap-2 hover:text-accent"
                         icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
                       />
                     </DialDropdown>
