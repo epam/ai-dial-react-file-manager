@@ -158,7 +158,7 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
     </div>
   );
 
-  const DialButtonDropdown = ({
+  const ButtonDropdown = ({
     label,
     items,
     disabled,
@@ -188,7 +188,7 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
 
   return {
     ...actual,
-    DialButtonDropdown,
+    ButtonDropdown,
     DialGrid,
     DialTooltipContainer,
     DialTooltipContent,
