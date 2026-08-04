@@ -5,6 +5,7 @@ import {
   ButtonAppearance,
   DialDropdown,
   FlexibleActionsDirection,
+  GhostIconButton,
   NeutralButton,
   PrimaryButton,
   type DropdownItem,
