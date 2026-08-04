@@ -1,19 +1,19 @@
+import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
+import { DialFileManagerTabs } from '@/types/file-manager';
+import type { DropdownItem, TabModel } from '@epam/ai-dial-ui-kit';
 import {
-  DialButtonDropdown,
+  BASE_ICON_PROPS,
+  ButtonDropdown,
+  ButtonVariant,
+  DIAL_ICON_SIZE,
   DialDropdown,
   DialSwitch,
   DialTabs,
   DialTooltip,
-  BASE_ICON_PROPS,
-  DIAL_ICON_SIZE,
-  ButtonVariant,
-  ScreenResolution,
   ElementSize,
   GhostIconButton,
+  ScreenResolution,
 } from '@epam/ai-dial-ui-kit';
-import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
-import type { DropdownItem, TabModel } from '@epam/ai-dial-ui-kit';
-import { DialFileManagerTabs } from '@/types/file-manager';
 import { IconDotsVertical, IconEye, IconEyeOff } from '@tabler/icons-react';
 import { type FC, useMemo } from 'react';
 
@@ -146,16 +146,12 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
   const renderDesktopActions = () => (
     <>
       {showHiddenFilesToggle && (
-        <>
-          <DialSwitch
-            switchId="hidden-files-switch"
-            label={hiddenFilesSwitcherLabel}
-            isOn={areHiddenFilesVisible}
-            onChange={onToggleHiddenFiles}
-          />
-
-          <div className="h-6 border-l border-primary" />
-        </>
+        <DialSwitch
+          switchId="hidden-files-switch"
+          label={hiddenFilesSwitcherLabel}
+          isOn={areHiddenFilesVisible}
+          onChange={onToggleHiddenFiles}
+        />
       )}
 
       {isNewButtonVisible && (
@@ -166,7 +162,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
               : undefined
           }
         >
-          <DialButtonDropdown
+          <ButtonDropdown
             label={newButtonLabel}
             variant={newButtonVariant}
             items={newButtonDropdownItems}
@@ -197,7 +193,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
               : undefined
           }
         >
-          <DialButtonDropdown
+          <ButtonDropdown
             label={newButtonLabel}
             variant={newButtonVariant}
             items={newButtonDropdownItems}
