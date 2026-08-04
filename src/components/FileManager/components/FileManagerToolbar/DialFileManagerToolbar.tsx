@@ -146,16 +146,12 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
   const renderDesktopActions = () => (
     <>
       {showHiddenFilesToggle && (
-        <>
-          <DialSwitch
-            switchId="hidden-files-switch"
-            label={hiddenFilesSwitcherLabel}
-            isOn={areHiddenFilesVisible}
-            onChange={onToggleHiddenFiles}
-          />
-
-          <div className="h-6 border-l border-primary" />
-        </>
+        <DialSwitch
+          switchId="hidden-files-switch"
+          label={hiddenFilesSwitcherLabel}
+          isOn={areHiddenFilesVisible}
+          onChange={onToggleHiddenFiles}
+        />
       )}
 
       {isNewButtonVisible && (
