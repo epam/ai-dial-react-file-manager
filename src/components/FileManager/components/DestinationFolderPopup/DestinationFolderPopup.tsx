@@ -8,17 +8,17 @@ import { DestinationFolderMode } from '@/types/file-manager';
 import {
   BASE_ICON_PROPS,
   ButtonAppearance,
-  DialDropdown,
   type DialNotificationProps,
-  DialPopup,
   DialSwitch,
   DialTooltip,
+  Dropdown,
   type DropdownItem,
   ElementSize,
   GhostIconButton,
   mergeClasses,
   NeutralButton,
   Notification,
+  Popup,
   PopupSize,
   PrimaryButton,
 } from '@epam/ai-dial-ui-kit';
@@ -197,20 +197,18 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
   }, [path, sourceFolder]);
 
   return (
-    <DialPopup
+    <Popup
       open={open}
       onClose={() => {
         onClose();
       }}
       size={PopupSize.Lg}
-      dividerFooter
-      dividers={false}
       className="md:!h-[800px] !bg-layer-sunken"
       footer={
         <div className="flex justify-between items-center gap-2 p-4 md:px-6">
           <div className="flex items-center gap-4 min-w-0">
             {isMobile ? (
-              <DialDropdown
+              <Dropdown
                 items={mobileFooterDropdownItems}
                 open={mobileMenuOpen}
                 onOpenChange={setMobileMenuOpen}
@@ -220,7 +218,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
                   aria-label="More options"
                   icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
                 />
-              </DialDropdown>
+              </Dropdown>
             ) : (
               <>
                 {showCreateFolderButton && (
@@ -272,6 +270,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
         </div>
       }
       header={header ?? defaultTitle}
+      ariaLabel={defaultTitle}
     >
       <div className="bg-layer-sunken h-full flex flex-col">
         {alertProps && (
@@ -309,6 +308,6 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
           />
         </div>
       </div>
-    </DialPopup>
+    </Popup>
   );
 };

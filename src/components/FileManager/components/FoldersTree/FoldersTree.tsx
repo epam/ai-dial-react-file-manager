@@ -4,8 +4,8 @@ import { DialFileNodeType, type DialFile } from '@/models/file';
 import {
   BASE_ICON_PROPS,
   mergeClasses,
-  DialDropdown,
-  DialIcon,
+  Dropdown,
+  GhostIconButton,
   DropdownTrigger,
   DialNoDataContent,
   DialItemType,
@@ -64,7 +64,7 @@ export interface DialFoldersTreeProps {
  * - Loading state indicators for specific paths
  * - Inline renaming support for folders or files
  * - Multi-item selection highlighting
- * - Context menu integration via `DialDropdown`
+ * - Context menu integration via `Dropdown`
  * - Recursive rendering with indentation and icons
  * - Customizable empty state (title, description, and icon)
  *
@@ -256,7 +256,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       return (
         <div key={`${path}-children`} className="cursor-pointer text-secondary">
           <div className="flex flex-col w-full" aria-label="folder">
-            <DialDropdown
+            <Dropdown
               trigger={[DropdownTrigger.ContextMenu]}
               className="w-full"
               anchorToMouse
@@ -321,21 +321,21 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
 
                 {menuItems.length > 0 && !isRenaming && !isRootFolder && (
                   <div className="flex-1 flex justify-end">
-                    <DialDropdown
+                    <Dropdown
                       placement="bottom-start"
                       allowedPlacements={['top-start', 'top-end']}
                       items={menuItems}
                       className="sticky right-0"
                     >
-                      <DialIcon
-                        className="invisible group-hover/item:visible text-secondary mx-2 flex flex-row gap-2 hover:text-accent"
+                      <GhostIconButton
+                        className="invisible group-hover/item:visible"
                         icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
                       />
-                    </DialDropdown>
+                    </Dropdown>
                   </div>
                 )}
               </div>
-            </DialDropdown>
+            </Dropdown>
 
             {isExpanded &&
               (items || node?.path === createdFolderPath) &&

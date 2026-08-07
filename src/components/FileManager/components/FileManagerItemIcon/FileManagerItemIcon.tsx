@@ -4,7 +4,7 @@ import {
   BASE_ICON_PROPS,
   DialItemType,
   DialSharedEntityIndicator,
-  DialLoader,
+  Spinner,
 } from '@epam/ai-dial-ui-kit';
 import { DialFileIcon, type DialFileIconProps } from '@epam/ai-dial-ui-kit';
 import { IconFolder } from '@tabler/icons-react';
@@ -85,7 +85,7 @@ export const DialFileManagerItemIcon: FC<DialFileManagerItemIconProps> = ({
   );
 
   if (loading) {
-    return wrapIcon(<DialLoader />);
+    return wrapIcon(<Spinner />);
   }
 
   if (type === DialItemType.File) {

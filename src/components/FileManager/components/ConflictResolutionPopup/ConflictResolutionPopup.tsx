@@ -1,14 +1,14 @@
 import {
   NeutralButton,
   PrimaryButton,
-  DialDropdown,
   DialFileName,
   DialFolderName,
   DialGrid,
-  DialPopup,
   DialRadioGroup,
   DIAL_ICON_SIZE,
+  Dropdown,
   DropdownTrigger,
+  Popup,
   PopupSize,
   RadioGroupOrientation,
 } from '@epam/ai-dial-ui-kit';
@@ -293,7 +293,7 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
 
           return (
             <div className="flex items-center h-full">
-              <DialDropdown
+              <Dropdown
                 trigger={[DropdownTrigger.Click]}
                 open={isOpen}
                 items={dropdownItems}
@@ -328,7 +328,7 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
                     )}
                   />
                 </button>
-              </DialDropdown>
+              </Dropdown>
             </div>
           );
         },
@@ -442,13 +442,12 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
   ]);
 
   return (
-    <DialPopup
+    <Popup
       open={open}
       onClose={handleClose}
       size={isSingleFile ? PopupSize.Sm : PopupSize.Md}
       className={classNames([!isSingleFile && 'w-[600px]'])}
       header={title}
-      dividers={false}
       preventKeyboardOnOpen
       footer={
         <div className="flex justify-end gap-3 py-4 px-6 border-t border-tertiary">
@@ -483,6 +482,6 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
           />
         )}
       </div>
-    </DialPopup>
+    </Popup>
   );
 };

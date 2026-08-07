@@ -396,7 +396,7 @@ describe('Dial UI Kit :: ConflictResolutionPopup', () => {
 
     const dialog = screen.getByRole('dialog');
 
-    expect(dialog).toHaveClass('dial-sm-popup');
+    expect(dialog).toHaveClass('md:max-w-[400px]');
   });
 
   it('applies correct width for multiple files mode', () => {

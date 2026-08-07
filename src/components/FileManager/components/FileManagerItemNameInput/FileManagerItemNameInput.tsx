@@ -2,7 +2,7 @@ import type { FC, ReactNode, Ref } from 'react';
 import { DialFileManagerItemIcon } from '@/components/FileManager/components/FileManagerItemIcon/FileManagerItemIcon';
 import type { DialItemType } from '@epam/ai-dial-ui-kit';
 import {
-  DialInput,
+  Input,
   BASE_ICON_PROPS,
   DialTooltip,
   mergeClasses,
@@ -153,7 +153,7 @@ export const DialFileManagerItemNameInput: FC<
         sharedIndicatorClassName={sharedIndicatorClassName}
         sharedIndicatorTooltip={sharedIndicatorTooltip}
       />
-      <DialInput
+      <Input
         containerClassName={mergeClasses(
           '!h-6 py-[1px] pl-[7px] pr-[7px]',
           inputContainerClassName,

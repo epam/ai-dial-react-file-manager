@@ -21,8 +21,8 @@ import {
 import {
   DialCheckbox,
   DialDateCellRenderer,
-  DialPopup,
   DialSwitch,
+  Popup,
   PopupSize,
   PrimaryButton,
 } from '@epam/ai-dial-ui-kit';
@@ -386,11 +386,12 @@ const PopupComponent = (args: DialFileManagerProps) => {
         label="Toggle File Manager"
         onClick={() => setIsOpen(!isOpen)}
       />
-      <DialPopup
+      <Popup
         open={isOpen}
         onClose={() => setIsOpen(false)}
         className="w-[1000px] !h-[600px]"
         size={PopupSize.Lg}
+        ariaLabel="File manager"
       >
         <DialFileManager
           {...args}
@@ -520,7 +521,7 @@ const PopupComponent = (args: DialFileManagerProps) => {
           maxFileSize={10 * 1024 * 1024} // 10MB
           rootItem={rootFolder}
         />
-      </DialPopup>
+      </Popup>
     </div>
   );
 };
@@ -1138,11 +1139,12 @@ const WithFileMetadataInPopupComponent = (args: DialFileManagerProps) => {
         label="Toggle File Manager"
         onClick={() => setIsOpen(!isOpen)}
       />
-      <DialPopup
+      <Popup
         open={isOpen}
         onClose={() => setIsOpen(false)}
         className="w-[1000px] !h-[600px]"
         size={PopupSize.Lg}
+        ariaLabel="File manager"
       >
         <DialFileManager
           {...args}
@@ -1203,7 +1205,7 @@ const WithFileMetadataInPopupComponent = (args: DialFileManagerProps) => {
             );
           }}
         />
-      </DialPopup>
+      </Popup>
     </div>
   );
 };
@@ -1443,11 +1445,12 @@ const WithSearchInPopupComponent = (args: DialFileManagerProps) => {
         label="Toggle File Manager with Search"
         onClick={() => setIsOpen(!isOpen)}
       />
-      <DialPopup
+      <Popup
         open={isOpen}
         onClose={() => setIsOpen(false)}
         className="w-[1000px] !h-[600px]"
         size={PopupSize.Lg}
+        ariaLabel="File manager"
       >
         <DialFileManager
           {...args}
@@ -1467,7 +1470,7 @@ const WithSearchInPopupComponent = (args: DialFileManagerProps) => {
             expandedPaths: new Set<string>(['All files']),
           }}
         />
-      </DialPopup>
+      </Popup>
     </div>
   );
 };

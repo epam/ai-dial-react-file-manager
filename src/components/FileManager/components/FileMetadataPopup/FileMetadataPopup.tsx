@@ -1,8 +1,8 @@
 import {
-  DialPopup,
+  Popup,
   PopupSize,
-  DialSkeleton,
-  DialSkeletonVariant,
+  Skeleton,
+  SkeletonVariant,
   DialEllipsisTooltip,
 } from '@epam/ai-dial-ui-kit';
 import { type FC, type ReactNode } from 'react';
@@ -80,12 +80,12 @@ export const FileMetadataPopup: FC<FileMetadataPopupProps> = ({
   dateOptions,
 }) => {
   return (
-    <DialPopup
+    <Popup
       open={open}
       onClose={onClose}
       size={PopupSize.Sm}
       header={header}
-      dividers={false}
+      ariaLabel="File information"
     >
       <div className="px-6 py-4">
         <div
@@ -95,40 +95,40 @@ export const FileMetadataPopup: FC<FileMetadataPopupProps> = ({
           {loading ? (
             <>
               <div className={LABEL_CLASS}>{nameLabel}</div>
-              <DialSkeleton
-                variant={DialSkeletonVariant.Text}
+              <Skeleton
+                variant={SkeletonVariant.Text}
                 width="100%"
                 height={SKELETON_HEIGHT}
                 className={SKELETON_CLASS}
               />
 
               <div className={LABEL_CLASS}>{modifiedDateLabel}</div>
-              <DialSkeleton
-                variant={DialSkeletonVariant.Text}
+              <Skeleton
+                variant={SkeletonVariant.Text}
                 width="90%"
                 height={SKELETON_HEIGHT}
                 className={SKELETON_CLASS}
               />
 
               <div className={LABEL_CLASS}>{sizeLabel}</div>
-              <DialSkeleton
-                variant={DialSkeletonVariant.Text}
+              <Skeleton
+                variant={SkeletonVariant.Text}
                 width="60%"
                 height={SKELETON_HEIGHT}
                 className={SKELETON_CLASS}
               />
 
               <div className={LABEL_CLASS}>{authorLabel}</div>
-              <DialSkeleton
-                variant={DialSkeletonVariant.Text}
+              <Skeleton
+                variant={SkeletonVariant.Text}
                 width="80%"
                 height={SKELETON_HEIGHT}
                 className={SKELETON_CLASS}
               />
 
               <div className={LABEL_CLASS}>{pathLabel}</div>
-              <DialSkeleton
-                variant={DialSkeletonVariant.Text}
+              <Skeleton
+                variant={SkeletonVariant.Text}
                 width="70%"
                 height={SKELETON_HEIGHT}
                 className={SKELETON_CLASS}
@@ -172,6 +172,6 @@ export const FileMetadataPopup: FC<FileMetadataPopupProps> = ({
           ) : null}
         </div>
       </div>
-    </DialPopup>
+    </Popup>
   );
 };

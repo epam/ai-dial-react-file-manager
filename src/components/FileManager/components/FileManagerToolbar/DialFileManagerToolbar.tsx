@@ -6,10 +6,10 @@ import {
   ButtonDropdown,
   ButtonVariant,
   DIAL_ICON_SIZE,
-  DialDropdown,
   DialSwitch,
   DialTabs,
   DialTooltip,
+  Dropdown,
   ElementSize,
   GhostIconButton,
   ScreenResolution,
@@ -175,7 +175,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
 
   const renderMobileActions = () => (
     <>
-      <DialDropdown
+      <Dropdown
         items={dropdownItems}
         allowedPlacements={['bottom', 'bottom-start']}
       >
@@ -183,7 +183,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
           size={ElementSize.Small}
           icon={<IconDotsVertical stroke={2} size={DIAL_ICON_SIZE.SM} />}
         />
-      </DialDropdown>
+      </Dropdown>
 
       {isNewButtonVisible ? (
         <DialTooltip
