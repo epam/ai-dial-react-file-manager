@@ -3,7 +3,7 @@ import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import {
   BASE_ICON_PROPS,
   ButtonAppearance,
-  DialDropdown,
+  Dropdown,
   FlexibleActionsDirection,
   GhostIconButton,
   NeutralButton,
@@ -117,7 +117,7 @@ export const DialFileManagerBulkActionsToolbar: FC<
 
         <div className="flex flex-1 w-full gap-3 items-center justify-end">
           {hiddenActions.length > 0 && (
-            <DialDropdown
+            <Dropdown
               items={hiddenActions}
               allowedPlacements={['bottom', 'bottom-start']}
             >
@@ -125,7 +125,7 @@ export const DialFileManagerBulkActionsToolbar: FC<
                 className="h-[38px]"
                 icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
               />
-            </DialDropdown>
+            </Dropdown>
           )}
 
           {visibleActions.map(

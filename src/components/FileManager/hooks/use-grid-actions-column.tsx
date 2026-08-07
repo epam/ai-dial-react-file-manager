@@ -1,6 +1,6 @@
 import {
-  DialDropdown,
-  DialIcon,
+  Dropdown,
+  GhostIconButton,
   BASE_ICON_PROPS,
   mergeClasses,
 } from '@epam/ai-dial-ui-kit';
@@ -55,17 +55,14 @@ export const useGridActionsColumn = ({
       if (!items.length) return null;
 
       return (
-        <DialDropdown
+        <Dropdown
           placement="bottom-start"
           allowedPlacements={['top-start', 'top-end', 'bottom-start']}
           items={items}
           className={mergeClasses('sticky right-0', buttonClassName)}
         >
-          <DialIcon
-            className="text-secondary mx-2 flex flex-row gap-2 hover:text-accent cursor-default"
-            icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
-          />
-        </DialDropdown>
+          <GhostIconButton icon={<IconDotsVertical {...BASE_ICON_PROPS} />} />
+        </Dropdown>
       );
     },
     [allowedFileTypes, maxSelectableFileSize, buttonClassName, isRowDisabled],

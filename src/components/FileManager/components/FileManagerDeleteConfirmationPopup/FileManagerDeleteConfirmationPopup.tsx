@@ -1,6 +1,6 @@
 import { type FC, type ReactNode } from 'react';
 import {
-  DialConfirmationPopup,
+  ConfirmationPopup,
   ConfirmationPopupVariant,
 } from '@epam/ai-dial-ui-kit';
 import type { DialFile } from '@/models/file';
@@ -96,9 +96,10 @@ export const FileManagerDeleteConfirmationPopup: FC<
   const content = contentRenderer?.(fileNames) || defaultContent;
 
   return (
-    <DialConfirmationPopup
+    <ConfirmationPopup
       open={open}
       header={title}
+      ariaLabel={defaultTitle}
       confirmLabel={confirmLabel}
       cancelLabel={cancelLabel}
       variant={ConfirmationPopupVariant.Danger}
@@ -106,6 +107,6 @@ export const FileManagerDeleteConfirmationPopup: FC<
       onConfirm={onConfirm}
     >
       {content}
-    </DialConfirmationPopup>
+    </ConfirmationPopup>
   );
 };
