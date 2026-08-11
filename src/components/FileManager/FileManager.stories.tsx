@@ -2249,3 +2249,59 @@ export const ComplexSearch: Story = {
 
   render: InteractiveDemoComponent,
 };
+
+/**
+ * Verifies create-folder validation: click "New Folder", type a name
+ * containing a forbidden character (e.g. "/"), leave the inline error
+ * visible, then press Enter or click outside the input. The confirmation
+ * must be cancelled — no folder should be created, and the log below must
+ * NOT show a "Created" entry for it. A valid name (e.g. "Reports") should
+ * still create a folder normally.
+ */
+const CreateFolderValidationDemo = (args: DialFileManagerProps) => {
+  const [log, setLog] = useState<string[]>([]);
+
+  const handleCreateFolderValidate = useCallback((name: string) => {
+    const forbiddenChars = /[<>:"/\\|?*]/;
+    return forbiddenChars.test(name)
+      ? `"${name}" contains a forbidden character`
+      : null;
+  }, []);
+
+  const handleCreateFolder = useCallback(
+    async (file: DialUploadFileItem, parentPath: string) => {
+      setLog((prev) => [`Created "${file.name}" in "${parentPath}"`, ...prev]);
+    },
+    [],
+  );
+
+  return (
+    <div className="flex h-[600px] flex-col gap-4 p-4">
+      <div className="flex min-h-0 grow">
+        <DialFileManager
+          {...args}
+          onCreateFolder={handleCreateFolder}
+          onCreateFolderValidate={handleCreateFolderValidate}
+        />
+      </div>
+      <div className="dial-small-text">
+        <p className="dial-body-semi-bold-text">Create-folder log:</p>
+        {log.length === 0 ? (
+          <p>
+            (empty — confirming an invalid name should never add an entry here)
+          </p>
+        ) : (
+          <ul>
+            {log.map((entry, index) => (
+              <li key={index}>{entry}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const CreateFolderValidation: Story = {
+  render: (args) => <CreateFolderValidationDemo {...args} />,
+};
