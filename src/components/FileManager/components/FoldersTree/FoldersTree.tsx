@@ -9,6 +9,7 @@ import {
   DropdownTrigger,
   DialNoDataContent,
   DialItemType,
+  ElementSize,
 } from '@epam/ai-dial-ui-kit';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import classNames from 'classnames';
@@ -328,6 +329,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       className="sticky right-0"
                     >
                       <GhostIconButton
+                        size={ElementSize.Small}
                         className="invisible group-hover/item:visible"
                         icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
                       />
