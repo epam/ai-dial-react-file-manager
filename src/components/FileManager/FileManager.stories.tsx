@@ -1,6 +1,7 @@
 import {
   type DialFile,
   DialFileNodeType,
+  DialFilePermission,
   DialFileResourceType,
   type DialRootFolder,
 } from '@/models/file';
@@ -2258,6 +2259,19 @@ export const ComplexSearch: Story = {
  * NOT show a "Created" entry for it. A valid name (e.g. "Reports") should
  * still create a folder normally.
  */
+const createFolderValidationItems: DialFile[] = [
+  {
+    id: 'root',
+    name: 'All files',
+    path: 'All files',
+    parentPath: '',
+    nodeType: DialFileNodeType.FOLDER,
+    folderId: 'root',
+    permissions: [DialFilePermission.WRITE],
+    items: [],
+  },
+];
+
 const CreateFolderValidationDemo = (args: DialFileManagerProps) => {
   const [log, setLog] = useState<string[]>([]);
 
@@ -2303,5 +2317,9 @@ const CreateFolderValidationDemo = (args: DialFileManagerProps) => {
 };
 
 export const CreateFolderValidation: Story = {
+  args: {
+    uploadEnabled: true,
+    items: createFolderValidationItems,
+  },
   render: (args) => <CreateFolderValidationDemo {...args} />,
 };
