@@ -330,7 +330,6 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                         size={ElementSize.Small}
                         className="invisible group-hover/item:visible"
                         icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
-                        size={ElementSize.Small}
                       />
                     </Dropdown>
                   </div>
