@@ -12,7 +12,6 @@ import {
   DialBreadcrumb,
   type DialBreadcrumbPathItem,
   type DialBreadcrumbProps,
-  DialSearch,
   type DialSearchProps,
   mergeClasses,
   NeutralButton,
