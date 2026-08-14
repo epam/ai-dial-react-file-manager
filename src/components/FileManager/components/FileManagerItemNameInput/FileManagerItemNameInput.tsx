@@ -155,7 +155,7 @@ export const DialFileManagerItemNameInput: FC<
       />
       <Input
         containerClassName={mergeClasses(
-          '!h-6 py-[1px] pl-[7px] pr-[7px]',
+          '!h-5 !py-[1px] !pl-[7px] pr-[7px]',
           inputContainerClassName,
         )}
         id={elementId}
