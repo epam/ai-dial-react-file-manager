@@ -62,8 +62,8 @@ export const NAME_COLUMN =
         const isDisabled = disabledRowIds?.has(params.data.path) ?? false;
 
         const sharedIndicatorClassName = mergeClasses([
-          'group-hover/grid-row:bg-accent-primary-alpha',
-          isSelected && 'bg-accent-primary-alpha',
+          'group-hover/grid-row:bg-control-accent-alpha-hover',
+          isSelected && 'bg-control-accent-alpha',
         ]);
 
         if (params.data?.isTemporary && params.data.id === newFolderTempId) {

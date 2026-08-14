@@ -268,15 +268,16 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
               key: DialFileManagerConflictActions.Replace,
               label: replaceLabel,
               icon: (
-                <IconCircleFilled size={10} className="text-accent-tertiary" />
+                <IconCircleFilled
+                  size={10}
+                  className="text-text-visual-violet-1"
+                />
               ),
             },
             {
               key: DialFileManagerConflictActions.Duplicate,
               label: duplicateLabel,
-              icon: (
-                <IconCircleFilled size={10} className="text-accent-secondary" />
-              ),
+              icon: <IconCircleFilled size={10} className="text-success" />,
             },
             {
               key: DialFileManagerConflictActions.Cancel,

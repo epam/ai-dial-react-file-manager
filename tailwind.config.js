@@ -104,20 +104,6 @@ const controlsTextColors = {
   'control-blue-active': 'var(--text-control-blue-active, #6785FB)', // blue-200
 };
 
-// remove
-const textColorsToRemove = {
-  'accent-secondary': 'var(--text-accent-secondary, #37BABC)',
-  'accent-tertiary': 'var(--text-accent-tertiary, #A972FF)',
-};
-
-const bgColorsToRemove = {
-  // REMOVED: old names, need to remove
-  'layer-1': 'var(--bg-layer-1, #E0E6F0)',
-  'layer-4': 'var(--bg-layer-4, #D1DBEA)',
-  'controls-disable-accent': 'var(--controls-bg-disable-accent, #7C8293)',
-  'accent-primary-alpha': 'var(--bg-accent-primary-alpha, #7DA4FF26)',
-};
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   blocklist: ['[-:=]'],
@@ -128,14 +114,13 @@ module.exports = {
   theme: {
     backgroundColor: {
       ...backgroundsColors,
-      ...bgColorsToRemove,
       ...controlsBgColors,
     },
     borderColor: borderColors,
     stroke: borderColors,
     divideColor: borderColors,
     placeholderColor: placeholderColor,
-    textColor: { ...textColors, ...textColorsToRemove, ...controlsTextColors },
+    textColor: { ...textColors, ...controlsTextColors },
     gradientColorStops: backgroundsColors,
 
     extend: {

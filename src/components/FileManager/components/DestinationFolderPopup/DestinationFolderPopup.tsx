@@ -232,7 +232,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
                   />
                 )}
                 {showCreateFolderButton && showHiddenFileSwitcher && (
-                  <div className="w-px h-[26px] bg-controls-disable-accent my-2" />
+                  <div className="w-px h-[26px] bg-control-disable my-2" />
                 )}
                 {showHiddenFileSwitcher && (
                   <>

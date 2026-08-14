@@ -9,6 +9,7 @@ import {
   DropdownTrigger,
   DialNoDataContent,
   DialItemType,
+  ElementSize,
 } from '@epam/ai-dial-ui-kit';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import classNames from 'classnames';
@@ -241,7 +242,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
         onRenameValidate && ((value: string) => onRenameValidate(value, node));
 
       const selectedClass = isSelected
-        ? 'bg-accent-primary-alpha border-l-2 border-l-accent-primary rounded'
+        ? 'bg-control-accent-alpha border-l-2 border-l-accent-primary rounded'
         : 'border-l-2 border-l-transparent';
 
       const menuItems = isRootFolder ? [] : (getContextMenuItems?.(node) ?? []);
@@ -255,17 +256,17 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
 
       return (
         <div key={`${path}-children`} className="cursor-pointer text-secondary">
-          <div className="flex flex-col w-full" aria-label="folder">
+          <div className="flex flex-col w-full gap-1" aria-label="folder">
             <Dropdown
               trigger={[DropdownTrigger.ContextMenu]}
-              className="w-full"
+              className="w-full h-[32px]"
               anchorToMouse
               items={menuItems}
             >
               <div
                 style={{ paddingLeft: `${level * FOLDER_LEVEL_PADDING}px` }}
                 className={mergeClasses(
-                  'py-1 gap-[2px] dial-small-text flex justify-between hover:bg-accent-primary-alpha rounded group/item w-full mb-[2px] relative',
+                  'pt-1 px-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover rounded group/item w-full relative',
                   selectedClass,
                 )}
                 aria-selected={isSelected}
@@ -298,8 +299,8 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       loading={isLoading}
                       shared={isSharedByMe}
                       sharedIndicatorClassName={mergeClasses(
-                        'group-hover/item:bg-accent-primary-alpha',
-                        isSelected && 'bg-accent-primary-alpha',
+                        'group-hover/item:bg-control-accent-alpha-hover',
+                        isSelected && 'bg-bg-control-accent-alpha',
                       )}
                       iconSize={BASE_FILE_MANAGER_ICON_SIZE}
                       forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
@@ -330,6 +331,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       <GhostIconButton
                         className="invisible group-hover/item:visible"
                         icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
+                        size={ElementSize.Small}
                       />
                     </Dropdown>
                   </div>

@@ -195,10 +195,6 @@ export const WithDisabledTooltip: StoryObj<WithDisabledTooltipArgs> = {
   },
 };
 
-export const CustomClasses: Story = {
-  args: { className: 'bg-layer-4 h-[640px]' },
-};
-
 const WithTabsControlledComponent = (args: DialFileManagerProps) => {
   const { activeTab, handleTabChange, tabs } = useDialFileManagerTabs({
     my_files: 'My Files',
