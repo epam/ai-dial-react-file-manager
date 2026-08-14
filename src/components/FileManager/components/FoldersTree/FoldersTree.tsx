@@ -241,9 +241,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       const validateHandler =
         onRenameValidate && ((value: string) => onRenameValidate(value, node));
 
-      const selectedClass = isSelected
-        ? 'bg-control-accent-alpha border-l-2 border-l-accent-primary rounded'
-        : 'border-l-2 border-l-transparent';
+      const selectedClass = isSelected ? 'bg-control-accent-alpha rounded' : '';
 
       const menuItems = isRootFolder ? [] : (getContextMenuItems?.(node) ?? []);
       const tooltipContent = forbiddenSymbolsRegExp
@@ -266,7 +264,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
               <div
                 style={{ paddingLeft: `${level * FOLDER_LEVEL_PADDING}px` }}
                 className={mergeClasses(
-                  'pt-1 px-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover rounded group/item w-full relative',
+                  'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover rounded group/item w-full relative',
                   selectedClass,
                 )}
                 aria-selected={isSelected}
