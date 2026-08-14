@@ -1,24 +1,23 @@
 import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import { DialFileManagerTabs } from '@/types/file-manager';
-import type { DropdownItem, TabModel } from '@epam/ai-dial-ui-kit';
+import type { DropdownItem, TabItem } from '@epam/ai-dial-ui-kit';
 import {
   BASE_ICON_PROPS,
   ButtonDropdown,
   ButtonVariant,
   DIAL_ICON_SIZE,
-  DialSwitch,
-  DialTabs,
   DialTooltip,
   Dropdown,
   ElementSize,
   GhostIconButton,
-  ScreenResolution,
+  Switch,
+  Tabs,
 } from '@epam/ai-dial-ui-kit';
 import { IconDotsVertical, IconEye, IconEyeOff } from '@tabler/icons-react';
 import { type FC, useMemo } from 'react';
 
 export interface DialFileManagerToolbarProps {
-  tabs?: TabModel[];
+  tabs?: TabItem[];
   activeTab?: string;
   areHiddenFilesVisible: boolean;
   hiddenFilesSwitcherLabel?: string;
@@ -133,22 +132,19 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
 
   const renderTabs = () =>
     tabs && activeTab && onTabChange ? (
-      <DialTabs
+      <Tabs
         tabs={tabs}
-        activeTab={activeTab}
-        onClick={(id: string) => onTabChange(id as DialFileManagerTabs)}
-        screenThreshold={ScreenResolution.Tablet}
-        smallScreenContainerClassName="w-fit bg-transparent h-[38px] overflow-hidden"
-        smallScreenDropdownItemClassName="px-3 h-[38px]"
+        activeTabId={activeTab}
+        onTabChange={(id: string) => onTabChange(id as DialFileManagerTabs)}
       />
     ) : null;
 
   const renderDesktopActions = () => (
     <>
       {showHiddenFilesToggle && (
-        <DialSwitch
-          switchId="hidden-files-switch"
-          label={hiddenFilesSwitcherLabel}
+        <Switch
+          id="hidden-files-switch"
+          labelProps={{ label: hiddenFilesSwitcherLabel }}
           isOn={areHiddenFilesVisible}
           onChange={onToggleHiddenFiles}
         />

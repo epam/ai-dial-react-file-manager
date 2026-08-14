@@ -1,22 +1,22 @@
 import {
+  type FC,
+  type MouseEvent,
   useCallback,
   useMemo,
   useState,
-  type FC,
-  type MouseEvent,
 } from 'react';
 
+import { getSegments } from '@/utils/path';
 import {
   BASE_ICON_PROPS,
   DialBreadcrumb,
-  type DialBreadcrumbProps,
   type DialBreadcrumbPathItem,
-  NeutralButton,
-  DialSearch,
+  type DialBreadcrumbProps,
   type DialSearchProps,
   mergeClasses,
+  NeutralButton,
+  Search,
 } from '@epam/ai-dial-ui-kit';
-import { getSegments } from '@/utils/path';
 import { IconArrowLeft } from '@tabler/icons-react';
 import {
   breadcrumbContainerClassName,
@@ -217,6 +217,10 @@ export const DialFileManagerNavigationPanel: FC<
 
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
+  const handleSearch = (value?: string) => {
+    onSearchChange?.(value ?? '');
+  };
+
   const expandSearch = useCallback(() => {
     if (isCompactView && !isSearchExpanded) {
       setIsSearchExpanded(true);
@@ -289,10 +293,10 @@ export const DialFileManagerNavigationPanel: FC<
           aria-label="Search"
           onClick={expandSearch}
         >
-          <DialSearch
+          <Search
             id={elementId}
             value={value ?? ''}
-            onChange={onSearchChange}
+            onChange={handleSearch}
             disabled={disabled}
             onBlur={handleSearchBlur}
             invalid={invalid}

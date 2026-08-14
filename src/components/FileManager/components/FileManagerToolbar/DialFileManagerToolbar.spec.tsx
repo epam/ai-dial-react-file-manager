@@ -52,7 +52,7 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
       />,
     );
 
-    const switcher = screen.getByRole('checkbox');
+    const switcher = screen.getByRole('switch');
     expect(switcher).toBeChecked();
 
     fireEvent.click(switcher);
@@ -137,7 +137,7 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
       />,
     );
 
-    expect(screen.getByRole('checkbox')).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toBeInTheDocument();
     expect(screen.getByText(customLabel)).toBeInTheDocument();
   });
 

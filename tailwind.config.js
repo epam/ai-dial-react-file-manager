@@ -2,7 +2,6 @@
 
 const backgroundsColors = {
   transparent: 'transparent',
-  // COLORS 2.0
   'layer-sunken': 'var(--bg-layer-sunken, #EEF1F7)', // grey-300
   'layer-base': 'var(--bg-layer-base, #F5F7FA)', // grey-200
   'layer-raised': 'var(--bg-layer-raised, #FCFCFC)', // grey-100
@@ -10,20 +9,14 @@ const backgroundsColors = {
   warning: 'var(--bg-warning, #FAF0CF)', // yellow-100
   info: 'var(--bg-info, #E1EAF9)', // blue-100
   success: 'var(--bg-success, #DBF1EB)', // green-100
-  backdrop: 'var(--bg-backdrop, #161B2D4D)', // grey-1000 with 70% opacity
+  backdrop: 'var(--bg-backdrop, #161B2D4D)', // grey-1000 with 30% opacity
 
   // shadow colors
   'shadow-blue': 'var(--shadow-blue-500, #2764D924)',
   'shadow-grey': 'var(--shadow-grey-1000, #161B2D08)',
-
-  // REMOVED: old names, need to remove
-  'layer-1': 'var(--bg-layer-1, #E0E6F0)',
-  'layer-4': 'var(--bg-layer-4, #D1DBEA)',
-  'accent-primary-alpha': 'var(--bg-accent-primary-alpha, #7DA4FF26)',
 };
 
 const controlsBgColors = {
-  // COLORS 2.0
   'control-accent-alpha': 'var(--bg-control-accent-alpha, #2764D90F)', // blue-500 alpha-6
   'control-accent-alpha-hover':
     'var(--bg-control-accent-alpha-hover, #2764D924)', // blue-500 alpha-14
@@ -43,47 +36,60 @@ const controlsBgColors = {
   'control-error-alpha-active':
     'var(--bg-control-error-alpha-active, #F7646433)', // red-800 alpha-20
 
-  'control-disable': 'var(--bg-control-disable, #C7CBD4)', // grey-700
+  'control-disable': 'var(--bg-control-disable, #848E9C)', // grey-700
+};
 
-  // REMOVED: old names, need to remove
-  'controls-disable-accent': 'var(--controls-bg-disable-accent, #7C8293)',
+const visualBgColors = {
+  blue: 'var(--bg-visual-blue, #D6EDF9)', // blue-50
+  'green-1': 'var(--bg-visual-green-1, #CDE8E5)', // green-200
+  'green-2': 'var(--bg-visual-green-2, #D1F0DC)', // green-300
+  brown: 'var(--bg-visual-brown, #FDE8D8)', // brown-300
+  red: 'var(--bg-visual-red, #FCE7F3)', // red-200
+  'violet-1': 'var(--bg-visual-violet-1, #DDE3F9)', // violet-100
+  'violet-2': 'var(--bg-visual-violet-2, #F1E9FF)', // violet-150
+};
+
+const visualTextColors = {
+  blue: 'var(--text-visual-blue, #1189C8)', // blue-250
+  'green-1': 'var(--text-visual-green-1, #059669)', // green-500
+  'green-2': 'var(--text-visual-green-2, #0D6E72)', // green-600
+  'green-3': 'var(--text-visual-green-3, #065F46)', // green-900
+  'brown-1': 'var(--text-visual-brown-1, #D36817)', // brown-400
+  'brown-2': 'var(--text-visual-brown-2, #B45309)', // brown-500
+  red: 'var(--text-visual-red, #9D174D)', // red-900
+  'violet-1': 'var(--text-visual-violet-1, #7C3AED)', // violet-500
+  'violet-2': 'var(--text-visual-violet-2, #3730B7)', // violet-800
 };
 
 const borderColors = {
   transparent: 'transparent',
-  primary: 'var(--stroke-primary, #6B7280)', // grey-800
+  primary: 'var(--stroke-primary, #57647A)', // grey-800
   secondary: 'var(--stroke-secondary, #D1DBEA)', // grey-600
   tertiary: 'var(--stroke-tertiary, #E0E6F0)', // grey-500
   error: 'var(--stroke-error, #AE2F2F)', // red-800
   warning: 'var(--stroke-warning, #EEC840)', // yellow-500
   info: 'var(--stroke-info, #124ACE)', // blue-500
   success: 'var(--stroke-success, #007274)', // green-800
+
   // controls
-  focus: 'var(--stroke-focus, #161B2D)', // grey-1000
+  'hover-alpha': 'var(--stroke-hover-alpha, #2764D933)', // blue-500 alpha-20
+  'focus-black': 'var(--stroke-focus-black, #161B2D)', // grey-1000
+  'focus-blue': 'var(--stroke-focus-blue, #6785FB)', // blue-200
   'accent-alpha': 'var(--stroke-accent-alpha, #2764D933)', // blue-500 alpha-20
   'error-alpha': 'var(--stroke-error-alpha, #AE2F2F73)', // red-800 alpha-45
 };
 
-const controlsBorderColors = {
-  'controls-focus': 'var(--controls-stroke-focus, #EEF1F7)',
-};
-
 const textColors = {
-  // COLORS 2.0
   transparent: 'transparent',
   primary: 'var(--text-primary, #161B2D)', // grey-1000
-  secondary: 'var(--text-secondary, #6B7280)', // grey-800
-  tertiary: 'var(--text-tertiary, #C7CBD4)', // grey-700
+  secondary: 'var(--text-secondary, #57647a)', // grey-800
+  tertiary: 'var(--text-tertiary, #848e9c)', // grey-700
   accent: 'var(--text-accent, #1D4ED8)', // blue-500
   error: 'var(--text-error, #AE2F2F)', // red-500
   warning: 'var(--text-warning, #7F6300)', // yellow-700
   'warning-icon': 'var(--text-warning-icon, #EEC840)', // yellow-500
   info: 'var(--text-info, #1D4ED8)', // blue-500
   success: 'var(--text-success, #007274)', // green-800
-
-  // REMOVED: old names, need to remove
-  'accent-secondary': 'var(--text-accent-secondary, #37BABC)',
-  'accent-tertiary': 'var(--text-accent-tertiary, #A972FF)',
 };
 
 const placeholderColor = {
@@ -92,32 +98,48 @@ const placeholderColor = {
 
 const controlsTextColors = {
   'control-permanent': 'var(--text-control-permanent, #FCFCFC)', // grey-100
-  'control-disable': 'var(--text-control-disable, #6B7280)', // grey-800
+  'control-disable-alpha': 'var(--text-control-disable-alpha, #DCE0E8)', // grey-550
+  'control-disable-beta': 'var(--text-control-disable-beta, #848E9C)', // grey-700
   'control-blue-hover': 'var(--text-control-blue-hover, #5976E9)', // blue-300
   'control-blue-active': 'var(--text-control-blue-active, #6785FB)', // blue-200
 };
 
 /** @type {import('tailwindcss').Config} */
-export default {
-  content: ['./src/**/*.{ts,tsx}', './src/**/*.scss'],
+module.exports = {
+  blocklist: ['[-:=]'],
+  content: [
+    './apps/chat/src/**/*.{html,js,ts,tsx,yaml}',
+    './node_modules/@epam/ai-dial-ui-kit/**/*.{js,ts,jsx,tsx}',
+  ],
   theme: {
-    backgroundColor: { ...backgroundsColors, ...controlsBgColors },
-    borderColor: { ...borderColors, ...controlsBorderColors },
-    stroke: { ...borderColors, ...controlsBorderColors },
-    divideColor: { ...borderColors, ...controlsBorderColors },
+    backgroundColor: {
+      ...backgroundsColors,
+      ...controlsBgColors,
+    },
+    borderColor: borderColors,
+    stroke: borderColors,
+    divideColor: borderColors,
     placeholderColor: placeholderColor,
     textColor: { ...textColors, ...controlsTextColors },
     gradientColorStops: backgroundsColors,
 
     extend: {
-      animation: {
-        'spin-steps': 'spin 0.75s steps(8, end) infinite',
+      screens: {
+        mobile: { max: '768px' },
+        desktop: { min: '769px' },
       },
+      /*
+       * `outline` emits a 1px solid ring and `outline-focus-black` paints it with the
+       * focus token — see the focus-visible states in buttons.scss. Kept in
+       * `extend` so the numeric widths (`outline-1`, still used in libs/*) stay.
+       */
+      outlineWidth: { DEFAULT: '1px' },
+      outlineColor: borderColors,
       boxShadow: {
-        xs: '0 1px 4px 0 var(--shadow-grey-1000, #161B2D08), 0 1px 2px 0 var(--shadow-blue-500, #2764D924)',
-        sm: '0 2px 12px 0 var(--shadow-grey-1000, #161B2D08), 0 2px 6px 0 var(--shadow-blue-500, #2764D924)',
-        md: '0 6px 24px 0 var(--shadow-grey-1000, #161B2D08), 0 6px 16px 0 var(--shadow-blue-500, #2764D924)',
-        lg: '0 10px 36px 0 var(--shadow-grey-1000, #161B2D08), 0 10px 24px 0 var(--shadow-blue-500, #2764D924)',
+        xs: '0 1px 4px 0 var(--shadow-grey-1000, #161B2D08), 0 1px 2px 0 var(--bg-control-accent-alpha-hover, #2764D924)',
+        sm: '0 2px 12px 0 var(--shadow-grey-1000, #161B2D08), 0 2px 6px 0 var(--bg-control-accent-alpha-hover, #2764D924)',
+        md: '0 6px 24px 0 var(--shadow-grey-1000, #161B2D08), 0 6px 16px 0 var(--bg-control-accent-alpha-hover, #2764D924)',
+        lg: '0 10px 36px 0 var(--shadow-grey-1000, #161B2D08), 0 10px 24px 0 var(--bg-control-accent-alpha-hover, #2764D924)',
       },
       borderRadius: {
         DEFAULT: '4px',
@@ -133,6 +155,15 @@ export default {
       },
       fontSize: {
         xxs: '10px',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+      animation: {
+        fadeIn: 'fadeIn 100ms ease-in',
       },
       typography: {
         DEFAULT: {

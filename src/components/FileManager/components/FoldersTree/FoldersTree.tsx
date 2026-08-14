@@ -241,9 +241,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       const validateHandler =
         onRenameValidate && ((value: string) => onRenameValidate(value, node));
 
-      const selectedClass = isSelected
-        ? 'bg-accent-primary-alpha border-l-2 border-l-accent-primary rounded'
-        : 'border-l-2 border-l-transparent';
+      const selectedClass = isSelected ? 'bg-control-accent-alpha rounded' : '';
 
       const menuItems = isRootFolder ? [] : (getContextMenuItems?.(node) ?? []);
       const tooltipContent = forbiddenSymbolsRegExp
@@ -256,17 +254,17 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
 
       return (
         <div key={`${path}-children`} className="cursor-pointer text-secondary">
-          <div className="flex flex-col w-full" aria-label="folder">
+          <div className="flex flex-col w-full gap-1" aria-label="folder">
             <Dropdown
               trigger={[DropdownTrigger.ContextMenu]}
-              className="w-full"
+              className="w-full h-[32px]"
               anchorToMouse
               items={menuItems}
             >
               <div
                 style={{ paddingLeft: `${level * FOLDER_LEVEL_PADDING}px` }}
                 className={mergeClasses(
-                  'py-1 gap-[2px] dial-small-text flex justify-between hover:bg-accent-primary-alpha rounded group/item w-full mb-[2px] relative',
+                  'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover rounded group/item w-full relative',
                   selectedClass,
                 )}
                 aria-selected={isSelected}
@@ -299,8 +297,8 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       loading={isLoading}
                       shared={isSharedByMe}
                       sharedIndicatorClassName={mergeClasses(
-                        'group-hover/item:bg-accent-primary-alpha',
-                        isSelected && 'bg-accent-primary-alpha',
+                        'group-hover/item:bg-control-accent-alpha-hover',
+                        isSelected && 'bg-bg-control-accent-alpha',
                       )}
                       iconSize={BASE_FILE_MANAGER_ICON_SIZE}
                       forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}

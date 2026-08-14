@@ -9,7 +9,6 @@ import {
   BASE_ICON_PROPS,
   ButtonAppearance,
   type DialNotificationProps,
-  DialSwitch,
   DialTooltip,
   Dropdown,
   type DropdownItem,
@@ -21,6 +20,7 @@ import {
   Popup,
   PopupSize,
   PrimaryButton,
+  Switch,
 } from '@epam/ai-dial-ui-kit';
 import { IconDotsVertical, IconEye, IconFolderPlus } from '@tabler/icons-react';
 import {
@@ -232,16 +232,16 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
                   />
                 )}
                 {showCreateFolderButton && showHiddenFileSwitcher && (
-                  <div className="w-px h-[26px] bg-controls-disable-accent my-2" />
+                  <div className="w-px h-[26px] bg-control-disable my-2" />
                 )}
                 {showHiddenFileSwitcher && (
                   <>
                     <div className="inline-flex items-center cursor-pointer">
-                      <DialSwitch
-                        label={hiddenFilesSwitcherLabel}
+                      <Switch
+                        labelProps={{ label: hiddenFilesSwitcherLabel }}
                         isOn={showHiddenFiles}
                         onChange={handleShowHiddenFilesChange}
-                        switchId="hidden-files-switch-modal"
+                        id="hidden-files-switch-modal"
                       />
                     </div>
                   </>
