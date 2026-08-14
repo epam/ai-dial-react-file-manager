@@ -281,7 +281,7 @@ describe('Dial UI Kit :: DialDestinationFolderPopup', () => {
       />,
     );
 
-    const switchElement = screen.getByRole('checkbox');
+    const switchElement = screen.getByRole('switch');
     expect(switchElement).not.toBeChecked();
 
     fireEvent.click(switchElement);
@@ -327,7 +327,7 @@ describe('Dial UI Kit :: DialDestinationFolderPopup', () => {
       />,
     );
 
-    const switchElement = screen.getByRole('checkbox');
+    const switchElement = screen.getByRole('switch');
     expect(switchElement).not.toBeChecked();
 
     fireEvent.click(switchElement);
