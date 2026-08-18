@@ -4,17 +4,6 @@ import type { GridApi } from 'ag-grid-community';
 import { DialFileManager } from '../FileManager';
 import { DialFileNodeType, type DialFile } from '@/models/file';
 
-/**
- * `DialGrid` supplies a case-insensitive comparator via its own `defaultColDef`,
- * but ag-Grid replaces `defaultColDef` instead of merging it — so the one the
- * FileManager passes used to drop that comparator, and sorting fell back to
- * ag-Grid's case-sensitive default (all uppercase names first).
- *
- * These tests drive a real ag-Grid, so they fail if the comparator stops
- * reaching the grid, which a comparator unit test alone would not catch.
- */
-
-// Names taken from the reported issue screenshot.
 const NAMES = [
   'New folder 1',
   'New folder 2',
@@ -99,7 +88,6 @@ describe('Dial UI Kit :: FileManager name sorting', () => {
   test('does not place all uppercase names before lowercase ones', async () => {
     const api = await renderGrid(['Zebra', 'appdata', 'Banana', 'cherry']);
 
-    // The reported bug produced ['Banana', 'Zebra', 'appdata', 'cherry'].
     expect(sortedNames(api, 'asc')).toEqual([
       'appdata',
       'Banana',
