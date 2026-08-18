@@ -120,7 +120,7 @@ import {
 } from './hooks/use-file-manager-columns';
 import { useFileManagerContext } from './hooks/use-file-manager-context';
 import { useGridContextMenu } from './hooks/use-grid-context-menu';
-import { findNodeByPath, getRowTooltip } from './utils';
+import { baseColumnComparator, findNodeByPath, getRowTooltip } from './utils';
 import { useTriggerViewCreateFolder } from './hooks/use-trigger-view-create-folder';
 
 type GridRow = FileManagerGridRow;
@@ -1363,6 +1363,7 @@ export const DialFileManagerView: FC = () => {
       rowHeight: COMPACT_VIEW_HEADER_HEIGHT,
       rowClass: 'group/grid-row',
       defaultColDef: {
+        comparator: baseColumnComparator,
         ...forwardedGridOptions.additionalGridOptions?.defaultColDef,
         floatingFilter: navigationPanelOptions?.searchable
           ? false
