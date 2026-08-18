@@ -275,6 +275,30 @@ export const getRowTooltip = (
   return undefined;
 };
 
+const nameCollator = new Intl.Collator(undefined, {
+  sensitivity: 'base',
+  numeric: true,
+});
+
+export const baseColumnComparator = (
+  a: string | number | undefined,
+  b: string | number | undefined,
+  _nodeA?: unknown,
+  _nodeB?: unknown,
+  isInverted?: boolean,
+): number => {
+  if (typeof a === 'string' && typeof b === 'string' && a && b) {
+    const result = nameCollator.compare(a, b);
+    return result === 0 ? 0 : result > 0 ? 1 : -1;
+  }
+
+  if (a === b) return 0;
+  if (!a) return isInverted ? -1 : 1;
+  if (!b) return isInverted ? 1 : -1;
+
+  return a > b ? 1 : -1;
+};
+
 export const getFolderNestingDepth = (folderPath: string): number => {
   const segments = folderPath.replace(/\/+$/, '').split('/').filter(Boolean);
   return segments.length;

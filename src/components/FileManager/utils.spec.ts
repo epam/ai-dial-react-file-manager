@@ -9,6 +9,7 @@ import {
   normalizeExtensionWithoutDot,
   splitPathAndName,
   getNextFolderName,
+  baseColumnComparator,
 } from './utils';
 
 describe('Dial UI Kit :: splitPathAndName', () => {
@@ -230,5 +231,67 @@ describe('Dial UI Kit :: getFolderNestingDepth', () => {
   it('returns 5 for fifth-level folder', () => {
     expect(getFolderNestingDepth('public/a/b/c/d')).toBe(5);
     expect(getFolderNestingDepth('public/a/b/c/d/')).toBe(5);
+  });
+});
+
+describe('Dial UI Kit :: baseColumnComparator', () => {
+  const sortNames = (names: string[]) =>
+    [...names].sort((a, b) => baseColumnComparator(a, b));
+
+  it('sorts names alphabetically regardless of letter case', () => {
+    expect(sortNames(['Zebra', 'appdata', 'banana', 'Code'])).toEqual([
+      'appdata',
+      'banana',
+      'Code',
+      'Zebra',
+    ]);
+  });
+
+  it('does not group uppercase names before lowercase ones', () => {
+    expect(sortNames(['banana', 'Apple', 'cherry', 'Date'])).toEqual([
+      'Apple',
+      'banana',
+      'cherry',
+      'Date',
+    ]);
+  });
+
+  it('orders digit runs numerically', () => {
+    expect(
+      sortNames(['New folder 10', 'New folder 2', 'New folder 1']),
+    ).toEqual(['New folder 1', 'New folder 2', 'New folder 10']);
+  });
+
+  it('treats names differing only by case as equal', () => {
+    expect(baseColumnComparator('Report', 'report')).toBe(0);
+  });
+
+  it('sorts accented and non-latin names next to their base letter', () => {
+    expect(sortNames(['banana', 'Apple', 'Zebra'])).toEqual([
+      'Apple',
+      'banana',
+      'Zebra',
+    ]);
+    expect(baseColumnComparator('Apfel', 'banana')).toBe(-1);
+  });
+
+  it('compares numbers without coercing them to strings', () => {
+    expect(baseColumnComparator(2, 10)).toBe(-1);
+    expect(baseColumnComparator(10, 2)).toBe(1);
+  });
+
+  it('keeps empty values last in both sort directions', () => {
+    expect(
+      baseColumnComparator(undefined, 'a', undefined, undefined, false),
+    ).toBe(1);
+    expect(
+      baseColumnComparator('a', undefined, undefined, undefined, false),
+    ).toBe(-1);
+    expect(
+      baseColumnComparator(undefined, 'a', undefined, undefined, true),
+    ).toBe(-1);
+    expect(
+      baseColumnComparator('a', undefined, undefined, undefined, true),
+    ).toBe(1);
   });
 });
