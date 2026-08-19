@@ -61,14 +61,14 @@ Before writing the draft, read `CHANGELOG.md`. This project follows [Keep a Chan
 
 The raw CI's `## Features` / `## Fixes` / `## Tests` / `## Other` partition is unreliable. Reclassify by actual consumer impact:
 
-| Where CI put it                               | Where it belongs | Rule                                          |
-| ---------------------------------------------- | ----------------- | ---------------------------------------------- |
-| `Other` starting with `feat:`                 | `Features`        | A feat that lost its slot.                     |
-| `Other` starting with `fix:`                  | `Fixes`            | Same, for fix.                                 |
-| `Tests` — any entry                           | **Drop**           | Zero consumer impact.                          |
-| Multiple PRs on the same component/feature    | one folded entry  | Cite PR numbers in parens.                     |
-| `Other` for a security dep bump (CVE)         | `Fixes`            | Security items are consumer-relevant.          |
-| `Other` for `@epam/ai-dial-ui-kit` peer bump  | `Features`/`Fixes`| Only if it changes consumer-visible behavior.  |
+| Where CI put it                              | Where it belongs   | Rule                                          |
+| -------------------------------------------- | ------------------ | --------------------------------------------- |
+| `Other` starting with `feat:`                | `Features`         | A feat that lost its slot.                    |
+| `Other` starting with `fix:`                 | `Fixes`            | Same, for fix.                                |
+| `Tests` — any entry                          | **Drop**           | Zero consumer impact.                         |
+| Multiple PRs on the same component/feature   | one folded entry   | Cite PR numbers in parens.                    |
+| `Other` for a security dep bump (CVE)        | `Fixes`            | Security items are consumer-relevant.         |
+| `Other` for `@epam/ai-dial-ui-kit` peer bump | `Features`/`Fixes` | Only if it changes consumer-visible behavior. |
 
 **Drop these entirely** — no consumer-visible effect:
 
