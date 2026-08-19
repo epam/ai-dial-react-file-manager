@@ -1,6 +1,6 @@
 {
   "name": "@epam/ai-dial-react-file-manager",
-  "version": "0.1.0-rc.0",
+  "version": "0.1.0",
   "type": "module",
   "license": "Apache-2.0",
   "description": "React file manager package for AI DIAL interfaces",
