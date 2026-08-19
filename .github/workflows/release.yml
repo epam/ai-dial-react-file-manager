@@ -4,6 +4,11 @@ on:
   push:
     branches: [development, release-*]
   workflow_dispatch:
+    inputs:
+      promote:
+        type: boolean
+        description: Promote release to stable (for release-* branches only)
+        default: false
 
 permissions:
   contents: write
@@ -21,6 +26,6 @@ jobs:
     with:
       docker-build-enabled: false
       node-version: '24'
-      promote: false
+      promote: ${{ inputs.promote || false }}
       publish-enabled: true
     secrets: inherit
