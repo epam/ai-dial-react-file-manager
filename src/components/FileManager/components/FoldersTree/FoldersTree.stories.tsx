@@ -288,7 +288,7 @@ export const Default: Story = {
       });
 
       return (
-        <div className="size-[400px] border rounded p-4 bg-background">
+        <div className="size-[400px] border rounded p-4 bg-layer-base">
           <DialFoldersTree
             {...args}
             showFiles

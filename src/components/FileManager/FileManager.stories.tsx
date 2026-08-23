@@ -19,9 +19,9 @@ import {
   FileManagerColumnKey,
 } from '@/types/file-manager';
 import {
-  DialCheckbox,
+  Checkbox,
   DialDateCellRenderer,
-  DialSwitch,
+  Switch,
   Popup,
   PopupSize,
   PrimaryButton,
@@ -1953,30 +1953,30 @@ const WithAllowedFileTypesComponent = (args: DialFileManagerProps) => {
   return (
     <div className="h-[640px] flex flex-col gap-4">
       <div className="flex gap-2 pl-6 mt-6">
-        <DialCheckbox
+        <Checkbox
           id={FILE_TYPES.SVG}
-          checked={allowedFileTypes.includes(FILE_TYPES.SVG)}
-          label={FILE_TYPES.SVG}
-          onChange={handleCheck}
+          isSelected={allowedFileTypes.includes(FILE_TYPES.SVG)}
+          labelProps={{ label: FILE_TYPES.SVG }}
+          onChange={(value) => handleCheck(value, FILE_TYPES.SVG)}
         />
-        <DialCheckbox
+        <Checkbox
           id={FILE_TYPES.PNG}
-          checked={allowedFileTypes.includes(FILE_TYPES.PNG)}
-          label={FILE_TYPES.PNG}
-          onChange={handleCheck}
+          isSelected={allowedFileTypes.includes(FILE_TYPES.PNG)}
+          labelProps={{ label: FILE_TYPES.PNG }}
+          onChange={(value) => handleCheck(value, FILE_TYPES.PNG)}
         />
-        <DialCheckbox
+        <Checkbox
           id={FILE_TYPES.TXT}
-          checked={allowedFileTypes.includes(FILE_TYPES.TXT)}
-          label={FILE_TYPES.TXT}
-          onChange={handleCheck}
+          isSelected={allowedFileTypes.includes(FILE_TYPES.TXT)}
+          labelProps={{ label: FILE_TYPES.TXT }}
+          onChange={(value) => handleCheck(value, FILE_TYPES.TXT)}
         />
       </div>
 
       <div className="pl-6">
-        <DialSwitch
-          switchId="allow-context-menu"
-          label="Context menu always enabled"
+        <Switch
+          id="allow-context-menu"
+          labelProps={{ label: 'Context menu always enabled' }}
           isOn={allowDisabledContextMenu}
           onChange={(v: boolean) => setAllowDisabledContextMenu(v)}
         />

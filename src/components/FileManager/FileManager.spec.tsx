@@ -127,7 +127,7 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
     );
   };
 
-  const DialTooltipContainer = ({
+  const TooltipContainer = ({
     children,
   }: {
     children: React.ReactNode;
@@ -135,14 +135,14 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
     placement?: string;
   }) => <>{children}</>;
 
-  const DialTooltipTrigger = ({
+  const TooltipTrigger = ({
     children,
   }: {
     children: React.ReactNode;
     asChild?: boolean;
   }) => <>{children}</>;
 
-  const DialTooltipContent = ({
+  const TooltipContent = ({
     children,
     className,
   }: {
@@ -190,9 +190,9 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
     ...actual,
     ButtonDropdown,
     DialGrid,
-    DialTooltipContainer,
-    DialTooltipContent,
-    DialTooltipTrigger,
+    TooltipContainer,
+    TooltipContent,
+    TooltipTrigger,
   };
 });
 

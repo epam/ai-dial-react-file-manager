@@ -4,19 +4,15 @@ import {
   DialFileName,
   DialFolderName,
   DialGrid,
-  DialRadioGroup,
   DIAL_ICON_SIZE,
   Dropdown,
   DropdownTrigger,
   Popup,
   PopupSize,
-  RadioGroupOrientation,
+  RadioGroup,
 } from '@epam/ai-dial-ui-kit';
 import { BASE_FILE_MANAGER_ICON_SIZE } from '@/components/FileManager/constants';
-import type {
-  DropdownItem,
-  RadioButtonWithContent,
-} from '@epam/ai-dial-ui-kit';
+import type { DropdownItem, RadioGroupItem } from '@epam/ai-dial-ui-kit';
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
 import {
@@ -202,15 +198,15 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
     (isSingleFile ? defaultSingleFileMessage : defaultMultipleFilesMessage);
 
   // Radio options for single file
-  const singleFileRadioOptions: RadioButtonWithContent[] = useMemo(
+  const singleFileRadioOptions: RadioGroupItem[] = useMemo(
     () => [
       {
-        id: DialFileManagerConflictActions.Replace,
-        name: replaceLabel,
+        value: DialFileManagerConflictActions.Replace,
+        label: replaceLabel,
       },
       {
-        id: DialFileManagerConflictActions.Duplicate,
-        name: duplicateLabel,
+        value: DialFileManagerConflictActions.Duplicate,
+        label: duplicateLabel,
       },
     ],
     [replaceLabel, duplicateLabel],
@@ -267,12 +263,7 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
             {
               key: DialFileManagerConflictActions.Replace,
               label: replaceLabel,
-              icon: (
-                <IconCircleFilled
-                  size={10}
-                  className="text-text-visual-violet-1"
-                />
-              ),
+              icon: <IconCircleFilled size={10} className="text-violet-1" />,
             },
             {
               key: DialFileManagerConflictActions.Duplicate,
@@ -344,41 +335,39 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
     openDropdownPath,
   ]);
 
-  const multipleFilesRadioOptions: RadioButtonWithContent[] = useMemo(
+  // `RadioGroup` mounts an option's content only while it is selected, so the
+  // grid does not need its own guard on the active strategy.
+  const multipleFilesRadioOptions: RadioGroupItem[] = useMemo(
     () => [
       {
-        id: DialFileManagerConflictStrategies.ReplaceAll,
-        name: replaceAllLabel,
+        value: DialFileManagerConflictStrategies.ReplaceAll,
+        label: replaceAllLabel,
       },
       {
-        id: DialFileManagerConflictStrategies.DuplicateAll,
-        name: duplicateAllLabel,
+        value: DialFileManagerConflictStrategies.DuplicateAll,
+        label: duplicateAllLabel,
       },
       {
-        id: DialFileManagerConflictStrategies.DecideForEach,
-        name: decideForEachLabel,
-        content:
-          strategy === DialFileManagerConflictStrategies.DecideForEach ? (
-            <div className="mt-4">
-              <DialGrid<ConflictGridRow>
-                columnDefs={columnDefs}
-                rowData={gridRows}
-                getRowId={(row) => row.id}
-                wrapCustomCellRenderers={false}
-                alternateOddRowColors={false}
-                additionalGridOptions={{
-                  domLayout: 'autoHeight',
-                }}
-              />
-            </div>
-          ) : undefined,
+        value: DialFileManagerConflictStrategies.DecideForEach,
+        label: decideForEachLabel,
+        content: (
+          <DialGrid<ConflictGridRow>
+            columnDefs={columnDefs}
+            rowData={gridRows}
+            getRowId={(row) => row.id}
+            wrapCustomCellRenderers={false}
+            alternateOddRowColors={false}
+            additionalGridOptions={{
+              domLayout: 'autoHeight',
+            }}
+          />
+        ),
       },
     ],
     [
       replaceAllLabel,
       duplicateAllLabel,
       decideForEachLabel,
-      strategy,
       columnDefs,
       gridRows,
     ],
@@ -461,25 +450,26 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
         <p className="text-secondary mb-4 break-words">{displayMessage}</p>
 
         {isSingleFile ? (
-          <DialRadioGroup
-            elementId="single-file-conflict"
-            radioButtons={singleFileRadioOptions}
-            activeRadioButton={singleFileMode}
-            orientation={RadioGroupOrientation.Column}
-            onChange={(id) =>
-              setSingleFileMode(id as DialFileManagerConflictActions)
+          <RadioGroup
+            id="single-file-conflict"
+            ariaLabel={title}
+            items={singleFileRadioOptions}
+            value={singleFileMode}
+            onChange={(value) =>
+              setSingleFileMode(value as DialFileManagerConflictActions)
             }
           />
         ) : (
-          <DialRadioGroup
-            elementId="multiple-files-conflict"
-            radioButtons={multipleFilesRadioOptions}
-            activeRadioButton={strategy}
-            orientation={RadioGroupOrientation.Column}
-            onChange={(id) =>
-              setStrategy(id as DialFileManagerConflictStrategies)
+          <RadioGroup
+            id="multiple-files-conflict"
+            ariaLabel={title}
+            items={multipleFilesRadioOptions}
+            value={strategy}
+            onChange={(value) =>
+              setStrategy(value as DialFileManagerConflictStrategies)
             }
-            formItemChildrenClassName="gap-3"
+            // The grid is the width of the popup, not of the option's label.
+            contentClassName="ml-0"
           />
         )}
       </div>
