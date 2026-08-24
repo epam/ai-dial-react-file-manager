@@ -298,7 +298,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       shared={isSharedByMe}
                       sharedIndicatorClassName={mergeClasses(
                         'group-hover/item:bg-control-accent-alpha-hover',
-                        isSelected && 'bg-bg-control-accent-alpha',
+                        isSelected && 'bg-control-accent-alpha',
                       )}
                       iconSize={BASE_FILE_MANAGER_ICON_SIZE}
                       forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}

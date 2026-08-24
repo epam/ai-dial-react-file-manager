@@ -6,7 +6,7 @@ import {
   FileManagerColumnKey,
 } from '@/types/file-manager';
 
-import { DialEllipsisTooltip } from '@epam/ai-dial-ui-kit';
+import { EllipsisTooltip } from '@epam/ai-dial-ui-kit';
 import type { FileManagerGridRow } from '@/components/FileManager/FileManagerContext';
 import {
   NAME_COLUMN,
@@ -129,14 +129,11 @@ export function useFileManagerColumns({
 
           if (!rootItemPath || !rootItemLabel) {
             return (
-              <DialEllipsisTooltip
-                text={displayPath}
-                hideTooltip={isDisabled}
-              />
+              <EllipsisTooltip text={displayPath} hideTooltip={isDisabled} />
             );
           }
           const path = displayPath.replace(rootItemPath, rootItemLabel);
-          return <DialEllipsisTooltip text={path} hideTooltip={isDisabled} />;
+          return <EllipsisTooltip text={path} hideTooltip={isDisabled} />;
         },
       },
       UPDATED_AT_COLUMN('Modified Date')(dateLocale, dateOptions),

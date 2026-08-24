@@ -3,7 +3,7 @@ import {
   PopupSize,
   Skeleton,
   SkeletonVariant,
-  DialEllipsisTooltip,
+  EllipsisTooltip,
 } from '@epam/ai-dial-ui-kit';
 import { type FC, type ReactNode } from 'react';
 import type { DialFile } from '@/models/file';
@@ -138,12 +138,12 @@ export const FileMetadataPopup: FC<FileMetadataPopupProps> = ({
             <>
               <div className={LABEL_CLASS}>{nameLabel}</div>
               <div className={VALUE_CLASS}>
-                <DialEllipsisTooltip text={fileMetadata.name} />
+                <EllipsisTooltip text={fileMetadata.name} />
               </div>
 
               <div className={LABEL_CLASS}>{modifiedDateLabel}</div>
               <div className={VALUE_CLASS}>
-                <DialEllipsisTooltip
+                <EllipsisTooltip
                   text={formatDate(
                     fileMetadata.updatedAt,
                     dateLocale,
@@ -154,14 +154,14 @@ export const FileMetadataPopup: FC<FileMetadataPopupProps> = ({
 
               <div className={LABEL_CLASS}>{sizeLabel}</div>
               <div className={VALUE_CLASS}>
-                <DialEllipsisTooltip
+                <EllipsisTooltip
                   text={formatBytes(fileMetadata.contentLength)}
                 />
               </div>
 
               <div className={LABEL_CLASS}>{authorLabel}</div>
               <div className={VALUE_CLASS}>
-                <DialEllipsisTooltip text={fileMetadata.author || '—'} />
+                <EllipsisTooltip text={fileMetadata.author || '—'} />
               </div>
 
               <div className={LABEL_CLASS}>{pathLabel}</div>

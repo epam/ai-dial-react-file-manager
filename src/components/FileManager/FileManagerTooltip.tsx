@@ -3,9 +3,10 @@ import { createPortal } from 'react-dom';
 import type { FileManagerGridRow } from './FileManagerContext';
 import type { DialFileAcceptType } from '@/models/file-manager';
 import {
-  DialTooltipContainer,
-  DialTooltipContent,
-  DialTooltipTrigger,
+  TooltipContainer,
+  TooltipContent,
+  TooltipPlacement,
+  TooltipTrigger,
 } from '@epam/ai-dial-ui-kit';
 import classNames from 'classnames';
 
@@ -118,8 +119,8 @@ export const FileManagerTooltip = ({
       {hoveredRowTooltipContent &&
         hoveredRowRect &&
         createPortal(
-          <DialTooltipContainer open={true} placement="top">
-            <DialTooltipTrigger asChild>
+          <TooltipContainer open={true} placement={TooltipPlacement.Top}>
+            <TooltipTrigger asChild>
               <div
                 className={classNames(
                   'fixed z-[-1]',
@@ -132,11 +133,11 @@ export const FileManagerTooltip = ({
                   height: hoveredRowRect.height,
                 }}
               />
-            </DialTooltipTrigger>
-            <DialTooltipContent className="max-w-[300px] rounded border border-ui-outline-primary bg-ui-popover px-3 py-1.5 text-center text-primary shadow-md fill-ui-popover">
+            </TooltipTrigger>
+            <TooltipContent className="text-center">
               {hoveredRowTooltipContent}
-            </DialTooltipContent>
-          </DialTooltipContainer>,
+            </TooltipContent>
+          </TooltipContainer>,
           document.body,
         )}
     </>

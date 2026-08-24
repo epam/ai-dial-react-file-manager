@@ -61,7 +61,7 @@ export const Default: Story = {
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(false);
 
       return (
-        <div className="p-4 border rounded-lg bg-background">
+        <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
             tabs={mockTabs}
             activeTab={activeTab}
@@ -87,7 +87,7 @@ export const WithSecondaryNewButton: Story = {
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(true);
 
       return (
-        <div className="p-4 border rounded-lg bg-background">
+        <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
             tabs={mockTabs}
             activeTab={activeTab}
@@ -113,7 +113,7 @@ export const WithoutNewButton: Story = {
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(false);
 
       return (
-        <div className="p-4 border rounded-lg bg-background">
+        <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
             tabs={mockTabs}
             activeTab={activeTab}
@@ -136,7 +136,7 @@ export const WithDisabledNewButton: Story = {
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(false);
 
       return (
-        <div className="p-4 border rounded-lg bg-background">
+        <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
             tabs={mockTabs}
             activeTab={activeTab}
@@ -176,7 +176,7 @@ export const WithTextNewActions: Story = {
       ];
 
       return (
-        <div className="p-4 border rounded-lg bg-background">
+        <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
             tabs={mockTabs}
             activeTab={activeTab}
@@ -201,7 +201,7 @@ export const WithoutHiddenFilesToggle: Story = {
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(false);
 
       return (
-        <div className="p-4 border rounded-lg bg-background">
+        <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
             tabs={mockTabs}
             activeTab={activeTab}

@@ -6,12 +6,12 @@ import {
   ButtonDropdown,
   ButtonVariant,
   DIAL_ICON_SIZE,
-  DialTooltip,
   Dropdown,
   ElementSize,
   GhostIconButton,
   Switch,
   Tabs,
+  Tooltip,
 } from '@epam/ai-dial-ui-kit';
 import { IconDotsVertical, IconEye, IconEyeOff } from '@tabler/icons-react';
 import { type FC, useMemo } from 'react';
@@ -81,8 +81,8 @@ export interface DialFileManagerToolbarProps {
  * @param [disabledNewButtonTooltip] - Tooltip text to show when the new button is disabled.
  *
  * @remarks
- * - Tabs are rendered via `DialTabs`.
- * - The hidden files toggle uses `DialSwitch`.
+ * - Tabs are rendered via `Tabs`.
+ * - The hidden files toggle uses `Switch`.
  * - The refresh and new actions use `GhostIconButton` or dropdown variants for consistency.
  * - The toolbar automatically adapts its layout for different screen sizes.
  * - When `newButtonDropdownItems` is provided, the new button becomes a dropdown menu.
@@ -151,7 +151,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
       )}
 
       {isNewButtonVisible && (
-        <DialTooltip
+        <Tooltip
           tooltip={
             isNewButtonDisabled && disabledNewButtonTooltip
               ? disabledNewButtonTooltip
@@ -164,7 +164,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
             items={newButtonDropdownItems}
             disabled={isNewButtonDisabled}
           />
-        </DialTooltip>
+        </Tooltip>
       )}
     </>
   );
@@ -182,7 +182,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
       </Dropdown>
 
       {isNewButtonVisible ? (
-        <DialTooltip
+        <Tooltip
           tooltip={
             isNewButtonDisabled && disabledNewButtonTooltip
               ? disabledNewButtonTooltip
@@ -195,7 +195,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
             items={newButtonDropdownItems}
             disabled={isNewButtonDisabled}
           />
-        </DialTooltip>
+        </Tooltip>
       ) : null}
     </>
   );

@@ -4,7 +4,7 @@ import type { DialItemType } from '@epam/ai-dial-ui-kit';
 import {
   Input,
   BASE_ICON_PROPS,
-  DialTooltip,
+  Tooltip,
   mergeClasses,
   NotificationVariant,
   editableContainerProps,
@@ -118,7 +118,7 @@ export const DialFileManagerItemNameInput: FC<
       '',
     );
     return (
-      <DialTooltip tooltip={cleanedMessage}>
+      <Tooltip tooltip={cleanedMessage}>
         {inputIconAfter ||
           (!isWarning ? (
             <IconAlertCircleFilled
@@ -133,7 +133,7 @@ export const DialFileManagerItemNameInput: FC<
               aria-label="warning"
             />
           ))}
-      </DialTooltip>
+      </Tooltip>
     );
   };
 

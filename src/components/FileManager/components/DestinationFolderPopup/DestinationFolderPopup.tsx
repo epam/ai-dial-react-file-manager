@@ -9,7 +9,6 @@ import {
   BASE_ICON_PROPS,
   ButtonAppearance,
   type DialNotificationProps,
-  DialTooltip,
   Dropdown,
   type DropdownItem,
   ElementSize,
@@ -21,6 +20,7 @@ import {
   PopupSize,
   PrimaryButton,
   Switch,
+  Tooltip,
 } from '@epam/ai-dial-ui-kit';
 import { IconDotsVertical, IconEye, IconFolderPlus } from '@tabler/icons-react';
 import {
@@ -232,7 +232,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
                   />
                 )}
                 {showCreateFolderButton && showHiddenFileSwitcher && (
-                  <div className="w-px h-[26px] bg-control-disable my-2" />
+                  <div className="w-px h-[26px] bg-control-disable-primary my-2" />
                 )}
                 {showHiddenFileSwitcher && (
                   <>
@@ -252,14 +252,14 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
           <div className="flex space-x-4 items-center">
             <NeutralButton onClick={onClose} label="Cancel" />
             {isDestinationDisabled ? (
-              <DialTooltip tooltip={disabledPathTooltip}>
+              <Tooltip tooltip={disabledPathTooltip}>
                 <PrimaryButton
                   onClick={onConfirm}
                   label={mode === 'copy' ? copyLabel : moveLabel}
                   disabled={isDestinationDisabled}
                   aria-disabled={isDestinationDisabled}
                 />
-              </DialTooltip>
+              </Tooltip>
             ) : (
               <PrimaryButton
                 onClick={onConfirm}
