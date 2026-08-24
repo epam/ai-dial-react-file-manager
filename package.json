@@ -65,7 +65,7 @@
     "build-storybook:css": "tailwindcss -m -i ./src/styles/tailwind-entry.scss -o ./src/index.css",
     "prepare": "node tools/setup-husky.mjs",
     "publish:npm": "npm publish --access public",
-    "publish:dry": "npm publish --access public --dry-run --provenance=false",
+    "publish:dry": "npm pack --dry-run",
     "storybook-docs": "storybook dev --docs",
     "build-storybook-docs": "storybook build --docs",
     "review:check": "node scripts/agent-review-check.mjs",
