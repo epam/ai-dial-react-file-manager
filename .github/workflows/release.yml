@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   release:
-    uses: epam/ai-dial-ci/.github/workflows/node_release.yml@4.8.0
+    uses: epam/ai-dial-ci/.github/workflows/node_release.yml@4.9.0
     with:
       docker-build-enabled: false
       node-version: '24'
