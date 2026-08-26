@@ -27,6 +27,7 @@ import {
   PrimaryButton,
 } from '@epam/ai-dial-ui-kit';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { userEvent, within } from 'storybook/test';
 import {
   IconBuildingCommunity,
   IconFileDescription,
@@ -271,6 +272,109 @@ export const WithTabsInitialTab: Story = {
 export const HandleTableFileClick: Story = {
   args: {
     onTableFileClick: (file) => alert(`File clicked: ${file.name}`),
+  },
+};
+
+const destinationPopupCaretItems: DialFile[] = [
+  {
+    id: 'destination-root',
+    name: 'All files',
+    path: 'All files',
+    parentPath: '',
+    nodeType: DialFileNodeType.FOLDER,
+    folderId: 'destination-root',
+    items: [
+      {
+        id: 'source-file',
+        name: 'source.txt',
+        path: 'All files/source.txt',
+        parentPath: 'All files',
+        nodeType: DialFileNodeType.ITEM,
+        resourceType: DialFileResourceType.FILE,
+        folderId: 'destination-root',
+      },
+      {
+        id: 'loaded-empty-folder',
+        name: 'Loaded empty folder',
+        path: 'All files/Loaded empty folder',
+        parentPath: 'All files',
+        nodeType: DialFileNodeType.FOLDER,
+        folderId: 'destination-root',
+        items: [],
+      },
+      {
+        id: 'not-loaded-folder',
+        name: 'Not loaded folder',
+        path: 'All files/Not loaded folder',
+        parentPath: 'All files',
+        nodeType: DialFileNodeType.FOLDER,
+        folderId: 'destination-root',
+        items: [],
+      },
+    ],
+  },
+];
+
+const destinationPopupCaretRootItem: DialRootFolder = {
+  ...destinationPopupCaretItems[0],
+  label: 'All files',
+};
+
+const DestinationPopupLoadedEmptyFolderComponent = (
+  args: DialFileManagerProps,
+) => {
+  const [destinationPath, setDestinationPath] = useState('All files');
+
+  return (
+    <div className="h-[720px] min-h-[480px]">
+      <DialFileManager
+        {...args}
+        items={destinationPopupCaretItems}
+        rootItem={destinationPopupCaretRootItem}
+        defaultPath="All files"
+        defaultSelectedPaths={new Set(['All files/source.txt'])}
+        gridOptions={{
+          ...args.gridOptions,
+          selectionMode: GridSelectionMode.MULTIPLE,
+        }}
+        treeOptions={{
+          ...args.treeOptions,
+          expandedPaths: new Set(['All files']),
+          loadedPaths: new Set(['All files', 'All files/Loaded empty folder']),
+          header: 'Folder tree',
+        }}
+        bulkActionsToolbarOptions={{
+          getSelectionLabel: (selectedCount) =>
+            `${selectedCount} item(s) selected`,
+          actionLabels: {
+            [DialFileManagerActions.Copy]: 'Copy to',
+          },
+        }}
+        destinationFolderPopupOptions={{
+          destinationFolderPath: destinationPath,
+          setDestinationFolderPath: setDestinationPath,
+          getCopyHeader: () => 'Copy source.txt',
+        }}
+        onCopyFiles={() => undefined}
+      />
+    </div>
+  );
+};
+
+export const DestinationPopupLoadedEmptyFolder: Story = {
+  render: DestinationPopupLoadedEmptyFolderComponent,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(
+      await within(canvasElement).findByRole('button', { name: 'Copy to' }),
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Click "Copy to" to open the destination popup. "Loaded empty folder" must not show a caret, while "Not loaded folder" keeps its caret until its contents are loaded. Resize the canvas to verify the same state in the mobile layout.',
+      },
+    },
   },
 };
 
