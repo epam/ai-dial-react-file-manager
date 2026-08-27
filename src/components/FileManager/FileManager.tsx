@@ -1576,7 +1576,11 @@ export const DialFileManagerView: FC = () => {
           sourceFolder={
             destinationFolderPopupOptions?.sourceFolder ?? currentPath
           }
-          treeOptions={{ header: treeOptions?.header }}
+          treeOptions={{
+            header: treeOptions?.header,
+            loadedPaths: treeOptions?.loadedPaths,
+            loadingPaths: treeOptions?.loadingPaths,
+          }}
           onFolderPopupPathChange={onFolderPopupPathChange}
           showHiddenFileSwitcher={showHiddenFileSwitcherInDestinationPopup}
           showCreateFolderButton={showCreateFolderButtonInDestinationPopup}
