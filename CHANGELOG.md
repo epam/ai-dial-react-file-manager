@@ -52,6 +52,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Bulk-action icons were pinned to `text-secondary`**, so every icon in the
+  selection toolbar stayed grey while the `NeutralButton` around it drew its
+  label in `text-accent` — an icon and its own label in two different colours.
+  The class also outlived the button's hover and disabled states, which it knew
+  nothing about. The icons now inherit `currentColor`, so they follow the button
+  in the toolbar and the row colour — including `danger` and disabled — in the
+  overflow dropdown, which renders the same nodes.
 - Two colour class names that Tailwind emitted nothing for:
   `bg-bg-control-accent-alpha` on a selected folder-tree row and
   `text-text-visual-violet-1` on the conflict "Replace" dot.

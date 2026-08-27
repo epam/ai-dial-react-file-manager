@@ -81,9 +81,7 @@ export const useBulkActions = ({
         label: actionLabels[DialFileManagerActions.RemoveAccess],
         title: actionLabels[DialFileManagerActions.RemoveAccess],
         disabled,
-        icon: (
-          <IconUserX size={BASE_ICON_PROPS.size} className="text-secondary" />
-        ),
+        icon: <IconUserX size={BASE_ICON_PROPS.size} />,
         onClick: () => {
           onRemoveAccess(selectedFilesArray);
           onClearSelection();
@@ -100,7 +98,6 @@ export const useBulkActions = ({
           <MoveToIcon
             width={BASE_ICON_PROPS.size}
             height={BASE_ICON_PROPS.size}
-            className="text-secondary"
           />
         ),
         onClick: () => onMove(selectedFilesArray),
@@ -116,7 +113,6 @@ export const useBulkActions = ({
           <CopyToIcon
             width={BASE_ICON_PROPS.size}
             height={BASE_ICON_PROPS.size}
-            className="text-secondary"
           />
         ),
         onClick: () => onCopy(selectedFilesArray),
@@ -131,7 +127,7 @@ export const useBulkActions = ({
         key: DialFileManagerActions.Duplicate,
         label: actionLabels[DialFileManagerActions.Duplicate],
         title: actionLabels[DialFileManagerActions.Duplicate],
-        icon: <IconCopy {...BASE_ICON_PROPS} className="text-secondary" />,
+        icon: <IconCopy {...BASE_ICON_PROPS} />,
         onClick: () => onDuplicate(selectedFilesArray),
       });
     }
@@ -147,7 +143,7 @@ export const useBulkActions = ({
         key: DialFileManagerActions.Delete,
         label: actionLabels[DialFileManagerActions.Delete],
         title: actionLabels[DialFileManagerActions.Delete],
-        icon: <IconTrashX {...BASE_ICON_PROPS} className="text-secondary" />,
+        icon: <IconTrashX {...BASE_ICON_PROPS} />,
         disabled: isDisabled,
         tooltip: isDisabled
           ? 'Selected items contain item which can not be deleted'
@@ -167,7 +163,7 @@ export const useBulkActions = ({
         key: DialFileManagerActions.Download,
         label: actionLabels[DialFileManagerActions.Download],
         title: actionLabels[DialFileManagerActions.Download],
-        icon: <IconDownload {...BASE_ICON_PROPS} className="text-secondary" />,
+        icon: <IconDownload {...BASE_ICON_PROPS} />,
         onClick: () => onDownload(selectedFilesArray),
       });
     }
@@ -189,7 +185,6 @@ export const useBulkActions = ({
           <IconUnshare
             width={BASE_ICON_PROPS.size}
             height={BASE_ICON_PROPS.size}
-            className="text-secondary"
           />
         ),
         onClick: () => {
