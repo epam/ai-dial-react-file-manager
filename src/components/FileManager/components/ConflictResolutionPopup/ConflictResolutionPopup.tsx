@@ -3,7 +3,7 @@ import {
   PrimaryButton,
   DialFileName,
   DialFolderName,
-  DialGrid,
+  Grid,
   DIAL_ICON_SIZE,
   Dropdown,
   DropdownTrigger,
@@ -351,7 +351,7 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
         value: DialFileManagerConflictStrategies.DecideForEach,
         label: decideForEachLabel,
         content: (
-          <DialGrid<ConflictGridRow>
+          <Grid<ConflictGridRow>
             columnDefs={columnDefs}
             rowData={gridRows}
             getRowId={(row) => row.id}

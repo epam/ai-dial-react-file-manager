@@ -33,11 +33,11 @@ import MoveToIcon from '@/assets/icons/move-to.svg?react';
 import IconUnshare from '@/assets/icons/unshare.svg?react';
 import {
   BASE_ICON_PROPS,
-  DialCollapsibleSidebar,
-  DialConditionalResizableContainer,
-  DialGrid,
-  type DialGridProps,
-  DialNoDataContent,
+  CollapsibleSidebar,
+  ConditionalResizableContainer,
+  Grid,
+  type GridProps,
+  NoDataContent,
   type DropdownItem,
   DropdownItemType,
   mergeClasses,
@@ -204,7 +204,7 @@ export type NavigationPanelOptions = Omit<
 >;
 
 export interface GridOptions extends Omit<
-  DialGridProps<GridRow>,
+  GridProps<GridRow>,
   'rowData' | 'columnDefs'
 > {
   columnDefs?: (
@@ -473,7 +473,7 @@ export interface DialFileManagerProps {
  * @param [showNavigationPanel] - Determines whether to display the navigation panel.
  * @param [navigationPanelOptions] - Options for the breadcrumb and search panel (value/onSearchChange for controlled search)
  * @param [toolbarOptions] - Options for the file manager toolbar
- * @param [gridOptions] - Options forwarded to `DialGrid`; supports `columnDefs` override and `filterable` flag and date locale/options
+ * @param [gridOptions] - Options forwarded to `Grid`; supports `columnDefs` override and `filterable` flag and date locale/options
  * @param [bulkActionsToolbarOptions] - Options for the bulk actions toolbar shown when items are selected
  * @param [deleteConfirmationOptions] - Options for the delete confirmation popup
  *
@@ -1134,13 +1134,12 @@ export const DialFileManagerView: FC = () => {
   const renderFoldersTree = useCallback(() => {
     if (isCompactView) return null;
 
+    // The 2.0 sidebar is itself the named landmark for this panel, so the
+    // wrapper below is a plain layout box: an `aside` around it would announce
+    // the tree twice.
     return (
-      <aside
-        role="region"
-        aria-label="File Manager Tree Navigation"
-        className="min-h-0 min-w-0 h-full flex-none"
-      >
-        <DialConditionalResizableContainer
+      <div className="min-h-0 min-w-0 h-full flex-none">
+        <ConditionalResizableContainer
           defaultWidth={sidebarCurrentWidth}
           width={sidebarCurrentWidth}
           onResizeStop={setSidebarCurrentWidth}
@@ -1149,10 +1148,11 @@ export const DialFileManagerView: FC = () => {
           maxWidth={FOLDERS_TREE_PANEL_MAX_WIDTH}
           enabled={!isTreeCollapsed}
         >
-          <DialCollapsibleSidebar
+          <CollapsibleSidebar
             width={sidebarCurrentWidth}
             title={header}
-            containerClassName={containerClassName}
+            ariaLabel="File Manager Tree Navigation"
+            className={containerClassName}
             titleClassName="dial-body-text text-primary"
             additionalButtons={additionalButtons}
             isOpened={!isTreeCollapsed}
@@ -1188,9 +1188,9 @@ export const DialFileManagerView: FC = () => {
               onCreateFolderSave={saveFolderCreation}
               newFolderDefaultName={newFolderDefaultName}
             />
-          </DialCollapsibleSidebar>
-        </DialConditionalResizableContainer>
-      </aside>
+          </CollapsibleSidebar>
+        </ConditionalResizableContainer>
+      </div>
     );
   }, [
     isCompactView,
@@ -1319,11 +1319,11 @@ export const DialFileManagerView: FC = () => {
 
   const emptyStateRenderer = useCallback(
     () => (
-      <DialNoDataContent
+      <NoDataContent
         title={emptyStateTitle}
         description={emptyStateDescription}
         descriptionClassName="text-sm"
-        containerClassName="gap-3 size-full bg-layer-sunken border rounded-[4px] border-primary"
+        className="gap-3 size-full bg-layer-sunken border rounded border-primary"
         titleClassName="mt-2 !text-lg"
         icon={
           emptyStateIcon || (
@@ -1426,7 +1426,7 @@ export const DialFileManagerView: FC = () => {
       gridRows.length === 0 && !isSearchMode && !filesLoading ? (
         emptyStateRenderer()
       ) : (
-        <DialGrid<GridRow>
+        <Grid<GridRow>
           columnDefs={columnDefs}
           rowData={gridRows}
           getRowId={gridRowIdGetter}
