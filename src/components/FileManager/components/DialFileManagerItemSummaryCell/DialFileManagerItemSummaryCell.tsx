@@ -2,7 +2,7 @@ import type { FC, ReactNode } from 'react';
 import { DialFileManagerItemName } from '@/components/FileManager/components/FileManagerItemName/FileManagerItemName';
 import { BASE_FILE_MANAGER_ICON_SIZE } from '@/components/FileManager/constants';
 import { DialFileNodeType } from '@/models/file';
-import { DialDateCellRenderer, DialItemType } from '@epam/ai-dial-ui-kit';
+import { DateCellRenderer, DialItemType } from '@epam/ai-dial-ui-kit';
 import { IconCircleFilled } from '@tabler/icons-react';
 import { formatBytes } from '@/components/FileManager/utils';
 
@@ -29,7 +29,7 @@ interface DialFileManagerItemSummaryCellProps {
  *
  * - File size (e.g., `"15 KB"`)
  * - A separator dot
- * - Formatted update date (via `DialDateCellRenderer`)
+ * - Formatted update date (via `DateCellRenderer`)
  *
  * The component automatically determines whether to show a **file** or **folder**
  * icon based on `nodeType`.
@@ -58,7 +58,7 @@ interface DialFileManagerItemSummaryCellProps {
  * @param name - File or folder display name.
  * @param nodeType - Determines whether the item renders as a **File** or **Folder**.
  * @param size - File size in bytes; formatted with {@link formatBytes}. Omit for folders.
- * @param updatedAt - Date or timestamp passed to `DialDateCellRenderer`. If invalid or missing, renders `"—"`.
+ * @param updatedAt - Date or timestamp passed to `DateCellRenderer`. If invalid or missing, renders `"—"`.
  * @param dateLocale - Optional locale override for date formatting (e.g., `"fr-FR"`).
  * @param dateOptions - Optional `Intl.DateTimeFormat` configuration (e.g., `{ timeZone: 'UTC' }`).
  * @params sharedIndicatorClassName - Optional CSS classes for the shared indicator.
@@ -109,7 +109,7 @@ export const DialFileManagerItemSummaryCell: FC<
               )}
               {updatedAt ? (
                 <span>
-                  <DialDateCellRenderer
+                  <DateCellRenderer
                     value={updatedAt}
                     locale={dateLocale?.toString()}
                     options={dateOptions}

@@ -1,13 +1,13 @@
 import {
-  convertGridDateToDate,
-  DEFAULT_GRID_DATE_FORMAT_OPTIONS,
-  DEFAULT_GRID_DATE_LOCALE,
-  DialDateCellRenderer,
+  convertToDate,
+  DEFAULT_DATE_FORMAT_OPTIONS,
+  DEFAULT_DATE_LOCALE,
+  DateCellRenderer,
   mergeClasses,
   DialFileName,
   DialFolderName,
   DialItemType,
-  type DialDateCellRendererProps,
+  type DateCellRendererProps,
 } from '@epam/ai-dial-ui-kit';
 import { DialFileNodeType } from '@/models/file';
 import {
@@ -197,10 +197,10 @@ export const UPDATED_AT_COLUMN =
     headerName: headerName,
     width: 168,
     suppressSizeToFit: true,
-    cellRenderer: (params: DialDateCellRendererProps) => {
+    cellRenderer: (params: DateCellRendererProps) => {
       const isDisabled =
         params.context?.disabledRowIds?.has(params.data?.path) ?? false;
-      return <DialDateCellRenderer {...params} hideTooltip={isDisabled} />;
+      return <DateCellRenderer {...params} hideTooltip={isDisabled} />;
     },
     cellRendererParams: {
       locale: dateLocale,
@@ -208,12 +208,12 @@ export const UPDATED_AT_COLUMN =
     },
     filterValueGetter: (params) => {
       const value = params.data[params.colDef.field || ''];
-      const date = convertGridDateToDate(value);
+      const date = convertToDate(value);
       if (!date) return '';
 
       const formatted = new Intl.DateTimeFormat(
-        dateLocale || DEFAULT_GRID_DATE_LOCALE,
-        dateOptions || DEFAULT_GRID_DATE_FORMAT_OPTIONS,
+        dateLocale || DEFAULT_DATE_LOCALE,
+        dateOptions || DEFAULT_DATE_FORMAT_OPTIONS,
       );
 
       return formatted.format(date);

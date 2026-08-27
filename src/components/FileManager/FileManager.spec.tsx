@@ -46,7 +46,7 @@ interface MockAdditionalGridOptions<Row extends GridRowLike> {
   onCellClicked?: (event: MockCellClickedEvent<Row>) => void;
 }
 
-interface MockDialGridProps<Row extends GridRowLike> {
+interface MockGridProps<Row extends GridRowLike> {
   rowData?: Row[];
   getRowId?: (row: Row) => string;
   columnDefs?: MockColumnDef[];
@@ -58,7 +58,7 @@ interface MockDialGridProps<Row extends GridRowLike> {
 vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@epam/ai-dial-ui-kit')>();
 
-  const DialGrid = <Row extends GridRowLike>(props: MockDialGridProps<Row>) => {
+  const Grid = <Row extends GridRowLike>(props: MockGridProps<Row>) => {
     const {
       rowData,
       getRowId,
@@ -189,7 +189,7 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
   return {
     ...actual,
     ButtonDropdown,
-    DialGrid,
+    Grid,
     TooltipContainer,
     TooltipContent,
     TooltipTrigger,

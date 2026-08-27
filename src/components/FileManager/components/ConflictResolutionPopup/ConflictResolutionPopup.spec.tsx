@@ -9,7 +9,7 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
 
   return {
     ...actual,
-    DialGrid: vi.fn(
+    Grid: vi.fn(
       ({
         rowData,
         columnDefs,
