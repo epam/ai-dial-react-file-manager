@@ -20,7 +20,7 @@ import {
 } from '@/types/file-manager';
 import {
   Checkbox,
-  DialDateCellRenderer,
+  DateCellRenderer,
   Switch,
   Popup,
   PopupSize,
@@ -1686,7 +1686,7 @@ const WithCustomColumnsComponent = (args: DialFileManagerProps) => {
         headerName: 'Modified Date',
         width: 168,
         suppressSizeToFit: true,
-        cellRenderer: DialDateCellRenderer,
+        cellRenderer: DateCellRenderer,
         cellRendererParams: {
           locale: 'en-US',
           options: {

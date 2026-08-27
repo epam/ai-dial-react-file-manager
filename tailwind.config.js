@@ -139,6 +139,7 @@ const controlsTextColors = {
 module.exports = {
   blocklist: ['[-:=]'],
   content: [
+    './src/**/*.{ts,tsx}',
     './apps/chat/src/**/*.{html,js,ts,tsx,yaml}',
     './node_modules/@epam/ai-dial-ui-kit/**/*.{js,ts,jsx,tsx}',
   ],

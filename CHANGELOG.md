@@ -10,10 +10,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Initial standalone AI DIAL React File Manager package.
+- **`DialFileManagerNavigationPanel` — `backButtonLabel`** — accessible name of
+  the control that collapses the expanded search in compact mode, defaulting to
+  `"Back"`. The control carried no name at all, so it was announced as a bare
+  "button".
 
 ### Changed
 
-- **UI Kit moved to `0.14.0-dev.9`** — the Tailwind token scales in
+- **UI Kit moved to `0.14.0-dev.12`** — the Tailwind token scales in
   `tailwind.config.js` now mirror the kit's 0.14.0 set: the control tokens are
   named by role (`bg-control-disable-primary`, `text-control-accent-hover`,
   `bg-control-neutral-hover-muted`), `border-hover-alpha` is gone in favour of
@@ -28,8 +32,20 @@ and this project follows [Semantic Versioning](https://semver.org/).
   no longer read; a theme that sets them must move the values to the new names.
 - **Generation 2.0 components replace their 1.0 counterparts** — `Tooltip`,
   `TooltipContainer`/`Trigger`/`Content`, `EllipsisTooltip`, `RadioGroup` (the
-  conflict-resolution choices, previously `DialRadioGroup`), and `Checkbox` /
-  `Switch` in the stories. The tooltip bubble is now the kit's inverted surface
+  conflict-resolution choices, previously `DialRadioGroup`),
+  `CollapsibleSidebar` and `ConditionalResizableContainer` around the folders
+  tree, `Grid` for both the file grid and the conflict grid, `NoDataContent` for
+  the empty states, `DateCellRenderer` with its `DEFAULT_DATE_LOCALE` /
+  `DEFAULT_DATE_FORMAT_OPTIONS` / `convertToDate` helpers, and `Checkbox` /
+  `Switch` in the stories. The 2.0 grid draws its selection column with the 2.0
+  `Checkbox` and `Radio` — so select-all reaches the `mixed` state — and honours
+  a `sort` declared on a column, which 1.0 stripped on startup. The 2.0 sidebar
+  is itself the
+  named landmark for the tree panel, so the `aside` that wrapped it is now a
+  plain layout box — the tree was being announced twice — and its
+  `containerClassName` is passed through as `className`; the `containerClassName`
+  prop of `DialFileManager` is unchanged. The tooltip bubble is now the kit's
+  inverted surface
   instead of the local one-off styling, which also drops three class names that
   resolved to nothing (`bg-ui-popover`, `fill-ui-popover`,
   `border-ui-outline-primary`).
@@ -39,3 +55,17 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Two colour class names that Tailwind emitted nothing for:
   `bg-bg-control-accent-alpha` on a selected folder-tree row and
   `text-text-visual-violet-1` on the conflict "Replace" dot.
+- **The navigation panel's compact-mode collapse control was a filled label
+  button** squeezed into an icon with `!p-[9px]`. A 2.0 button is a pill, so it
+  rendered as a filled circle next to the search field, reading as a second
+  field. It is now a `GhostIconButton` at the field's own 40px.
+- **The search field's focus ring was clipped.** A focused 2.0 field paints its
+  ring as an `outline` at `outline-offset-0`, in the 1px immediately outside its
+  box, and the panel row sat flush against the `overflow-hidden` grid wrapper.
+  The row now keeps 1px of padding, and the breadcrumb strip moves from 38px to
+  40px so it matches the field and the control beside it.
+- **This package's own utility classes were missing from the CSS it ships.** The
+  Tailwind `content` globs covered the ui-kit and a path from the chat app, but
+  not `src`, so any class the kit happens not to use — `p-px`, `py-[2px]` —
+  resolved to nothing here and only rendered in a host that scans our `dist`
+  itself.

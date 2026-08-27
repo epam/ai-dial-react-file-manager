@@ -13,8 +13,9 @@ import {
   type DialBreadcrumbPathItem,
   type DialBreadcrumbProps,
   type DialSearchProps,
+  ElementSize,
+  GhostIconButton,
   mergeClasses,
-  NeutralButton,
   Search,
 } from '@epam/ai-dial-ui-kit';
 import { IconArrowLeft } from '@tabler/icons-react';
@@ -56,6 +57,7 @@ export interface DialFileManagerNavigationPanelProps
   searchClassName?: string;
   searchContainerClassName?: string;
   isCompactView?: boolean;
+  backButtonLabel?: string;
 }
 
 /**
@@ -100,6 +102,7 @@ export interface DialFileManagerNavigationPanelProps
  * @param [searchClassName] - Extra classes for the search input element
  * @param [searchContainerClassName] - Extra classes for the search container
  * @param [isCompactView=false] - Whether the component should render in compact mode
+ * @param [backButtonLabel="Back"] - Accessible name of the control that collapses the expanded search in compact mode
  */
 export const DialFileManagerNavigationPanel: FC<
   DialFileManagerNavigationPanelProps
@@ -126,6 +129,7 @@ export const DialFileManagerNavigationPanel: FC<
   searchClassName,
   searchContainerClassName,
   isCompactView = false,
+  backButtonLabel = 'Back',
 }) => {
   const breadcrumbPathItems: DialBreadcrumbPathItem[] | undefined =
     useMemo(() => {
@@ -240,9 +244,10 @@ export const DialFileManagerNavigationPanel: FC<
   const renderNavigation = useCallback(() => {
     if (isCompactView && isSearchExpanded) {
       return (
-        <NeutralButton
-          className="!p-[9px]"
-          iconBefore={<IconArrowLeft {...BASE_ICON_PROPS} />}
+        <GhostIconButton
+          size={ElementSize.Standard}
+          aria-label={backButtonLabel}
+          icon={<IconArrowLeft {...BASE_ICON_PROPS} />}
           onClick={() => {
             setIsSearchExpanded(false);
             onSearchChange?.('');
@@ -263,6 +268,7 @@ export const DialFileManagerNavigationPanel: FC<
     );
   }, [
     ariaLabel,
+    backButtonLabel,
     breadcrumbClassName,
     breadcrumbPathItems,
     isSearchExpanded,

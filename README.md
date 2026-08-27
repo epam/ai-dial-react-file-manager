@@ -18,9 +18,9 @@ their own persistence and backend integration through callbacks.
 
 ## Compatibility
 
-| File manager               | AI DIAL UI Kit | React     | AG Grid   | Module format |
-| -------------------------- | -------------- | --------- | --------- | ------------- |
-| Current development branch | `0.14.0-dev.9` | `^19.2.5` | `^35.2.1` | ESM           |
+| File manager               | AI DIAL UI Kit  | React     | AG Grid   | Module format |
+| -------------------------- | --------------- | --------- | --------- | ------------- |
+| Current development branch | `0.14.0-dev.12` | `^19.2.5` | `^35.2.1` | ESM           |
 
 ## Installation
 

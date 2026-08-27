@@ -7,7 +7,7 @@ import {
   Dropdown,
   GhostIconButton,
   DropdownTrigger,
-  DialNoDataContent,
+  NoDataContent,
   DialItemType,
   ElementSize,
 } from '@epam/ai-dial-ui-kit';
@@ -351,7 +351,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       {items.length > 0 ? (
         renderTree(items, 0)
       ) : (
-        <DialNoDataContent
+        <NoDataContent
           title={emptyStateTitle}
           description={emptyStateDescription}
           icon={emptyStateIcon}

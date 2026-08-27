@@ -22,7 +22,7 @@ describe('Dial UI Kit :: FileManagerItemSummaryCell', () => {
     expect(screen.getByText('15 KB')).toBeInTheDocument();
   });
 
-  test('renders ISO date via DialDateCellRenderer', () => {
+  test('renders ISO date via DateCellRenderer', () => {
     render(
       <DialFileManagerItemSummaryCell
         {...baseProps}

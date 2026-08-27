@@ -140,7 +140,7 @@ describe('Dial UI Kit :: DialFileManagerNavigationPanel', () => {
     fireEvent.click(searchContainer);
 
     expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
-    const backButton = screen.getByRole('button');
+    const backButton = screen.getByRole('button', { name: 'Back' });
     expect(backButton).toBeInTheDocument();
 
     fireEvent.click(backButton);
