@@ -17,13 +17,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- **UI Kit moved to `0.14.0-dev.12`** — the Tailwind token scales in
+- **UI Kit moved to `0.14.0-dev.13`** — the Tailwind token scales in
   `tailwind.config.js` now mirror the kit's 0.14.0 set: the control tokens are
   named by role (`bg-control-disable-primary`, `text-control-accent-hover`,
   `bg-control-neutral-hover-muted`), `border-hover-alpha` is gone in favour of
   `border-accent-alpha`, the focus tokens are back to `focus` / `accent-focus`,
   the accent gradient is themed through `--bg-gradient-*`, and a `fill` scale
   was added so the 2.0 tooltip arrow is painted.
+  dev.13 also carries the kit fix for `Grid`: a host passing
+  `additionalGridOptions.rowSelection` used to replace the grid's own selection
+  config wholesale, which put a second checkbox column beside the grid's own.
 - **Shadows are themed per step** — each step reads its own variable named after
   the step rather than the hue: `--shadow-xs-sm-1` / `--shadow-xs-sm-2` for the
   two layers `shadow-xs` and `shadow-sm` share (blue wide, grey tight — the
