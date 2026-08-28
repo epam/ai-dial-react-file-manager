@@ -5,7 +5,7 @@ import {
   IconFolder,
   IconPlus,
 } from '@tabler/icons-react';
-import { BASE_ICON_PROPS } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import type { NewAction } from '../FileManager';
 import { DialFilePermission, type DialFile } from '@/models/file';
@@ -55,7 +55,10 @@ export const useNewActions = ({
           newActions?.newFolder?.icon !== undefined ? (
             newActions?.newFolder?.icon
           ) : (
-            <IconFolder {...BASE_ICON_PROPS} className="text-secondary" />
+            <IconFolder
+              {...FILE_MANAGER_ICON_PROPS}
+              className="text-secondary"
+            />
           ),
         onClick: () => {
           if (onCreateFolder) {
@@ -73,7 +76,7 @@ export const useNewActions = ({
           newActions?.newItem?.icon !== undefined ? (
             newActions?.newItem?.icon
           ) : (
-            <IconPlus {...BASE_ICON_PROPS} className="text-secondary" />
+            <IconPlus {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
           ),
         onClick: () => {
           if (onCreateNewItem) {
@@ -91,7 +94,7 @@ export const useNewActions = ({
           newActions?.uploadFiles?.icon !== undefined ? (
             newActions?.uploadFiles?.icon
           ) : (
-            <IconFile {...BASE_ICON_PROPS} className="text-secondary" />
+            <IconFile {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
           ),
         onClick: () => {
           if (onUploadFiles) {
@@ -109,7 +112,10 @@ export const useNewActions = ({
           newActions?.uploadArchive?.icon !== undefined ? (
             newActions?.uploadArchive?.icon
           ) : (
-            <IconFileZip {...BASE_ICON_PROPS} className="text-secondary" />
+            <IconFileZip
+              {...FILE_MANAGER_ICON_PROPS}
+              className="text-secondary"
+            />
           ),
         onClick: () => {
           if (onUploadArchive) {

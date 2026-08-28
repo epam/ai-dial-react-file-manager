@@ -1,9 +1,5 @@
-import {
-  Dropdown,
-  GhostIconButton,
-  BASE_ICON_PROPS,
-  mergeClasses,
-} from '@epam/ai-dial-ui-kit';
+import { Dropdown, GhostIconButton, mergeClasses } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { IconDotsVertical } from '@tabler/icons-react';
 import type { ColDef, ICellRendererParams } from 'ag-grid-community';
 import { useRef, useEffect, useCallback, useMemo } from 'react';
@@ -61,7 +57,9 @@ export const useGridActionsColumn = ({
           items={items}
           className={mergeClasses('sticky right-0', buttonClassName)}
         >
-          <GhostIconButton icon={<IconDotsVertical {...BASE_ICON_PROPS} />} />
+          <GhostIconButton
+            icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
+          />
         </Dropdown>
       );
     },

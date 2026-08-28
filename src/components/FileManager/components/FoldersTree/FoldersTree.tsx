@@ -2,7 +2,6 @@ import { type FC, type ReactNode } from 'react';
 import { IconCaretRightFilled, IconDotsVertical } from '@tabler/icons-react';
 import { DialFileNodeType, type DialFile } from '@/models/file';
 import {
-  BASE_ICON_PROPS,
   mergeClasses,
   Dropdown,
   GhostIconButton,
@@ -11,6 +10,7 @@ import {
   DialItemType,
   ElementSize,
 } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import classNames from 'classnames';
 import {
@@ -118,7 +118,7 @@ export interface DialFoldersTreeProps {
  *   items={[]}
  *   emptyStateTitle="No Content"
  *   emptyStateDescription="Upload files or create a new folder to get started."
- *   emptyStateIcon={<IconFolderPlus />}
+ *   emptyStateIcon={<IconFolderPlus {...FILE_MANAGER_ICON_PROPS} />}
  *   getContextMenuItems={getContextMenuItems}
  * />
  * ```
@@ -329,7 +329,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       <GhostIconButton
                         size={ElementSize.Small}
                         className="invisible group-hover/item:visible"
-                        icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
+                        icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
                       />
                     </Dropdown>
                   </div>

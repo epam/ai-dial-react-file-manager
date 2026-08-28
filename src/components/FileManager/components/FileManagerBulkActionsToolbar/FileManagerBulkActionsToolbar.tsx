@@ -1,7 +1,6 @@
 import { useFlexibleActions } from '@/hooks/use-flexible-actions';
 import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import {
-  BASE_ICON_PROPS,
   ButtonAppearance,
   Dropdown,
   FlexibleActionsDirection,
@@ -10,6 +9,7 @@ import {
   PrimaryButton,
   type DropdownItem,
 } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { IconDotsVertical, IconX } from '@tabler/icons-react';
 import type { FC } from 'react';
 import { ACTIONS_GAP, CONTAINER_PADDING } from './constants';
@@ -54,8 +54,8 @@ export interface DialFileManagerBulkActionsToolbarProps {
  *   getSelectionLabel={(count) => `${count} files selected`}
  *   onClearSelection={() => console.log('Cleared')}
  *   actions={[
- *     { key: 'download', title: 'Download', icon: <IconDownload />, onClick: () => {} },
- *     { key: 'delete', title: 'Delete', icon: <IconTrash />, onClick: () => {} },
+ *     { key: 'download', title: 'Download', icon: <IconDownload {...FILE_MANAGER_ICON_PROPS} />, onClick: () => {} },
+ *     { key: 'delete', title: 'Delete', icon: <IconTrash {...FILE_MANAGER_ICON_PROPS} />, onClick: () => {} },
  *   ]}
  * />
  * ```
@@ -111,7 +111,7 @@ export const DialFileManagerBulkActionsToolbar: FC<
             onClick={onClearSelection}
             textClassName="text-accent whitespace-nowrap"
             appearance={ButtonAppearance.Ghost}
-            iconBefore={<IconX {...BASE_ICON_PROPS} />}
+            iconBefore={<IconX {...FILE_MANAGER_ICON_PROPS} />}
           />
         </div>
 
@@ -123,7 +123,7 @@ export const DialFileManagerBulkActionsToolbar: FC<
             >
               <GhostIconButton
                 className="h-[38px]"
-                icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
+                icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
               />
             </Dropdown>
           )}

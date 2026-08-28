@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { DialFileManagerToolbar } from './DialFileManagerToolbar';
 import type { TabModel, DropdownItem } from '@epam/ai-dial-ui-kit';
-import { ButtonVariant, BASE_ICON_PROPS } from '@epam/ai-dial-ui-kit';
+import { ButtonVariant } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { IconFile, IconFileZip, IconFolder } from '@tabler/icons-react';
 
 const meta: Meta<typeof DialFileManagerToolbar> = {
@@ -37,19 +38,23 @@ const mockCreateItems: DropdownItem[] = [
   {
     key: 'new-folder',
     label: 'New folder',
-    icon: <IconFolder className="text-secondary" {...BASE_ICON_PROPS} />,
+    icon: (
+      <IconFolder className="text-secondary" {...FILE_MANAGER_ICON_PROPS} />
+    ),
     onClick: () => alert('Create new folder'),
   },
   {
     key: 'upload-files',
     label: 'Upload files',
-    icon: <IconFile className="text-secondary" {...BASE_ICON_PROPS} />,
+    icon: <IconFile className="text-secondary" {...FILE_MANAGER_ICON_PROPS} />,
     onClick: () => alert('Upload files'),
   },
   {
     key: 'upload-archive',
     label: 'Upload archive',
-    icon: <IconFileZip className="text-secondary" {...BASE_ICON_PROPS} />,
+    icon: (
+      <IconFileZip className="text-secondary" {...FILE_MANAGER_ICON_PROPS} />
+    ),
     onClick: () => alert('Upload archive'),
   },
 ];

@@ -17,7 +17,8 @@ import MoveToIcon from '@/assets/icons/move-to.svg?react';
 import IconUnshare from '@/assets/icons/unshare.svg?react';
 import AddChild from '@/assets/icons/add-child.svg?react';
 import AddSibling from '@/assets/icons/add-sibling.svg?react';
-import { BASE_ICON_PROPS, DropdownItemType } from '@epam/ai-dial-ui-kit';
+import { DropdownItemType } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { DialFileNodeType } from '@/models/file';
 import { cleanForbiddenSymbolsRegExp } from '../utils';
 
@@ -105,8 +106,8 @@ export const useGridContextMenu = ({
           label: actionLabels[DialFileManagerActions.AddSibling],
           icon: (
             <AddSibling
-              width={BASE_ICON_PROPS.size}
-              height={BASE_ICON_PROPS.size}
+              width={FILE_MANAGER_ICON_PROPS.size}
+              height={FILE_MANAGER_ICON_PROPS.size}
               className="text-secondary"
             />
           ),
@@ -125,8 +126,8 @@ export const useGridContextMenu = ({
             label: actionLabels[DialFileManagerActions.AddChild],
             icon: (
               <AddChild
-                width={BASE_ICON_PROPS.size}
-                height={BASE_ICON_PROPS.size}
+                width={FILE_MANAGER_ICON_PROPS.size}
+                height={FILE_MANAGER_ICON_PROPS.size}
                 className="text-secondary"
               />
             ),
@@ -149,7 +150,10 @@ export const useGridContextMenu = ({
           key: DialFileManagerActions.OpenInNewTab,
           label: actionLabels[DialFileManagerActions.OpenInNewTab],
           icon: (
-            <IconExternalLink {...BASE_ICON_PROPS} className="text-secondary" />
+            <IconExternalLink
+              {...FILE_MANAGER_ICON_PROPS}
+              className="text-secondary"
+            />
           ),
           onClick: () => onOpenInNewTab?.(file),
         });
@@ -168,7 +172,9 @@ export const useGridContextMenu = ({
         items.push({
           key: DialFileManagerActions.Duplicate,
           label: actionLabels[DialFileManagerActions.Duplicate],
-          icon: <IconCopy {...BASE_ICON_PROPS} className="text-secondary" />,
+          icon: (
+            <IconCopy {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
+          ),
           onClick: () => onDuplicate(file),
         });
       }
@@ -182,8 +188,8 @@ export const useGridContextMenu = ({
           label: actionLabels[DialFileManagerActions.Copy],
           icon: (
             <CopyToIcon
-              width={BASE_ICON_PROPS.size}
-              height={BASE_ICON_PROPS.size}
+              width={FILE_MANAGER_ICON_PROPS.size}
+              height={FILE_MANAGER_ICON_PROPS.size}
               className="text-secondary"
             />
           ),
@@ -200,8 +206,8 @@ export const useGridContextMenu = ({
           label: actionLabels[DialFileManagerActions.Move],
           icon: (
             <MoveToIcon
-              width={BASE_ICON_PROPS.size}
-              height={BASE_ICON_PROPS.size}
+              width={FILE_MANAGER_ICON_PROPS.size}
+              height={FILE_MANAGER_ICON_PROPS.size}
               className="text-secondary"
             />
           ),
@@ -217,7 +223,10 @@ export const useGridContextMenu = ({
           key: DialFileManagerActions.Download,
           label: actionLabels[DialFileManagerActions.Download],
           icon: (
-            <IconDownload {...BASE_ICON_PROPS} className="text-secondary" />
+            <IconDownload
+              {...FILE_MANAGER_ICON_PROPS}
+              className="text-secondary"
+            />
           ),
           onClick: () => onDownload(file),
         });
@@ -233,7 +242,10 @@ export const useGridContextMenu = ({
           key: DialFileManagerActions.ManagePermissions,
           label: actionLabels[DialFileManagerActions.ManagePermissions],
           icon: (
-            <IconExternalLink {...BASE_ICON_PROPS} className="text-secondary" />
+            <IconExternalLink
+              {...FILE_MANAGER_ICON_PROPS}
+              className="text-secondary"
+            />
           ),
           onClick: () => onManagePermissions?.(file.path),
         });
@@ -254,7 +266,9 @@ export const useGridContextMenu = ({
         items.push({
           key: DialFileManagerActions.Preview,
           label: actionLabels[DialFileManagerActions.Preview],
-          icon: <IconEye {...BASE_ICON_PROPS} className="text-secondary" />,
+          icon: (
+            <IconEye {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
+          ),
           onClick: () => onPreview?.(file.path),
         });
       }
@@ -270,7 +284,12 @@ export const useGridContextMenu = ({
         items.push({
           key: DialFileManagerActions.Delete,
           label: actionLabels[DialFileManagerActions.Delete],
-          icon: <IconTrashX {...BASE_ICON_PROPS} className="text-secondary" />,
+          icon: (
+            <IconTrashX
+              {...FILE_MANAGER_ICON_PROPS}
+              className="text-secondary"
+            />
+          ),
           onClick: () => onDelete(file, file.parentPath ?? ''),
         });
       }
@@ -287,7 +306,10 @@ export const useGridContextMenu = ({
           key: DialFileManagerActions.Rename,
           label: actionLabels[DialFileManagerActions.Rename],
           icon: (
-            <IconPencilMinus {...BASE_ICON_PROPS} className="text-secondary" />
+            <IconPencilMinus
+              {...FILE_MANAGER_ICON_PROPS}
+              className="text-secondary"
+            />
           ),
           onClick: () => onRename(file.path),
         });
@@ -302,7 +324,10 @@ export const useGridContextMenu = ({
           key: DialFileManagerActions.Info,
           label: actionLabels[DialFileManagerActions.Info],
           icon: (
-            <IconInfoCircle {...BASE_ICON_PROPS} className="text-secondary" />
+            <IconInfoCircle
+              {...FILE_MANAGER_ICON_PROPS}
+              className="text-secondary"
+            />
           ),
           onClick: () => onInfo(file),
         });
@@ -317,8 +342,8 @@ export const useGridContextMenu = ({
           label: actionLabels[DialFileManagerActions.Unshare],
           icon: (
             <IconUnshare
-              width={BASE_ICON_PROPS.size}
-              height={BASE_ICON_PROPS.size}
+              width={FILE_MANAGER_ICON_PROPS.size}
+              height={FILE_MANAGER_ICON_PROPS.size}
               className="text-secondary"
             />
           ),
@@ -335,7 +360,10 @@ export const useGridContextMenu = ({
           key: DialFileManagerActions.RemoveAccess,
           label: actionLabels[DialFileManagerActions.RemoveAccess],
           icon: (
-            <IconUserX size={BASE_ICON_PROPS.size} className="text-secondary" />
+            <IconUserX
+              {...FILE_MANAGER_ICON_PROPS}
+              className="text-secondary"
+            />
           ),
           onClick: () => onRemoveAccess(file),
         });

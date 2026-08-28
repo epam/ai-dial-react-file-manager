@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { DialFileManagerItemIcon } from './FileManagerItemIcon';
 import { DialItemType } from '@epam/ai-dial-ui-kit';
-import { BASE_ICON_PROPS } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 
 describe('Dial UI Kit :: DialFileManagerItemIcon', () => {
   test('renders file icon with proper accessible label', () => {
@@ -66,10 +66,14 @@ describe('Dial UI Kit :: DialFileManagerItemIcon', () => {
     );
     const svg = container.querySelector('svg');
     expect(svg).toBeTruthy();
-    expect(svg!.getAttribute('width')).toBe(String(BASE_ICON_PROPS.size));
-    expect(svg!.getAttribute('height')).toBe(String(BASE_ICON_PROPS.size));
+    expect(svg!.getAttribute('width')).toBe(
+      String(FILE_MANAGER_ICON_PROPS.size),
+    );
+    expect(svg!.getAttribute('height')).toBe(
+      String(FILE_MANAGER_ICON_PROPS.size),
+    );
     expect(svg!.getAttribute('stroke-width')).toBe(
-      String(BASE_ICON_PROPS.stroke),
+      String(FILE_MANAGER_ICON_PROPS.stroke),
     );
   });
 

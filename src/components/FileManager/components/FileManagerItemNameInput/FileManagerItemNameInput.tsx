@@ -3,12 +3,12 @@ import { DialFileManagerItemIcon } from '@/components/FileManager/components/Fil
 import type { DialItemType } from '@epam/ai-dial-ui-kit';
 import {
   Input,
-  BASE_ICON_PROPS,
   Tooltip,
   mergeClasses,
   NotificationVariant,
   editableContainerProps,
 } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import {
   IconAlertCircleFilled,
   IconAlertTriangleFilled,
@@ -122,13 +122,13 @@ export const DialFileManagerItemNameInput: FC<
         {inputIconAfter ||
           (!isWarning ? (
             <IconAlertCircleFilled
-              {...BASE_ICON_PROPS}
+              {...FILE_MANAGER_ICON_PROPS}
               className="text-error"
               aria-label="alert"
             />
           ) : (
             <IconAlertTriangleFilled
-              {...BASE_ICON_PROPS}
+              {...FILE_MANAGER_ICON_PROPS}
               className="text-warning-icon"
               aria-label="warning"
             />

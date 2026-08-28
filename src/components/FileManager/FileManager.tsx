@@ -32,7 +32,6 @@ import CopyToIcon from '@/assets/icons/copy-to.svg?react';
 import MoveToIcon from '@/assets/icons/move-to.svg?react';
 import IconUnshare from '@/assets/icons/unshare.svg?react';
 import {
-  BASE_ICON_PROPS,
   CollapsibleSidebar,
   ConditionalResizableContainer,
   Grid,
@@ -42,6 +41,7 @@ import {
   DropdownItemType,
   mergeClasses,
 } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import {
   ConflictResolutionPopup,
   type ConflictResolutionPopupProps,
@@ -803,8 +803,8 @@ export const DialFileManagerView: FC = () => {
             label: treeOptions.actionLabels[DialFileManagerActions.AddSibling],
             icon: (
               <AddSibling
-                width={BASE_ICON_PROPS.size}
-                height={BASE_ICON_PROPS.size}
+                width={FILE_MANAGER_ICON_PROPS.size}
+                height={FILE_MANAGER_ICON_PROPS.size}
                 className="text-secondary"
               />
             ),
@@ -822,8 +822,8 @@ export const DialFileManagerView: FC = () => {
             label: treeOptions.actionLabels[DialFileManagerActions.AddChild],
             icon: (
               <AddChild
-                width={BASE_ICON_PROPS.size}
-                height={BASE_ICON_PROPS.size}
+                width={FILE_MANAGER_ICON_PROPS.size}
+                height={FILE_MANAGER_ICON_PROPS.size}
                 className="text-secondary"
               />
             ),
@@ -839,7 +839,12 @@ export const DialFileManagerView: FC = () => {
           elements.push({
             key: 'duplicate',
             label: treeOptions.actionLabels[DialFileManagerActions.Duplicate],
-            icon: <IconCopy {...BASE_ICON_PROPS} className="text-secondary" />,
+            icon: (
+              <IconCopy
+                {...FILE_MANAGER_ICON_PROPS}
+                className="text-secondary"
+              />
+            ),
             onClick: () => handleDuplicate([file]),
           });
         }
@@ -854,8 +859,8 @@ export const DialFileManagerView: FC = () => {
             label: treeOptions.actionLabels[DialFileManagerActions.Copy],
             icon: (
               <CopyToIcon
-                width={BASE_ICON_PROPS.size}
-                height={BASE_ICON_PROPS.size}
+                width={FILE_MANAGER_ICON_PROPS.size}
+                height={FILE_MANAGER_ICON_PROPS.size}
                 className="text-secondary"
               />
             ),
@@ -875,8 +880,8 @@ export const DialFileManagerView: FC = () => {
             label: treeOptions.actionLabels[DialFileManagerActions.Move],
             icon: (
               <MoveToIcon
-                width={BASE_ICON_PROPS.size}
-                height={BASE_ICON_PROPS.size}
+                width={FILE_MANAGER_ICON_PROPS.size}
+                height={FILE_MANAGER_ICON_PROPS.size}
                 className="text-secondary"
               />
             ),
@@ -895,7 +900,10 @@ export const DialFileManagerView: FC = () => {
             key: 'download',
             label: treeOptions.actionLabels[DialFileManagerActions.Download],
             icon: (
-              <IconDownload {...BASE_ICON_PROPS} className="text-secondary" />
+              <IconDownload
+                {...FILE_MANAGER_ICON_PROPS}
+                className="text-secondary"
+              />
             ),
             onClick: () => handleDownloadFiles([file]),
           });
@@ -914,7 +922,7 @@ export const DialFileManagerView: FC = () => {
               ],
             icon: (
               <IconExternalLink
-                {...BASE_ICON_PROPS}
+                {...FILE_MANAGER_ICON_PROPS}
                 className="text-secondary"
               />
             ),
@@ -930,7 +938,10 @@ export const DialFileManagerView: FC = () => {
             key: 'delete',
             label: treeOptions.actionLabels[DialFileManagerActions.Delete],
             icon: (
-              <IconTrashX {...BASE_ICON_PROPS} className="text-secondary" />
+              <IconTrashX
+                {...FILE_MANAGER_ICON_PROPS}
+                className="text-secondary"
+              />
             ),
             onClick: () =>
               openDeleteConfirmation([file], file.parentPath ?? ''),
@@ -945,7 +956,7 @@ export const DialFileManagerView: FC = () => {
             label: treeOptions.actionLabels[DialFileManagerActions.Rename],
             icon: (
               <IconPencilMinus
-                {...BASE_ICON_PROPS}
+                {...FILE_MANAGER_ICON_PROPS}
                 className="text-secondary"
               />
             ),
@@ -962,8 +973,8 @@ export const DialFileManagerView: FC = () => {
             label: treeOptions.actionLabels[DialFileManagerActions.Unshare],
             icon: (
               <IconUnshare
-                width={BASE_ICON_PROPS.size}
-                height={BASE_ICON_PROPS.size}
+                width={FILE_MANAGER_ICON_PROPS.size}
+                height={FILE_MANAGER_ICON_PROPS.size}
                 className="text-secondary"
               />
             ),
@@ -981,7 +992,7 @@ export const DialFileManagerView: FC = () => {
               treeOptions.actionLabels[DialFileManagerActions.RemoveAccess],
             icon: (
               <IconUserX
-                size={BASE_ICON_PROPS.size}
+                {...FILE_MANAGER_ICON_PROPS}
                 className="text-secondary"
               />
             ),

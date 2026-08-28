@@ -11,7 +11,7 @@ import {
   IconPencil,
   IconTrashX,
 } from '@tabler/icons-react';
-import { BASE_ICON_PROPS } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 
 const meta: Meta<typeof DialFoldersTree> = {
   title: 'Data Display/FoldersTree',
@@ -110,7 +110,9 @@ const getMenuFunction =
     {
       key: 'copy',
       label: 'Copy',
-      icon: <IconCopy {...BASE_ICON_PROPS} className="text-secondary" />,
+      icon: (
+        <IconCopy {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
+      ),
       onClick: (info) => {
         info.domEvent.stopPropagation();
         // eslint-disable-next-line no-console
@@ -120,7 +122,7 @@ const getMenuFunction =
     {
       key: 'cut',
       label: 'Cut',
-      icon: <IconCut {...BASE_ICON_PROPS} className="text-secondary" />,
+      icon: <IconCut {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />,
       onClick: (info) => {
         info.domEvent.stopPropagation();
         // eslint-disable-next-line no-console
@@ -131,7 +133,10 @@ const getMenuFunction =
       key: 'paste',
       label: 'Paste',
       icon: (
-        <IconClipboardCopy {...BASE_ICON_PROPS} className="text-secondary" />
+        <IconClipboardCopy
+          {...FILE_MANAGER_ICON_PROPS}
+          className="text-secondary"
+        />
       ),
       onClick: (info) => {
         info.domEvent.stopPropagation();
@@ -142,7 +147,9 @@ const getMenuFunction =
     {
       key: 'download',
       label: 'Download',
-      icon: <IconDownload {...BASE_ICON_PROPS} className="text-secondary" />,
+      icon: (
+        <IconDownload {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
+      ),
       onClick: (info) => {
         info.domEvent.stopPropagation();
         // eslint-disable-next-line no-console
@@ -152,7 +159,9 @@ const getMenuFunction =
     {
       key: 'delete',
       label: 'Delete',
-      icon: <IconTrashX {...BASE_ICON_PROPS} className="text-secondary" />,
+      icon: (
+        <IconTrashX {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
+      ),
       onClick: (info) => {
         info.domEvent.stopPropagation();
         // eslint-disable-next-line no-console
@@ -162,7 +171,9 @@ const getMenuFunction =
     {
       key: 'rename',
       label: 'Rename',
-      icon: <IconPencil {...BASE_ICON_PROPS} className="text-secondary" />,
+      icon: (
+        <IconPencil {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
+      ),
       onClick: (info) => {
         info.domEvent.stopPropagation();
 

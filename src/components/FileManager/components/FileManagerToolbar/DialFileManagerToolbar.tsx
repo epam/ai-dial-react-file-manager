@@ -2,7 +2,6 @@ import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import { DialFileManagerTabs } from '@/types/file-manager';
 import type { DropdownItem, TabItem } from '@epam/ai-dial-ui-kit';
 import {
-  BASE_ICON_PROPS,
   ButtonDropdown,
   ButtonVariant,
   DIAL_ICON_SIZE,
@@ -13,6 +12,10 @@ import {
   Tabs,
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
+import {
+  FILE_MANAGER_ICON_PROPS,
+  FILE_MANAGER_ICON_STROKE,
+} from '@/constants/icon';
 import { IconDotsVertical, IconEye, IconEyeOff } from '@tabler/icons-react';
 import { type FC, useMemo } from 'react';
 
@@ -114,9 +117,9 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
           ? hideHiddenFilesLabel
           : showHiddenFilesLabel,
         icon: areHiddenFilesVisible ? (
-          <IconEyeOff {...BASE_ICON_PROPS} className="text-secondary" />
+          <IconEyeOff {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
         ) : (
-          <IconEye {...BASE_ICON_PROPS} className="text-secondary" />
+          <IconEye {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
         ),
         onClick: () => onToggleHiddenFiles?.(!areHiddenFilesVisible),
       },
@@ -177,7 +180,12 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
       >
         <GhostIconButton
           size={ElementSize.Small}
-          icon={<IconDotsVertical stroke={2} size={DIAL_ICON_SIZE.SM} />}
+          icon={
+            <IconDotsVertical
+              stroke={FILE_MANAGER_ICON_STROKE}
+              size={DIAL_ICON_SIZE.SM}
+            />
+          }
         />
       </Dropdown>
 

@@ -14,7 +14,7 @@ import {
   IconTrashX,
   IconZip,
 } from '@tabler/icons-react';
-import { BASE_ICON_PROPS } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 
 const meta: Meta<typeof DialFileManagerBulkActionsToolbar> = {
   title: 'FileManager/components/FileManagerBulkActionsToolbar',
@@ -59,14 +59,14 @@ const mockActions: DialActionDropdownItem[] = [
     key: 'cut',
     title: 'Cut',
     label: 'Cut',
-    icon: <IconCut {...BASE_ICON_PROPS} />,
+    icon: <IconCut {...FILE_MANAGER_ICON_PROPS} />,
     onClick: () => alert('Cut clicked'),
   },
   {
     key: 'copy',
     title: 'Copy',
     label: 'Copy',
-    icon: <IconCopy {...BASE_ICON_PROPS} />,
+    icon: <IconCopy {...FILE_MANAGER_ICON_PROPS} />,
     onClick: () => alert('Copy clicked'),
   },
   {
@@ -74,14 +74,14 @@ const mockActions: DialActionDropdownItem[] = [
     title: 'Delete',
     label: 'Delete',
     disabled: true,
-    icon: <IconTrashX {...BASE_ICON_PROPS} />,
+    icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
     onClick: () => alert('Delete clicked'),
   },
   {
     key: 'download',
     title: 'Download',
     label: 'Download',
-    icon: <IconDownload {...BASE_ICON_PROPS} />,
+    icon: <IconDownload {...FILE_MANAGER_ICON_PROPS} />,
     onClick: () => alert('Download clicked'),
   },
 ];
@@ -91,35 +91,35 @@ const extraMockActions = [
     key: 'share',
     title: 'Share',
     label: 'Share',
-    icon: <IconShare {...BASE_ICON_PROPS} />,
+    icon: <IconShare {...FILE_MANAGER_ICON_PROPS} />,
     onClick: () => alert('Share clicked'),
   },
   {
     key: 'move',
     title: 'Move',
     label: 'Move',
-    icon: <IconArrowMoveRight {...BASE_ICON_PROPS} />,
+    icon: <IconArrowMoveRight {...FILE_MANAGER_ICON_PROPS} />,
     onClick: () => alert('Move clicked'),
   },
   {
     key: 'info',
     title: 'Info',
     label: 'Info',
-    icon: <IconInfoCircle {...BASE_ICON_PROPS} />,
+    icon: <IconInfoCircle {...FILE_MANAGER_ICON_PROPS} />,
     onClick: () => alert('Info clicked'),
   },
   {
     key: 'archive',
     title: 'Archive',
     label: 'Archive',
-    icon: <IconZip {...BASE_ICON_PROPS} />,
+    icon: <IconZip {...FILE_MANAGER_ICON_PROPS} />,
     onClick: () => alert('Archive clicked'),
   },
   {
     key: 'publish',
     title: 'Publish',
     label: 'Publish',
-    icon: <IconEyeShare {...BASE_ICON_PROPS} />,
+    icon: <IconEyeShare {...FILE_MANAGER_ICON_PROPS} />,
     onClick: () => alert('Publish clicked'),
   },
 ];

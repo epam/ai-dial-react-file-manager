@@ -28,11 +28,26 @@ and this project follows [Semantic Versioning](https://semver.org/).
   `additionalGridOptions.rowSelection` used to replace the grid's own selection
   config wholesale, which put a second checkbox column beside the grid's own.
 - **Shadows are themed per step** — each step reads its own variable named after
-  the step rather than the hue: `--shadow-xs-sm-1` / `--shadow-xs-sm-2` for the
-  two layers `shadow-xs` and `shadow-sm` share (blue wide, grey tight — the
-  reverse of 0.13.0), and `--shadow-md` / `--shadow-lg` for the single blue
-  layer those steps now draw. `--shadow-blue-500` and `--shadow-grey-1000` are
-  no longer read; a theme that sets them must move the values to the new names.
+  the step rather than the hue: `--shadow-xs-1` / `--shadow-xs-2` for the two
+  layers `shadow-xs` draws (blue wide, grey tight — the reverse of 0.13.0), and
+  `--shadow-sm` / `--shadow-md` / `--shadow-lg` for the single blue layer each of
+  those steps now draws. The scale reads xs, sm, md, lg with `sm` as the side
+  bar / side panel / right panel step (`0 8px 10px`, blue-500 alpha-8) and `md` a
+  notch stronger at alpha-6; `sm` used to hold the resting shadow of a solid
+  control, which now lives in the kit's `dial-kit-control-shadow` class. Nothing
+  in this package draws a shadow, so the change is a token surface only — but
+  `shadow-sm` is safelisted so the panel step survives into the shipped
+  stylesheet. `--shadow-blue-500` and `--shadow-grey-1000` are no longer read; a
+  theme that sets them must move the values to the new names.
+- **Icons are on the 1.5px stroke of the 2.0 scale.** Tabler draws every outline
+  icon at `stroke={2}` unless told otherwise, so the file manager's icons were a
+  step heavier than the design system asks for — and heavier than this package's
+  own SVG assets, which are authored at 1.5. `FILE_MANAGER_ICON_PROPS` replaces
+  the kit's 1.0 `BASE_ICON_PROPS` at every internal call site (same 18px size,
+  new stroke), and both it and `FILE_MANAGER_ICON_STROKE` are exported so icons a
+  host passes in — a `NewAction`, a bulk action, a context-menu entry — can
+  match. The empty-state illustrations keep their much lighter stroke: 1.5px
+  reads as a drawing at 16px and as a fence at 100px.
 - **Generation 2.0 components replace their 1.0 counterparts** — `Tooltip`,
   `TooltipContainer`/`Trigger`/`Content`, `EllipsisTooltip`, `RadioGroup` (the
   conflict-resolution choices, previously `DialRadioGroup`),

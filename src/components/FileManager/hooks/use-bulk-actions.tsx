@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react';
 import CopyToIcon from '@/assets/icons/copy-to.svg?react';
 import MoveToIcon from '@/assets/icons/move-to.svg?react';
-import { BASE_ICON_PROPS } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import IconUnshare from '@/assets/icons/unshare.svg?react';
 
 import { cleanForbiddenSymbolsRegExp } from '@/components/FileManager/utils';
@@ -81,7 +81,7 @@ export const useBulkActions = ({
         label: actionLabels[DialFileManagerActions.RemoveAccess],
         title: actionLabels[DialFileManagerActions.RemoveAccess],
         disabled,
-        icon: <IconUserX size={BASE_ICON_PROPS.size} />,
+        icon: <IconUserX {...FILE_MANAGER_ICON_PROPS} />,
         onClick: () => {
           onRemoveAccess(selectedFilesArray);
           onClearSelection();
@@ -96,8 +96,8 @@ export const useBulkActions = ({
         title: actionLabels[DialFileManagerActions.Move],
         icon: (
           <MoveToIcon
-            width={BASE_ICON_PROPS.size}
-            height={BASE_ICON_PROPS.size}
+            width={FILE_MANAGER_ICON_PROPS.size}
+            height={FILE_MANAGER_ICON_PROPS.size}
           />
         ),
         onClick: () => onMove(selectedFilesArray),
@@ -111,8 +111,8 @@ export const useBulkActions = ({
         title: actionLabels[DialFileManagerActions.Copy],
         icon: (
           <CopyToIcon
-            width={BASE_ICON_PROPS.size}
-            height={BASE_ICON_PROPS.size}
+            width={FILE_MANAGER_ICON_PROPS.size}
+            height={FILE_MANAGER_ICON_PROPS.size}
           />
         ),
         onClick: () => onCopy(selectedFilesArray),
@@ -127,7 +127,7 @@ export const useBulkActions = ({
         key: DialFileManagerActions.Duplicate,
         label: actionLabels[DialFileManagerActions.Duplicate],
         title: actionLabels[DialFileManagerActions.Duplicate],
-        icon: <IconCopy {...BASE_ICON_PROPS} />,
+        icon: <IconCopy {...FILE_MANAGER_ICON_PROPS} />,
         onClick: () => onDuplicate(selectedFilesArray),
       });
     }
@@ -143,7 +143,7 @@ export const useBulkActions = ({
         key: DialFileManagerActions.Delete,
         label: actionLabels[DialFileManagerActions.Delete],
         title: actionLabels[DialFileManagerActions.Delete],
-        icon: <IconTrashX {...BASE_ICON_PROPS} />,
+        icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
         disabled: isDisabled,
         tooltip: isDisabled
           ? 'Selected items contain item which can not be deleted'
@@ -163,7 +163,7 @@ export const useBulkActions = ({
         key: DialFileManagerActions.Download,
         label: actionLabels[DialFileManagerActions.Download],
         title: actionLabels[DialFileManagerActions.Download],
-        icon: <IconDownload {...BASE_ICON_PROPS} />,
+        icon: <IconDownload {...FILE_MANAGER_ICON_PROPS} />,
         onClick: () => onDownload(selectedFilesArray),
       });
     }
@@ -183,8 +183,8 @@ export const useBulkActions = ({
           : undefined,
         icon: (
           <IconUnshare
-            width={BASE_ICON_PROPS.size}
-            height={BASE_ICON_PROPS.size}
+            width={FILE_MANAGER_ICON_PROPS.size}
+            height={FILE_MANAGER_ICON_PROPS.size}
           />
         ),
         onClick: () => {

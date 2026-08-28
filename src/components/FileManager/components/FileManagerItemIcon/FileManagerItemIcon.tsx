@@ -1,11 +1,11 @@
 import type { FC, ReactNode } from 'react';
 import {
   DialIcon,
-  BASE_ICON_PROPS,
   DialItemType,
   DialSharedEntityIndicator,
   Spinner,
 } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { DialFileIcon, type DialFileIconProps } from '@epam/ai-dial-ui-kit';
 import { IconFolder } from '@tabler/icons-react';
 
@@ -116,8 +116,8 @@ export const DialFileManagerItemIcon: FC<DialFileManagerItemIconProps> = ({
         icon={
           <IconFolder
             className={restProps.className}
-            size={restProps.size ?? BASE_ICON_PROPS.size}
-            stroke={restProps.stroke ?? BASE_ICON_PROPS.stroke}
+            size={restProps.size ?? FILE_MANAGER_ICON_PROPS.size}
+            stroke={restProps.stroke ?? FILE_MANAGER_ICON_PROPS.stroke}
           />
         }
         className="inline-block align-middle"

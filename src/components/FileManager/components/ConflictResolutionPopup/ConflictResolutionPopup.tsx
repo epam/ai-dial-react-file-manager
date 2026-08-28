@@ -12,6 +12,7 @@ import {
   RadioGroup,
 } from '@epam/ai-dial-ui-kit';
 import { BASE_FILE_MANAGER_ICON_SIZE } from '@/components/FileManager/constants';
+import { FILE_MANAGER_ICON_STROKE } from '@/constants/icon';
 import type { DropdownItem, RadioGroupItem } from '@epam/ai-dial-ui-kit';
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
@@ -314,6 +315,7 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
                   </span>
                   <IconChevronDown
                     size={DIAL_ICON_SIZE.SM}
+                    stroke={FILE_MANAGER_ICON_STROKE}
                     className={classNames(
                       'text-secondary transition-transform',
                       isOpen && 'rotate-180',

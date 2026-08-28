@@ -8,7 +8,6 @@ import {
 
 import { getSegments } from '@/utils/path';
 import {
-  BASE_ICON_PROPS,
   DialBreadcrumb,
   type DialBreadcrumbPathItem,
   type DialBreadcrumbProps,
@@ -18,6 +17,7 @@ import {
   mergeClasses,
   Search,
 } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { IconArrowLeft } from '@tabler/icons-react';
 import {
   breadcrumbContainerClassName,
@@ -247,7 +247,7 @@ export const DialFileManagerNavigationPanel: FC<
         <GhostIconButton
           size={ElementSize.Standard}
           aria-label={backButtonLabel}
-          icon={<IconArrowLeft {...BASE_ICON_PROPS} />}
+          icon={<IconArrowLeft {...FILE_MANAGER_ICON_PROPS} />}
           onClick={() => {
             setIsSearchExpanded(false);
             onSearchChange?.('');

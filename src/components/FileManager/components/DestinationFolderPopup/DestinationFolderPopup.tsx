@@ -6,7 +6,6 @@ import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import type { DialFileManagerActionsRef } from '@/models/file-manager';
 import { DestinationFolderMode } from '@/types/file-manager';
 import {
-  BASE_ICON_PROPS,
   ButtonAppearance,
   type DialNotificationProps,
   Dropdown,
@@ -22,6 +21,7 @@ import {
   Switch,
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
+import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { IconDotsVertical, IconEye, IconFolderPlus } from '@tabler/icons-react';
 import {
   type FC,
@@ -139,7 +139,10 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
         key: 'add-folder',
         label: addFolderLabel,
         icon: (
-          <IconFolderPlus {...BASE_ICON_PROPS} className="text-secondary" />
+          <IconFolderPlus
+            {...FILE_MANAGER_ICON_PROPS}
+            className="text-secondary"
+          />
         ),
         onClick: () => {
           fileManagerActionRef.current?.createFolder();
@@ -152,7 +155,9 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
       footerDropdownItems.push({
         key: 'show-hidden-files',
         label: hiddenFilesSwitcherLabel,
-        icon: <IconEye {...BASE_ICON_PROPS} className="text-secondary" />,
+        icon: (
+          <IconEye {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
+        ),
         onClick: () => {
           setShowHiddenFiles((prev) => !prev);
           setMobileMenuOpen(false);
@@ -216,7 +221,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
                 <GhostIconButton
                   size={ElementSize.Large}
                   aria-label="More options"
-                  icon={<IconDotsVertical {...BASE_ICON_PROPS} />}
+                  icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
                 />
               </Dropdown>
             ) : (
@@ -225,7 +230,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
                   <PrimaryButton
                     label={addFolderLabel}
                     appearance={ButtonAppearance.Ghost}
-                    iconBefore={<IconFolderPlus {...BASE_ICON_PROPS} />}
+                    iconBefore={<IconFolderPlus {...FILE_MANAGER_ICON_PROPS} />}
                     onClick={() => {
                       fileManagerActionRef.current?.createFolder();
                     }}

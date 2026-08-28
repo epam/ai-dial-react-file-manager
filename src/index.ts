@@ -59,3 +59,8 @@ export {
   SIZE_COLUMN,
   UPDATED_AT_COLUMN,
 } from './constants/file-grid-columns';
+
+export {
+  FILE_MANAGER_ICON_PROPS,
+  FILE_MANAGER_ICON_STROKE,
+} from './constants/icon';
