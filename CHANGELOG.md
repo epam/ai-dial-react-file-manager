@@ -17,7 +17,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- **UI Kit moved to `0.14.0-dev.13`** — the Tailwind token scales in
+- **UI Kit moved to `0.14.0-dev.15`** — the Tailwind token scales in
   `tailwind.config.js` now mirror the kit's 0.14.0 set: the control tokens are
   named by role (`bg-control-disable-primary`, `text-control-accent-hover`,
   `bg-control-neutral-hover-muted`), `border-hover-alpha` is gone in favour of
@@ -27,6 +27,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
   dev.13 also carries the kit fix for `Grid`: a host passing
   `additionalGridOptions.rowSelection` used to replace the grid's own selection
   config wholesale, which put a second checkbox column beside the grid's own.
+  dev.14 lands the kit half of the stroke and shadow scales described below,
+  which this package had mirrored in its own token config ahead of the release:
+  the icon stroke is a published token, and `Grid` draws its row, header-row
+  and header-column dividers on the 0.5px thin stroke instead of the 1px main
+  one, so a dense file grid reads as rows of data rather than a set of boxes —
+  the table frame and the pinned-column boundary stay on the main stroke.
+  dev.15 gives the 2.0 resize handle its chevron back, so the draggable edge of
+  the folders-tree panel is marked by an arrow again instead of a bare accent
+  line.
 - **Shadows are themed per step** — each step reads its own variable named after
   the step rather than the hue: `--shadow-xs-1` / `--shadow-xs-2` for the two
   layers `shadow-xs` draws (blue wide, grey tight — the reverse of 0.13.0), and
@@ -46,8 +55,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
   the kit's 1.0 `BASE_ICON_PROPS` at every internal call site (same 18px size,
   new stroke), and both it and `FILE_MANAGER_ICON_STROKE` are exported so icons a
   host passes in — a `NewAction`, a bulk action, a context-menu entry — can
-  match. The empty-state illustrations keep their much lighter stroke: 1.5px
-  reads as a drawing at 16px and as a fence at 100px.
+  match. `FILE_MANAGER_ICON_STROKE` re-exports the kit's `DIAL_KIT_ICON_STROKE`
+  rather than repeating the value, so the file manager's icons cannot drift from
+  the ones the 2.0 components draw themselves. The empty-state illustrations
+  keep their much lighter stroke: 1.5px reads as a drawing at 16px and as a
+  fence at 100px.
 - **Generation 2.0 components replace their 1.0 counterparts** — `Tooltip`,
   `TooltipContainer`/`Trigger`/`Content`, `EllipsisTooltip`, `RadioGroup` (the
   conflict-resolution choices, previously `DialRadioGroup`),
