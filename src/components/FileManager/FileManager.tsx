@@ -35,6 +35,7 @@ import {
   CollapsibleSidebar,
   ConditionalResizableContainer,
   Grid,
+  GRID_SELECTION_COLUMN_ID,
   type GridProps,
   NoDataContent,
   type DropdownItem,
@@ -99,6 +100,7 @@ import {
 } from './components/FoldersTree/FoldersTree';
 import {
   actionsColumnButtonClassName,
+  AG_GRID_SELECTION_COLUMN_ID,
   COMPACT_VIEW_HEADER_HEIGHT,
   containerBaseClassName,
   contentGridClassName,
@@ -1310,7 +1312,8 @@ export const DialFileManagerView: FC = () => {
   const cellClickHandler = useCallback(
     (event: CellClickedEvent<FileManagerGridRow>) => {
       if (
-        event.colDef.colId === 'ag-Grid-SelectionColumn' ||
+        event.colDef.colId === GRID_SELECTION_COLUMN_ID ||
+        event.colDef.colId === AG_GRID_SELECTION_COLUMN_ID ||
         event.colDef.colId === FileManagerColumnKey.Actions ||
         (renamedPath && event.data?.path === renamedPath) ||
         event.data?.isTemporary ||
