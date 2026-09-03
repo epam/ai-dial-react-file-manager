@@ -38,6 +38,13 @@ export const FOLDERS_TREE_PANEL_MIN_WIDTH = 280;
 
 export const FOLDERS_TREE_PANEL_MAX_WIDTH = 460;
 
+/*
+ * AG Grid's built-in selection column id. The kit's Grid renders its own
+ * selection column (GRID_SELECTION_COLUMN_ID), but a consumer that passes a raw
+ * `rowSelection` config without `selectionMode` still gets this one.
+ */
+export const AG_GRID_SELECTION_COLUMN_ID = 'ag-Grid-SelectionColumn';
+
 export const COMPACT_VIEW_HEADER_HEIGHT = 44;
 
 export const COMPACT_VIEW_FILE_ROW_HEIGHT = 56;

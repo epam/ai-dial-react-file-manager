@@ -19,6 +19,7 @@ import {
 } from './hooks/use-file-manager-columns';
 import type { FileManagerGridRow } from './FileManagerContext';
 import { FileManagerColumnKey } from '@/types/file-manager';
+import { GridSelectionMode } from '@/models/selection-mode';
 import {
   DialFileNodeType,
   DialFileResourceType,
@@ -79,10 +80,14 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
         (col) => col.filter === false && col.floatingFilter === false,
       );
 
-    const handleRowClick = (row: Row): void => {
+    const clickCell = (row: Row, colId: string): void => {
       const handler = additionalGridOptions?.onCellClicked;
       if (!handler) return;
-      handler({ colDef: { colId: 'name' }, data: row });
+      handler({ colDef: { colId }, data: row });
+    };
+
+    const handleRowClick = (row: Row): void => {
+      clickCell(row, 'name');
     };
 
     const rows = rowsArray.map((row, index) => {
@@ -100,6 +105,16 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
           }}
           onClick={() => handleRowClick(row)}
         >
+          <td>
+            <input
+              type="checkbox"
+              aria-label={`Select ${label}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                clickCell(row, actual.GRID_SELECTION_COLUMN_ID);
+              }}
+            />
+          </td>
           <td>{label}</td>
         </tr>
       );
@@ -392,6 +407,49 @@ describe('Dial UI Kit :: FileManager', () => {
     await userEvent.click(videoNode);
 
     expect(await findInGridByRowText('promo.mp4')).toBeInTheDocument();
+  });
+
+  test('clicking a folder row selection checkbox selects it without navigating into the folder', async () => {
+    renderWithinSizedShell(
+      <DialFileManager
+        items={itemsMock}
+        defaultPath="All files/Design/Icons"
+        gridOptions={{
+          selectionMode: GridSelectionMode.MULTIPLE,
+          showFiles: true,
+        }}
+      />,
+    );
+
+    const folderRow = await findInGridByRowText('SVG');
+    await userEvent.click(
+      within(folderRow as HTMLElement).getByRole('checkbox', {
+        name: 'Select SVG',
+      }),
+    );
+
+    /* The listing must stay on the parent folder, so its siblings remain visible. */
+    expect(await findInGridByRowText('PNG')).toBeInTheDocument();
+    expect(await findInGridByRowText('SVG')).toBeInTheDocument();
+    expect((await queryAllInGridByRowText('24px')).length).toBe(0);
+  });
+
+  test('clicking a folder name cell still navigates into the folder', async () => {
+    renderWithinSizedShell(
+      <DialFileManager
+        items={itemsMock}
+        defaultPath="All files/Design/Icons"
+        gridOptions={{
+          selectionMode: GridSelectionMode.MULTIPLE,
+          showFiles: true,
+        }}
+      />,
+    );
+
+    const folderRow = await findInGridByRowText('SVG');
+    await userEvent.click(within(folderRow as HTMLElement).getByText('SVG'));
+
+    expect(await findInGridByRowText('24px')).toBeInTheDocument();
   });
 
   test('gridOptions.filterable=false disables floating filters in grid header', async () => {
