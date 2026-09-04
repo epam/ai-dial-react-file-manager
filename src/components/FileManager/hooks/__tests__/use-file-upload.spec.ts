@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useFileUpload } from '@/components/FileManager/hooks/use-file-upload';
-import type { DialFileAcceptType } from '@/models/file-manager';
+import type {
+  DialFileAcceptType,
+  DialUploadFileItem,
+} from '@/models/file-manager';
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
 import { DialFilePermission } from '@/models/file';
@@ -441,6 +444,146 @@ describe('Dial UI Kit :: FileManager :: useFileUpload', () => {
       expect(result.current.uploadError).toBeUndefined();
       expect(result.current.uploadConflictResolutionOpen).toBe(false);
       expect(onUploadFiles).toHaveBeenCalled();
+    });
+
+    it('uploads the non-conflicting files immediately and holds only the colliding ones', async () => {
+      const onUploadFiles = vi.fn();
+      const { result } = renderUseFileUpload({ onUploadFiles });
+
+      const files = [
+        createMockFile('existing.txt', 1024),
+        createMockFile('document.pdf', 1024),
+        createMockFile('fresh-a.txt', 1024),
+        createMockFile('fresh-b.txt', 1024),
+        createMockFile('fresh-c.txt', 1024),
+      ];
+
+      const mockEvent = {
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+        dataTransfer: {
+          types: ['Files'],
+          files,
+        },
+      } as unknown as DragEvent;
+
+      await act(async () => {
+        await result.current.handleDrop(
+          mockEvent,
+          '/folder',
+          mockExistingFiles,
+        );
+      });
+
+      await waitFor(() => {
+        expect(result.current.uploadConflictResolutionOpen).toBe(true);
+      });
+
+      expect(onUploadFiles).toHaveBeenCalledOnce();
+      expect(
+        onUploadFiles.mock.calls[0]?.[0].map(
+          (file: DialUploadFileItem) => file.name,
+        ),
+      ).toEqual(['fresh-a.txt', 'fresh-b.txt', 'fresh-c.txt']);
+      expect(onUploadFiles.mock.calls[0]?.[1]).toBe('/folder');
+
+      expect(
+        result.current.uploadConflictingFiles.map((file) => file.name),
+      ).toEqual(['existing.txt', 'document.pdf']);
+    });
+
+    it('does not re-upload the already dispatched files when the conflict is resolved', async () => {
+      const onUploadFiles = vi.fn();
+      const { result } = renderUseFileUpload({ onUploadFiles });
+
+      const files = [
+        createMockFile('existing.txt', 1024),
+        createMockFile('fresh.txt', 1024),
+      ];
+
+      const mockEvent = {
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+        dataTransfer: {
+          types: ['Files'],
+          files,
+        },
+      } as unknown as DragEvent;
+
+      await act(async () => {
+        await result.current.handleDrop(
+          mockEvent,
+          '/folder',
+          mockExistingFiles,
+        );
+      });
+
+      await waitFor(() => {
+        expect(result.current.uploadConflictResolutionOpen).toBe(true);
+      });
+
+      act(() => {
+        result.current.handleUploadConflictReplace();
+      });
+
+      await waitFor(() => {
+        expect(onUploadFiles).toHaveBeenCalledTimes(2);
+      });
+
+      expect(
+        onUploadFiles.mock.calls[1]?.[0].map(
+          (file: DialUploadFileItem) => file.name,
+        ),
+      ).toEqual(['existing.txt']);
+    });
+
+    it('gives a duplicated name a suffix that no file dispatched in the same batch already claims', async () => {
+      const onUploadFiles = vi.fn();
+      const { result } = renderUseFileUpload({ onUploadFiles });
+
+      /*
+       * 'existing.txt' collides, and 'existing (1).txt' does not — so the free
+       * one goes out first and the duplicate decision has to skip past it.
+       */
+      const files = [
+        createMockFile('existing.txt', 1024),
+        createMockFile('existing (1).txt', 1024),
+      ];
+
+      const mockEvent = {
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+        dataTransfer: {
+          types: ['Files'],
+          files,
+        },
+      } as unknown as DragEvent;
+
+      await act(async () => {
+        await result.current.handleDrop(
+          mockEvent,
+          '/folder',
+          mockExistingFiles,
+        );
+      });
+
+      await waitFor(() => {
+        expect(result.current.uploadConflictResolutionOpen).toBe(true);
+      });
+
+      act(() => {
+        result.current.handleUploadConflictDuplicate();
+      });
+
+      await waitFor(() => {
+        expect(onUploadFiles).toHaveBeenCalledTimes(2);
+      });
+
+      expect(
+        onUploadFiles.mock.calls[1]?.[0].map(
+          (file: DialUploadFileItem) => file.name,
+        ),
+      ).toEqual(['existing (2).txt']);
     });
 
     it('handles conflict resolution - replace', async () => {
@@ -972,8 +1115,15 @@ describe('Dial UI Kit :: FileManager :: useFileUpload', () => {
         );
         expect(conflictNames).toContain('existing.txt');
         expect(conflictNames).toContain('document.pdf');
-        expect(onUploadFiles).not.toHaveBeenCalled();
       });
+
+      // The third name is free, so it does not wait on the popup.
+      expect(onUploadFiles).toHaveBeenCalledOnce();
+      expect(
+        onUploadFiles.mock.calls[0]?.[0].map(
+          (file: DialUploadFileItem) => file.name,
+        ),
+      ).toEqual(['newfile.txt']);
     });
 
     it('validates all files and shows all oversized names', async () => {

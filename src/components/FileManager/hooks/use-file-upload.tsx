@@ -102,6 +102,8 @@ export const useFileUpload = ({
 
   const [uploadMetadata, setUploadMetadata] = useState<{
     destinationFolder: string;
+    /** Set by the archive dialog, which resolves conflicts through the same handler as a plain upload. */
+    isArchive?: boolean;
   } | null>(null);
 
   const filterAcceptedFiles = useCallback(
@@ -124,6 +126,7 @@ export const useFileUpload = ({
     conflictingFiles,
     conflictResolutionOpen,
     hasActiveConflictRef,
+    checkForConflicts,
     startConflictResolution,
     closeConflictResolution,
     openConflictResolution,
@@ -156,7 +159,7 @@ export const useFileUpload = ({
         })
         .filter(Boolean) as DialUploadFileItem[];
 
-      if (uploadItems[0]?.fileContent?.type === 'application/zip') {
+      if (uploadMetadata.isArchive && uploadItems[0]) {
         const { fileContent, name } = uploadItems[0];
         onUploadArchive?.(fileContent, name, destinationFolder);
       } else if (uploadItems.length > 0) {
@@ -304,27 +307,57 @@ export const useFileUpload = ({
         }
       }
 
-      const filesMap = new Map(preparedFiles.map((f) => [f.name, f]));
-      setPendingUploadFiles(filesMap);
-
       const dialFiles = convertUploadItemsToDialFiles(
         preparedFiles,
         destinationFolder,
       );
 
-      setUploadMetadata({ destinationFolder });
+      const { conflicts } = checkForConflicts(destinationFolder, dialFiles);
+      const conflictingNames = new Set(conflicts.map((file) => file.name));
 
-      const result = startConflictResolution(destinationFolder, dialFiles, {
-        destinationFolder,
-      });
-
-      if (result.hasConflicts) {
-        return false;
+      /*
+       * One colliding name is not a reason to hold the whole batch. Files whose
+       * names are free in the destination go out immediately; only the colliding
+       * ones wait on the user's decision.
+       */
+      const readyFiles = preparedFiles.filter(
+        (file) => !conflictingNames.has(file.name),
+      );
+      if (readyFiles.length > 0) {
+        onUploadFiles?.(readyFiles, destinationFolder);
       }
 
-      onUploadFiles?.(preparedFiles, destinationFolder);
-      clearUploadState();
-      return true;
+      if (conflictingNames.size === 0) {
+        clearUploadState();
+        return true;
+      }
+
+      /*
+       * Those names are taken now. The resolver reads the destination through
+       * this ref, so extending it stops a "duplicate" decision on a held file
+       * from generating a name one of the dispatched files already claims.
+       */
+      existingFilesRef.current = [
+        ...existingFiles,
+        ...convertUploadItemsToDialFiles(readyFiles, destinationFolder),
+      ];
+
+      setPendingUploadFiles(
+        new Map(
+          preparedFiles
+            .filter((file) => conflictingNames.has(file.name))
+            .map((file) => [file.name, file]),
+        ),
+      );
+      setUploadMetadata({ destinationFolder });
+
+      startConflictResolution(
+        destinationFolder,
+        dialFiles.filter((file) => conflictingNames.has(file.name)),
+        { destinationFolder },
+      );
+
+      return false;
     },
     [
       uploadEnabled,
@@ -335,6 +368,7 @@ export const useFileUpload = ({
       maxFileSize,
       validationMessages,
       convertUploadItemsToDialFiles,
+      checkForConflicts,
       startConflictResolution,
       clearUploadState,
       hasWriteAccess,
@@ -631,7 +665,7 @@ export const useFileUpload = ({
         };
 
         existingFilesRef.current = existingFiles;
-        setUploadMetadata({ destinationFolder });
+        setUploadMetadata({ destinationFolder, isArchive: true });
         setPendingUploadFiles(
           new Map([[dialFile.path, { fileContent: file, name: archiveName }]]),
         );
