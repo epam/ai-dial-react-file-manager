@@ -10,7 +10,7 @@ import {
   splitPathAndName,
   getNextFolderName,
   baseColumnComparator,
-  excludePathsFromTree
+  excludePathsFromTree,
 } from './utils';
 
 describe('Dial UI Kit :: splitPathAndName', () => {

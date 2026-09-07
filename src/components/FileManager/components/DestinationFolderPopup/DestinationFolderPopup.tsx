@@ -97,7 +97,7 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
  * @param [collapsedFileTree=false] - Whether the file tree should be initially collapsed
  * @param [processDestinationFolderPath] - Optional function to process the destination folder path before setting it
  * @param [excludedPaths] - Paths to hide from this popup's tree and grid (e.g. a root folder that shouldn't be a valid destination). Matching items and their subtree are excluded.
- * 
+ *
  * @returns A React component for the destination folder selection popup
  */
 export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
@@ -132,7 +132,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
   const fileManagerActionRef = useRef<DialFileManagerActionsRef>(null);
   const isMobile = useIsMobileScreen();
 
-   const visibleItems = useMemo(
+  const visibleItems = useMemo(
     () => excludePathsFromTree(items, excludedPaths),
     [items, excludedPaths],
   );
