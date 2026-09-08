@@ -25,7 +25,7 @@ jobs:
     uses: epam/ai-dial-ci/.github/workflows/node_release.yml@4.11.0
     with:
       docker-build-enabled: false
-      node-version: '24'
-      promote: ${{ inputs.promote || false }}
+      node-version: "24"
+      promote: ${{ github.event_name == 'workflow_dispatch' && inputs.promote }}
       publish-enabled: true
     secrets: inherit

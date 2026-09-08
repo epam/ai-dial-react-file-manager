@@ -18,7 +18,7 @@ jobs:
     secrets: inherit
     with:
       docker-build-enabled: false
-      node-version: '24'
+      node-version: "24"
 
   package_check:
     name: package
@@ -31,7 +31,7 @@ jobs:
         uses: epam/ai-dial-ci/actions/node_prepare@4.11.0
         with:
           clean-install: true
-          node-version: '24'
+          node-version: "24"
 
       - name: Typecheck
         run: npm run typecheck
