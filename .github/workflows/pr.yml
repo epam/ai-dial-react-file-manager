@@ -14,11 +14,11 @@ concurrency:
 
 jobs:
   run_tests:
-    uses: epam/ai-dial-ci/.github/workflows/node_pr.yml@4.8.0
+    uses: epam/ai-dial-ci/.github/workflows/node_pr.yml@4.11.0
     secrets: inherit
     with:
       docker-build-enabled: false
-      node-version: '24'
+      node-version: "24"
 
   package_check:
     name: package
@@ -28,10 +28,10 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Prepare Node.js
-        uses: epam/ai-dial-ci/actions/node_prepare@4.9.0
+        uses: epam/ai-dial-ci/actions/node_prepare@4.11.0
         with:
           clean-install: true
-          node-version: '24'
+          node-version: "24"
 
       - name: Typecheck
         run: npm run typecheck
