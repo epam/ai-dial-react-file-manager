@@ -28,8 +28,15 @@ Install the package together with its peer dependencies:
 
 ```bash
 npm install @epam/ai-dial-react-file-manager @epam/ai-dial-ui-kit \
-  @tabler/icons-react ag-grid-community ag-grid-react react react-dom
+  ag-grid-community ag-grid-react react react-dom
 ```
+
+`@tabler/icons-react` is not in that list any more: this package imports the
+icon set itself, so it ships as a dependency and npm installs it for you (see
+[issue epam/ai-dial-chat#8719](https://github.com/epam/ai-dial-chat/issues/8719)).
+AG Grid stays a peer — the grid engine needs exactly one copy per host, or its
+module registration breaks — and so does the UI Kit, the design-system
+singleton a host renders with directly.
 
 Import the UI Kit stylesheet first, followed by the file manager stylesheet:
 
