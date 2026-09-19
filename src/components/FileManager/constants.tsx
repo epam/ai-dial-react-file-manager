@@ -3,8 +3,7 @@ import { FileManagerColumnKey } from '@/types/file-manager.ts';
 export const containerBaseClassName =
   'w-full h-full grid grid-rows-[minmax(0,1fr)] overflow-hidden min-w-0';
 
-export const toolbarBaseClassName =
-  'ml-auto shrink-0 text-secondary flex items-center gap-2';
+export const toolbarBaseClassName = 'text-secondary flex items-center gap-2';
 
 export const mainGridClassName =
   'flex min-h-0 min-w-0 h-full gap-4 overflow-hidden';
@@ -15,29 +14,13 @@ export const contentGridClassName =
 export const contentHeaderClassName =
   'flex w-full shrink-0 items-center justify-between gap-4 h-[64px]';
 
-/*
- * The folders panel holds a fixed width now that it neither resizes nor
- * collapses: it is the page's left edge, not a pane the user arranges.
- */
 export const sidebarPanelClassName =
   'min-h-0 min-w-[360px] h-full bg-layer-raised shadow-sm';
 
-/*
- * The kit's CollapsibleSidebar only paints its `title` while collapsed, as
- * vertical text on the rail. The expanded panel's own heading, the tab row and
- * the tree are the panel's content, so they share one column here: heading and
- * tabs hold their height and the tree takes the rest and scrolls on its own.
- */
 export const sidebarContentClassName = 'flex h-full min-h-0 flex-col gap-3';
 
 export const sidebarHeadingClassName = 'dial-h1-text text-primary';
 
-/*
- * The panel's title row. The kit sidebar used to keep the panel's own controls
- * — "collapse all", and whatever the host adds — in a footer beside its
- * collapse toggle; with that sidebar gone they sit at the trailing edge of this
- * row instead.
- */
 export const sidebarHeadingRowClassName =
   'px-4 h-[64px] flex items-center justify-between gap-2';
 
@@ -60,7 +43,7 @@ export const gridBaseClassName =
  * never covers the header and never pushes a row out of view.
  */
 export const bulkActionsToolbarWrapperClassName =
-  'absolute bottom-4 left-1/2 z-10 -translate-x-1/2 max-w-[calc(100%-2rem)]';
+  'absolute bottom-4 left-4 right-4 z-10';
 
 export const actionsColumnButtonClassName =
   'opacity-0 pointer-events-none group-hover/grid-row:opacity-100 group-hover/grid-row:pointer-events-auto';

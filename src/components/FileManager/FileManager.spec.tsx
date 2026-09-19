@@ -57,6 +57,8 @@ interface MockGridProps<Row extends GridRowLike> {
   className?: string;
   additionalGridOptions?: MockAdditionalGridOptions<Row>;
   disabledRowIds?: Set<string>;
+  selectedRowIds?: Set<string>;
+  onSelectionChange?: (ids: Set<string>, rows: Row[]) => void;
 }
 
 vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
@@ -70,6 +72,8 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
       className,
       additionalGridOptions,
       disabledRowIds,
+      selectedRowIds,
+      onSelectionChange,
     } = props;
 
     const rowsArray: Row[] = rowData ?? [];
@@ -93,15 +97,27 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
       clickCell(row, 'name');
     };
 
+    const toggleSelection = (row: Row, key: string): void => {
+      const next = new Set(selectedRowIds ?? []);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      onSelectionChange?.(next, Array.from(next).length ? [row] : []);
+    };
+
     const rows = rowsArray.map((row, index) => {
       const key = getId(row, index);
       const label = row.name ?? row.path ?? String(index);
       const isDisabled = disabledRowIds?.has(key) ?? false;
+      const isSelected = selectedRowIds?.has(key) ?? false;
 
       return (
         <tr
           key={key}
           className="ag-row"
+          aria-selected={isSelected}
           data-disabled={isDisabled || undefined}
           ref={(el: HTMLTableRowElement | null) => {
             if (el) el.setAttribute('row-id', key);
@@ -112,8 +128,11 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
             <input
               type="checkbox"
               aria-label={`Select ${label}`}
+              checked={isSelected}
+              readOnly
               onClick={(event) => {
                 event.stopPropagation();
+                toggleSelection(row, key);
                 clickCell(row, actual.GRID_SELECTION_COLUMN_ID);
               }}
             />
@@ -1297,6 +1316,121 @@ describe('Dial UI Kit :: FileManager', () => {
         context: { hideSearchPathItemName: true },
       }) as React.ReactElement<{ text: string }>;
       expect(result.props.text).toBe('All files/Design/Icons');
+    });
+  });
+
+  describe('selection of server-side search results', () => {
+    const SEARCH_ROOT = 'All files';
+    const SEARCH_RESULT_PATH = 'All files/Archive/2024/report.pdf';
+
+    /* Lives in a folder the tree has never loaded, as a recursive search hit does. */
+    const searchResultFile: DialFile = {
+      id: 'archive-report',
+      name: 'report.pdf',
+      path: SEARCH_RESULT_PATH,
+      parentPath: 'All files/Archive/2024',
+      nodeType: DialFileNodeType.ITEM,
+      resourceType: DialFileResourceType.FILE,
+      extension: 'pdf',
+      contentType: 'application/pdf',
+      folderId: 'archive-2024',
+      updatedAt: '2025-02-01',
+      contentLength: 1024,
+      permissions: [DialFilePermission.READ],
+    };
+
+    interface ControlledManagerProps {
+      searchResults: DialFile[];
+      onSelectionCommit: (paths: Set<string>) => void;
+      onSearchFiles?: (folder: string, query: string) => void;
+      initialSelectedPaths?: Set<string>;
+    }
+
+    const ControlledManager = ({
+      searchResults,
+      onSelectionCommit,
+      onSearchFiles,
+      initialSelectedPaths,
+    }: ControlledManagerProps) => {
+      const [selectedPaths, setSelectedPaths] = React.useState<Set<string>>(
+        () => initialSelectedPaths ?? new Set<string>(),
+      );
+
+      return (
+        <DialFileManager
+          items={itemsMock}
+          path={SEARCH_ROOT}
+          navigationPanelOptions={{ searchable: true }}
+          gridOptions={{
+            selectionMode: GridSelectionMode.MULTIPLE,
+            showFiles: true,
+          }}
+          onSearchFiles={onSearchFiles}
+          searchResults={searchResults}
+          selectedPaths={selectedPaths}
+          onSelectedPathsChange={(paths) => {
+            setSelectedPaths(new Set(paths));
+            onSelectionCommit(new Set(paths));
+          }}
+        />
+      );
+    };
+
+    test('a file selected in the search results stays selected', async () => {
+      const onSearchFiles = vi.fn();
+      const onSelectionCommit = vi.fn();
+
+      const { rerender } = renderWithinSizedShell(
+        <ControlledManager
+          searchResults={[]}
+          onSearchFiles={onSearchFiles}
+          onSelectionCommit={onSelectionCommit}
+        />,
+      );
+
+      const searchRegion = screen.getByRole('search', { name: 'Search' });
+      const searchInput = within(searchRegion).getByRole('textbox');
+      await userEvent.type(searchInput, 'report');
+
+      await waitFor(() => {
+        expect(onSearchFiles).toHaveBeenCalled();
+      });
+
+      rerender(
+        <div style={{ height: 640, width: 1100 }}>
+          <ControlledManager
+            searchResults={[searchResultFile]}
+            onSearchFiles={onSearchFiles}
+            onSelectionCommit={onSelectionCommit}
+          />
+        </div>,
+      );
+
+      const row = (await findInGridByRowText('report.pdf')) as HTMLElement;
+      await userEvent.click(within(row).getByRole('checkbox'));
+
+      await waitFor(() => {
+        expect(row).toHaveAttribute('aria-selected', 'true');
+      });
+      expect(onSelectionCommit).toHaveBeenLastCalledWith(
+        new Set([SEARCH_RESULT_PATH]),
+      );
+    });
+
+    test('a selected path missing from both the tree and the search results is dropped', async () => {
+      const onSelectionCommit = vi.fn();
+
+      renderWithinSizedShell(
+        <ControlledManager
+          searchResults={[]}
+          onSelectionCommit={onSelectionCommit}
+          initialSelectedPaths={new Set(['All files/Ghost/missing.txt'])}
+        />,
+      );
+
+      await waitFor(() => {
+        expect(onSelectionCommit).toHaveBeenLastCalledWith(new Set());
+      });
     });
   });
 

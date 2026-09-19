@@ -17,6 +17,7 @@ import {
   bulkActionsContainerClassName,
   bulkActionsGroupClassName,
   bulkActionsLabelClassName,
+  bulkActionsStripClassName,
 } from './constants';
 
 export interface DialActionDropdownItem extends DropdownItem {
@@ -117,49 +118,50 @@ export const DialFileManagerBulkActionsToolbar: FC<
         ))}
       </div>
 
-      <div
-        ref={containerRef}
-        className={bulkActionsContainerClassName}
-        role="toolbar"
-        aria-label="File bulk actions"
-      >
-        <div ref={leftSectionRef} className={bulkActionsLabelClassName}>
-          <span className="whitespace-nowrap">{selectionLabel}</span>
-          <GhostIconButton
-            size={ElementSize.Small}
-            aria-label={clearSelectionLabel}
-            tooltipProps={{ tooltip: clearSelectionLabel }}
-            icon={<IconX {...FILE_MANAGER_ICON_PROPS} />}
-            onClick={onClearSelection}
-          />
-        </div>
+      <div ref={containerRef} className={bulkActionsStripClassName}>
+        <div
+          className={bulkActionsContainerClassName}
+          role="toolbar"
+          aria-label="File bulk actions"
+        >
+          <div ref={leftSectionRef} className={bulkActionsLabelClassName}>
+            <span className="whitespace-nowrap">{selectionLabel}</span>
+            <GhostIconButton
+              size={ElementSize.Small}
+              aria-label={clearSelectionLabel}
+              tooltipProps={{ tooltip: clearSelectionLabel }}
+              icon={<IconX {...FILE_MANAGER_ICON_PROPS} />}
+              onClick={onClearSelection}
+            />
+          </div>
 
-        <div className={bulkActionsGroupClassName}>
-          {hiddenActions.length > 0 && (
-            <Dropdown
-              items={hiddenActions}
-              allowedPlacements={['bottom', 'bottom-start']}
-            >
-              <GhostIconButton
-                className="h-[38px]"
-                icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
-              />
-            </Dropdown>
-          )}
+          <div className={bulkActionsGroupClassName}>
+            {hiddenActions.length > 0 && (
+              <Dropdown
+                items={hiddenActions}
+                allowedPlacements={['bottom', 'bottom-start']}
+              >
+                <GhostIconButton
+                  className="h-[38px]"
+                  icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
+                />
+              </Dropdown>
+            )}
 
-          {visibleActions.map(
-            ({ key, icon, tooltip, title, onClick, disabled }) => (
-              <NeutralButton
-                className="!p-[9px]"
-                key={key}
-                iconBefore={icon}
-                label={title}
-                disabled={disabled}
-                tooltipProps={{ tooltip }}
-                onClick={(domEvent) => onClick?.({ key, domEvent })}
-              />
-            ),
-          )}
+            {visibleActions.map(
+              ({ key, icon, tooltip, title, onClick, disabled }) => (
+                <NeutralButton
+                  className="!p-[9px]"
+                  key={key}
+                  iconBefore={icon}
+                  label={title}
+                  disabled={disabled}
+                  tooltipProps={{ tooltip }}
+                  onClick={(domEvent) => onClick?.({ key, domEvent })}
+                />
+              ),
+            )}
+          </div>
         </div>
       </div>
     </>

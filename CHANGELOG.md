@@ -196,3 +196,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
   not `src`, so any class the kit happens not to use — `p-px`, `py-[2px]` —
   resolved to nothing here and only rendered in a host that scans our `dist`
   itself.
+- **A file could not be selected from the search results**
+  ([epam/ai-dial-chat#8820](https://github.com/epam/ai-dial-chat/issues/8820)).
+  Selected paths were resolved against the `items` tree alone, and a server-side
+  search hit usually lives in a folder the tree has never loaded. So the path
+  the grid reported on the click resolved to nothing, was treated as a stale
+  selection, and was pruned away on the same render — the row never came back
+  checked. Selection now falls back to `searchResults` when the tree does not
+  hold the path, so a search hit selects like any other row while paths that
+  exist in neither are still dropped.

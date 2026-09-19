@@ -98,6 +98,19 @@ export const PreselectedNode: Story = {
       selectionMode: GridSelectionMode.MULTIPLE,
     },
     defaultSelectedPaths: new Set(['All files/Design/Icons/SVG/24px/logo.svg']),
+    // The story opens with a live selection, so it is where the floating bulk
+    // actions bar is seen.
+    bulkActionsToolbarOptions: {
+      getSelectionLabel: (selectedCount: number) =>
+        `${selectedCount} item(s) selected`,
+      actionLabels: {
+        [DialFileManagerActions.Duplicate]: 'Duplicate',
+        [DialFileManagerActions.Copy]: 'Copy to',
+        [DialFileManagerActions.Move]: 'Move to',
+        [DialFileManagerActions.Download]: 'Download',
+        [DialFileManagerActions.Delete]: 'Delete',
+      },
+    },
     treeOptions: {
       expandedPaths: new Set<string>([
         'All files',
