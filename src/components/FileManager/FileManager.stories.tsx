@@ -101,8 +101,16 @@ export const PreselectedNode: Story = {
     // The story opens with a live selection, so it is where the floating bulk
     // actions bar is seen.
     bulkActionsToolbarOptions: {
-      getSelectionLabel: (selectedCount: number) =>
-        `${selectedCount} item(s) selected`,
+      // The count reads as a badge; the label returns a node, so the count's
+      // styling stays with the host that pluralises the sentence around it.
+      getSelectionLabel: (selectedCount: number) => (
+        <>
+          <span className="rounded bg-layer-sunken px-1.5 py-0.5 dial-small-text font-semibold text-primary">
+            {selectedCount}
+          </span>{' '}
+          items selected
+        </>
+      ),
       actionLabels: {
         [DialFileManagerActions.Duplicate]: 'Duplicate',
         [DialFileManagerActions.Copy]: 'Copy to',

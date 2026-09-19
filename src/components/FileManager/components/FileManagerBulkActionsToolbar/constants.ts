@@ -12,8 +12,9 @@ export const CONTAINER_PADDING = 8;
  */
 export const bulkActionsStripClassName = 'w-full flex justify-center';
 
+/* 64px tall and sized by its contents, per the design. */
 export const bulkActionsContainerClassName =
-  'w-auto max-w-full rounded bg-layer-raised p-2 pl-3 flex items-center gap-3 shadow-lg border border-tertiary';
+  'w-auto max-w-full h-16 rounded bg-layer-raised px-4 flex items-center gap-4 shadow-lg border border-tertiary';
 
 export const bulkActionsLabelClassName =
   'flex shrink-0 items-center gap-1 dial-body-text text-primary';

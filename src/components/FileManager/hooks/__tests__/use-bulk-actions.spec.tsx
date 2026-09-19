@@ -127,13 +127,47 @@ describe('Dial UI Kit :: useBulkActions', () => {
     );
 
     expect(result.current).toHaveLength(5);
+    // The row order the design asks for, destructive action last.
     expect(result.current.map((a) => a.key)).toEqual([
+      DialFileManagerActions.Download,
       DialFileManagerActions.Move,
       DialFileManagerActions.Copy,
       DialFileManagerActions.Duplicate,
       DialFileManagerActions.Delete,
-      DialFileManagerActions.Download,
     ]);
+  });
+
+  test('marks only delete as a danger action', () => {
+    const selectedFiles = new Map<string, DialFile>([
+      [testFiles[0].path, testFiles[0]],
+    ]);
+
+    const { result } = renderHook(() =>
+      useBulkActions({
+        selectedFiles,
+        actionLabels: {
+          [DialFileManagerActions.Move]: 'Move to',
+          [DialFileManagerActions.Copy]: 'Copy to',
+          [DialFileManagerActions.Duplicate]: 'Duplicate',
+          [DialFileManagerActions.Delete]: 'Delete',
+          [DialFileManagerActions.Download]: 'Download',
+        },
+        onDuplicate: vi.fn(),
+        onCopy: vi.fn(),
+        onMove: vi.fn(),
+        onDownload: vi.fn(),
+        onRename: vi.fn(),
+        onDelete: vi.fn(),
+        getCurrentFolderPath: () => '/',
+        onClearSelection: vi.fn(),
+      }),
+    );
+
+    const danger = result.current
+      .filter((action) => action.danger)
+      .map((action) => action.key);
+
+    expect(danger).toEqual([DialFileManagerActions.Delete]);
   });
 
   test('returns only actions with provided labels', () => {

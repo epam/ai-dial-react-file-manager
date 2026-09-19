@@ -53,6 +53,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
   configuring search needs no change; a host rendering
   `DialFileManagerNavigationPanel` directly does, as the panel is breadcrumbs
   only now.
+- **The bulk actions row follows the design's order and colour (breaking)** —
+  it runs Download, Move to, Copy to, Duplicate, Delete, with the destructive
+  action last instead of fourth, and the two sharing actions grouped before it.
+  The buttons are ghost accent rather than neutral, and `Delete` carries
+  `danger`, so it paints in the danger colour here and in the overflow menu.
+  The bar itself is 64px tall and sized by its contents.
 - **The bulk actions bar floats over the grid instead of replacing the header
   (breaking)** — a live selection used to swap the whole toolbar row for the
   bulk bar, which took the breadcrumbs and the add button away mid-task. The bar

@@ -1,11 +1,13 @@
 import { useFlexibleActions } from '@/hooks/use-flexible-actions';
 import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import {
+  ButtonAppearance,
+  DangerButton,
   Dropdown,
   ElementSize,
   FlexibleActionsDirection,
   GhostIconButton,
-  NeutralButton,
+  PrimaryButton,
   type DropdownItem,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
@@ -63,7 +65,8 @@ export interface DialFileManagerBulkActionsToolbarProps {
  * @example
  * ```tsx
  * <DialFileManagerSelectionToolbar
- *   getSelectionLabel={(count) => `${count} files selected`}
+ *   // A node, so the count can carry a badge of its own
+ *   getSelectionLabel={(count) => <><Badge>{count}</Badge> files selected</>}
  *   onClearSelection={() => console.log('Cleared')}
  *   actions={[
  *     { key: 'download', title: 'Download', icon: <IconDownload {...FILE_MANAGER_ICON_PROPS} />, onClick: () => {} },
@@ -113,9 +116,18 @@ export const DialFileManagerBulkActionsToolbar: FC<
         ref={measureRef}
         className="absolute top-0 left-0 invisible pointer-events-none overflow-hidden whitespace-nowrap flex gap-3"
       >
-        {actions.map(({ key, icon, title }) => (
-          <NeutralButton key={key} iconBefore={icon} label={title} />
-        ))}
+        {actions.map(({ key, icon, title, danger }) => {
+          const MeasuredButton = danger ? DangerButton : PrimaryButton;
+
+          return (
+            <MeasuredButton
+              key={key}
+              appearance={ButtonAppearance.Ghost}
+              iconBefore={icon}
+              label={title}
+            />
+          );
+        })}
       </div>
 
       <div ref={containerRef} className={bulkActionsStripClassName}>
@@ -149,17 +161,26 @@ export const DialFileManagerBulkActionsToolbar: FC<
             )}
 
             {visibleActions.map(
-              ({ key, icon, tooltip, title, onClick, disabled }) => (
-                <NeutralButton
-                  className="!p-[9px]"
-                  key={key}
-                  iconBefore={icon}
-                  label={title}
-                  disabled={disabled}
-                  tooltipProps={{ tooltip }}
-                  onClick={(domEvent) => onClick?.({ key, domEvent })}
-                />
-              ),
+              ({ key, icon, tooltip, title, onClick, disabled, danger }) => {
+                /*
+                 * The row reads as a set of links rather than filled buttons:
+                 * no fill, accent labels, and the one destructive action in the
+                 * danger colour.
+                 */
+                const ActionButton = danger ? DangerButton : PrimaryButton;
+
+                return (
+                  <ActionButton
+                    key={key}
+                    appearance={ButtonAppearance.Ghost}
+                    iconBefore={icon}
+                    label={title}
+                    disabled={disabled}
+                    tooltipProps={{ tooltip }}
+                    onClick={(domEvent) => onClick?.({ key, domEvent })}
+                  />
+                );
+              },
             )}
           </div>
         </div>
