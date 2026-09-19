@@ -4,19 +4,13 @@ export const ACTIONS_GAP = 12;
 export const MORE_BUTTON_WIDTH = BASE_ICON_SIZE;
 export const CONTAINER_PADDING = 8;
 
-/*
- * The strip the bar is centered in. It spans the space the caller gives it, and
- * it — not the bar — is what the overflow measurement reads: the bar is sized by
- * its contents, so measuring the bar would feed the collapse decision back into
- * its own input and settle on everything hidden.
- */
 export const bulkActionsStripClassName = 'w-full flex justify-center';
 
 /* 64px tall and sized by its contents, per the design. */
 export const bulkActionsContainerClassName =
-  'w-auto max-w-full h-16 rounded bg-layer-raised px-4 flex items-center gap-4 shadow-lg border border-tertiary';
+  'w-auto max-w-full h-16 rounded-[12px] bg-layer-base shadow-sm px-[24px] flex items-center gap-3';
 
 export const bulkActionsLabelClassName =
-  'flex shrink-0 items-center gap-1 dial-body-text text-primary';
+  'flex shrink-0 items-center gap-1 dial-small-semi-text text-primary';
 
 export const bulkActionsGroupClassName = 'flex gap-3 items-center';

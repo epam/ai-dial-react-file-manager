@@ -158,6 +158,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
   `"Hide hidden files"` defaults and should move its translation onto the pair.
   `DestinationFolderPopup` keeps a `hiddenFilesSwitcherLabel` of its own; that
   one is untouched.
+- **The tree's built-in "collapse all" button (breaking)** — the panel heading
+  carries the title and nothing else, so the control the kit sidebar's footer
+  used to hold is gone, and with it the `useTreeAdditionalButtons` hook that
+  built it. `treeOptions.additionalButtons` stays as a slot at the trailing
+  edge of the heading row, but it is now empty unless the host fills it: a host
+  that wants "collapse all" back renders its own button there and drives it
+  from `treeOptions.onExpandedPathsChange`.
 - **`managerLabel` (breaking)** — the node it rendered headed the toolbar row
   that no longer exists. The panel's own `treeOptions.header` titles the File
   Manager now, so the prop is gone from `DialFileManager`,
@@ -167,9 +174,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   the drag handle, its throttled width state and `treeOptions.width` are gone
   along with the kit's `ConditionalResizableContainer` and
   `CollapsibleSidebar`. The panel is its own `aside` landmark now that the kit
-  sidebar is not there to be one, named by its heading, and the "collapse all"
-  control — with whatever `treeOptions.additionalButtons` adds before it —
-  moved from the sidebar footer to the trailing edge of the heading row.
+  sidebar is not there to be one, named by its heading.
   `treeOptions.containerClassName` still restyles the panel; its default is the
   panel's own surface rather than the old tree box.
 - **`DialFileManagerNavigationPanel` — `backButtonLabel`** — the compact view no

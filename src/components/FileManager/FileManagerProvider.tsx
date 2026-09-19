@@ -40,7 +40,6 @@ import { useItemRenaming } from './hooks/use-item-renaming';
 import { useExpandedPaths } from './components/FoldersTree/hooks/use-expanded-paths';
 import { useNewActions } from './hooks/use-new-actions';
 import { useFolderCreation } from './hooks/use-folder-creation';
-import { useTreeAdditionalButtons } from '@/components/FileManager/hooks/use-tree-additional-buttons';
 import { useFileMetadata } from './hooks/use-file-metadata';
 import { useFileSearch } from './hooks/use-file-search';
 import { usePathsSelection } from './hooks/use-paths-selection';
@@ -764,15 +763,9 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     [handlePathChange, onTableFileClick],
   );
 
-  const { expandedPaths, setExpandedPaths, collapseAll } = useExpandedPaths({
+  const { expandedPaths, setExpandedPaths } = useExpandedPaths({
     expandedPaths: treeOptions?.expandedPaths,
     onExpandedPathsChange: treeOptions?.onExpandedPathsChange,
-  });
-
-  const { additionalButtons } = useTreeAdditionalButtons({
-    collapseAll,
-    expandedPathsLength: expandedPaths.size,
-    additionalButtons: treeOptions?.additionalButtons,
   });
 
   const handleGridAddSibling = useCallback(
@@ -906,7 +899,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
       ...treeOptions,
       expandedPaths,
       onExpandedPathsChange: setExpandedPaths,
-      additionalButtons,
     },
     showNavigationPanel,
     navigationPanelOptions,
