@@ -15,6 +15,6 @@ export const bulkActionsLabelClassName =
 
 /* The count reads as a badge, so the number is legible apart from the wording. */
 export const bulkActionsCountClassName =
-  'rounded bg-layer-sunken px-1.5 py-0.5 dial-small-text font-semibold text-primary';
+  'rounded bg-control-neutral-active px-1.5 py-0.5 dial-small-text font-semibold text-primary rounded-full';
 
 export const bulkActionsGroupClassName = 'flex gap-3 items-center';
