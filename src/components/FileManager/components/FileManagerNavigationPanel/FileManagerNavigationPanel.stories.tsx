@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useState } from 'react';
 import {
   DialFileManagerNavigationPanel,
   type DialFileManagerNavigationPanelProps,
@@ -18,22 +17,10 @@ const meta = {
     makeHref: { control: false },
     onItemClick: { control: false },
 
-    searchable: { control: { type: 'boolean' } },
-    elementId: { control: { type: 'text' } },
-    value: { control: { type: 'text' } },
-    disabled: { control: { type: 'boolean' } },
-    readOnly: { control: { type: 'boolean' } },
-    invalid: { control: { type: 'boolean' } },
-    searchClassName: { control: { type: 'text' } },
-    searchContainerClassName: { control: { type: 'text' } },
-
     className: { control: { type: 'text' } },
   },
   args: {
     path: 'Organization/Folder 4',
-    searchable: true,
-    elementId: 'storybook-fm-search',
-    value: '',
   },
 } satisfies Meta<DialFileManagerNavigationPanelProps>;
 
@@ -41,10 +28,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-
-export const WithoutSearch: Story = {
-  args: { searchable: false },
-};
 
 export const WithItemClick: Story = {
   render: (args) => {
@@ -88,42 +71,6 @@ export const WithLinks: Story = {
       }
     />
   ),
-};
-
-const ControlledSearchStateComponent = (
-  args: DialFileManagerNavigationPanelProps,
-) => {
-  const [query, setQuery] = useState(args.value as string);
-  return (
-    <DialFileManagerNavigationPanel
-      {...args}
-      value={query}
-      onSearchChange={setQuery}
-    />
-  );
-};
-
-export const ControlledSearchState: Story = {
-  render: (args) => <ControlledSearchStateComponent {...args} />,
-};
-
-export const DisabledReadonlyInvalid: Story = {
-  args: {
-    disabled: false,
-    invalid: true,
-  },
-};
-
-export const CompactView: Story = {
-  args: {
-    isCompactView: true,
-    searchable: true,
-    path: 'Organization/Folder 4',
-    elementId: 'compact-search',
-  },
-  render: (args) => {
-    return <DialFileManagerNavigationPanel {...args} />;
-  },
 };
 
 export const WithHiddenPathPart: Story = {

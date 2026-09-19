@@ -10,13 +10,73 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Initial standalone AI DIAL React File Manager package.
-- **`DialFileManagerNavigationPanel` — `backButtonLabel`** — accessible name of
-  the control that collapses the expanded search in compact mode, defaulting to
-  `"Back"`. The control carried no name at all, so it was announced as a bare
-  "button".
+- **`DialFileManagerSearchBar`** — the search field as a component of its own,
+  full width at the head of the grid card. It takes the search props the
+  navigation panel used to carry, plus `placeholder`, which the panel omitted,
+  so the field can name the folder it searches ("Search in My files...").
+- **`treeOptions.tabs` / `activeTab` / `onTabChange` / `tabsAriaLabel`** — the
+  filter row in the folders panel. The tabs scope both the tree and the grid, so
+  they now sit above the tree they filter instead of in the toolbar.
+- **`DialFileManagerBulkActionsToolbar` — `clearSelectionLabel`** — accessible
+  name of the control that drops the selection, defaulting to
+  `"Clear selection"`.
 
 ### Changed
 
+- **UI Kit moved to `0.15.0-dev.9`** — it brings `FilterChips`, the row the
+  folders panel needs, and the public `DIAL_KIT_CLASS` names for the 2.0
+  components. The peer range moved with it: `FilterChips` did not exist in
+  `0.15.0-dev.0`, so a host on an earlier dev build would crash rather than
+  render a filter row.
+- **The storage sections are filter chips, not tabs (breaking)** — the row
+  scopes one list to a subset of itself, which is what `FilterChips` is for;
+  `Tabs` underlines an option and reads as navigation between panels. The row
+  is a named `role="group"` of `aria-pressed` toggles instead of a
+  `tablist`, and it is named from the panel's own visible heading, falling back
+  to `treeOptions.tabsAriaLabel` when there is no heading to point at. The item
+  shape moved with the component: `treeOptions.tabs` takes
+  `{ value, label }` rather than `{ id, label }`, and `useDialFileManagerTabs`
+  returns the new shape. `count` and `disabled` are gone — a chip row has no
+  disabled chip, so an option the user must not pick is left out of `tabs`.
+  `treeOptions.activeTab` is typed `DialFileManagerTabs` rather than `string`,
+  since the search behind it always branched on the enum.
+- **The content header replaces the full-width toolbar row (breaking)** — the
+  layout now follows the 2.0 File Manager design. The tab row moved out of
+  `toolbarOptions` into `treeOptions`, so it sits in the folders panel above the
+  tree it scopes; `toolbarOptions.tabs`, `activeTab` and `onTabChange` are gone.
+  The toolbar itself is no longer a row of its own above the sidebar: the
+  hidden-files switch and the add button sit at the trailing edge of the content
+  column's header, on the same line as the breadcrumb trail. The trail lost its
+  raised plaque and reads as plain text on the page, and the search field left
+  the trail's right-hand side for the head of the grid card, where it spans the
+  full width. Its props still arrive through `navigationPanelOptions`, so a host
+  configuring search needs no change; a host rendering
+  `DialFileManagerNavigationPanel` directly does, as the panel is breadcrumbs
+  only now.
+- **The bulk actions bar floats over the grid instead of replacing the header
+  (breaking)** — a live selection used to swap the whole toolbar row for the
+  bulk bar, which took the breadcrumbs and the add button away mid-task. The bar
+  is now a content-sized bar over the bottom of the grid card, and the header
+  stays put. Its selection label is plain text rather than a button:
+  `getSelectionLabel` may return a node, and the selection is dropped through a
+  close button of its own, named by `clearSelectionLabel`.
+- **`NavigationPanelOptions` lists only the search props it forwards** — the
+  type used to carry the whole input surface through `DialSearchProps`, but
+  `readOnly`, `name` and the focus handlers never reached the field. It now
+  picks the eight that do — `elementId`, `placeholder`, `size`,
+  `withoutBorder`, `disabled`, `invalid`, `searchClassName`,
+  `searchContainerClassName` — so a no-op stops type-checking instead of
+  silently doing nothing.
+- **`treeOptions.header` is visible while the panel is expanded** — the kit's
+  `CollapsibleSidebar` paints its `title` only on the collapsed rail, so the
+  expanded folders panel carried no heading at all. It now renders the same
+  `header` as a heading above the tab row, the way the design titles the panel.
+  A host that passed `header` only for the collapsed rail will see it in both
+  states.
+- **The compact view no longer collapses the search into an icon** — the field
+  stays open across widths, so `isCompactView` and `backButtonLabel` left
+  `DialFileManagerNavigationPanel` with the expand-and-collapse behaviour they
+  drove.
 - **UI Kit moved to `0.14.0-dev.15`** — the Tailwind token scales in
   `tailwind.config.js` now mirror the kit's 0.14.0 set: the control tokens are
   named by role (`bg-control-disable-primary`, `text-control-accent-hover`,
@@ -79,6 +139,36 @@ and this project follows [Semantic Versioning](https://semver.org/).
   instead of the local one-off styling, which also drops three class names that
   resolved to nothing (`bg-ui-popover`, `fill-ui-popover`,
   `border-ui-outline-primary`).
+
+### Removed
+
+- **`toolbarOptions.hiddenFilesSwitcherLabel` (breaking)** — the hidden-files
+  toggle carried two labels: a static one naming the control and a pair naming
+  the action. It now reads only the pair, so the toggle says what the click
+  leads to — `showHiddenFilesLabel` while hidden files are out of sight,
+  `hideHiddenFilesLabel` while they are shown — in the header as well as in the
+  compact menu, and the static label is gone. A host that set only
+  `hiddenFilesSwitcherLabel` now shows the `"Show hidden files"` /
+  `"Hide hidden files"` defaults and should move its translation onto the pair.
+  `DestinationFolderPopup` keeps a `hiddenFilesSwitcherLabel` of its own; that
+  one is untouched.
+- **`managerLabel` (breaking)** — the node it rendered headed the toolbar row
+  that no longer exists. The panel's own `treeOptions.header` titles the File
+  Manager now, so the prop is gone from `DialFileManager`,
+  `FileManagerProvider` and the context value.
+- **The folders panel no longer resizes or collapses (breaking)** — it holds a
+  fixed width as the page's left edge rather than a pane the user arranges, so
+  the drag handle, its throttled width state and `treeOptions.width` are gone
+  along with the kit's `ConditionalResizableContainer` and
+  `CollapsibleSidebar`. The panel is its own `aside` landmark now that the kit
+  sidebar is not there to be one, named by its heading, and the "collapse all"
+  control — with whatever `treeOptions.additionalButtons` adds before it —
+  moved from the sidebar footer to the trailing edge of the heading row.
+  `treeOptions.containerClassName` still restyles the panel; its default is the
+  panel's own surface rather than the old tree box.
+- **`DialFileManagerNavigationPanel` — `backButtonLabel`** — the compact view no
+  longer collapses the search into an icon, so the control this named is gone
+  along with the `isCompactView` prop it belonged to.
 
 ### Fixed
 

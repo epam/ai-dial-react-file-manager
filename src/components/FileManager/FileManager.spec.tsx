@@ -18,7 +18,10 @@ import {
   type UseFileManagerColumnsArgs,
 } from './hooks/use-file-manager-columns';
 import type { FileManagerGridRow } from './FileManagerContext';
-import { FileManagerColumnKey } from '@/types/file-manager';
+import {
+  DialFileManagerTabs,
+  FileManagerColumnKey,
+} from '@/types/file-manager';
 import { GridSelectionMode } from '@/models/selection-mode';
 import {
   DialFileNodeType,
@@ -472,6 +475,184 @@ describe('Dial UI Kit :: FileManager', () => {
     const grid = await waitForGridTable();
     const textboxesInsideGrid = within(grid).queryAllByRole('textbox');
     expect(textboxesInsideGrid.length).toBe(0);
+  });
+
+  describe('content layout', () => {
+    const getFoldersPanel = (name = 'File storage') =>
+      screen.getByRole('complementary', { name });
+
+    const tabsMock = [
+      { value: DialFileManagerTabs.MyFiles, label: 'My files' },
+      { value: DialFileManagerTabs.Shared, label: 'Shared' },
+    ];
+
+    test('renders the filter row inside the folders panel, not the toolbar', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{
+            header: 'File storage',
+            tabs: tabsMock,
+            activeTab: DialFileManagerTabs.MyFiles,
+            onTabChange: vi.fn(),
+          }}
+          toolbarOptions={{}}
+        />,
+      );
+
+      await waitForGridTable();
+
+      const panel = getFoldersPanel();
+      // The chip row is named from the panel's own visible heading.
+      const chipRow = within(panel).getByRole('group', {
+        name: 'File storage',
+      });
+
+      expect(
+        within(chipRow).getByRole('button', { name: 'My files' }),
+      ).toHaveAttribute('aria-pressed', 'true');
+      expect(
+        within(chipRow).getByRole('button', { name: 'Shared' }),
+      ).toHaveAttribute('aria-pressed', 'false');
+
+      const toolbar = screen.getByRole('toolbar', {
+        name: 'File Manager Toolbar',
+      });
+      expect(within(toolbar).queryByRole('group')).not.toBeInTheDocument();
+    });
+
+    test('names the folders panel from its heading', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{ header: 'File storage' }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      expect(getFoldersPanel()).toBeInTheDocument();
+    });
+
+    test('falls back to a landmark label when the panel has no heading', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{ header: null }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      expect(
+        getFoldersPanel('File Manager Tree Navigation'),
+      ).toBeInTheDocument();
+    });
+
+    test('names the filter row from tabsAriaLabel when the panel has no heading', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{
+            header: null,
+            tabs: tabsMock,
+            activeTab: DialFileManagerTabs.MyFiles,
+            onTabChange: vi.fn(),
+          }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      expect(
+        screen.getByRole('group', { name: 'File storage sections' }),
+      ).toBeInTheDocument();
+    });
+
+    test('reports tab changes through treeOptions.onTabChange', async () => {
+      const onTabChange = vi.fn();
+
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{
+            tabs: tabsMock,
+            activeTab: DialFileManagerTabs.MyFiles,
+            onTabChange,
+          }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Shared' }));
+
+      expect(onTabChange).toHaveBeenCalledWith(DialFileManagerTabs.Shared);
+    });
+
+    test('renders no filter row when treeOptions carries no tabs', async () => {
+      renderWithinSizedShell(
+        <DialFileManager items={itemsMock} path="/All files" />,
+      );
+
+      await waitForGridTable();
+
+      expect(screen.queryByRole('group')).not.toBeInTheDocument();
+    });
+
+    test('renders the search field above the grid rather than inside it', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          navigationPanelOptions={{ searchable: true }}
+        />,
+      );
+
+      const grid = await waitForGridTable();
+
+      const search = screen.getByRole('search', { name: 'Search' });
+      expect(search).toBeInTheDocument();
+      expect(grid.contains(search)).toBe(false);
+    });
+
+    /*
+     * The bulk bar used to take the header's place. It floats over the grid
+     * now, so the breadcrumbs and the header actions survive a selection.
+     */
+    test('keeps the content header while a selection is live', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          selectedPaths={new Set(['/All files/Design'])}
+          toolbarOptions={{}}
+          bulkActionsToolbarOptions={{
+            getSelectionLabel: (count) => `${count} item(s) selected`,
+            actionLabels: { download: 'Download', delete: 'Delete' },
+          }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      expect(
+        screen.getByRole('toolbar', { name: 'File bulk actions' }),
+      ).toBeInTheDocument();
+      expect(screen.getByText('1 item(s) selected')).toBeInTheDocument();
+
+      expect(
+        screen.getByRole('toolbar', { name: 'File Manager Toolbar' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('navigation', { name: 'Breadcrumb' }),
+      ).toBeInTheDocument();
+    });
   });
 
   test('actionsRef.createFolder adds a new row to the grid', async () => {

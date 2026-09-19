@@ -40,10 +40,10 @@ describe('Dial UI Kit :: FileManager :: useDialFileManagerTabs', () => {
 
     expect(result.current.tabs).toHaveLength(4);
     expect(result.current.tabs).toEqual([
-      { id: DialFileManagerTabs.MyFiles, label: 'My Files' },
-      { id: DialFileManagerTabs.Shared, label: 'Shared With Me' },
-      { id: DialFileManagerTabs.Organization, label: 'Public Files' },
-      { id: DialFileManagerTabs.Review, label: 'Review files' },
+      { value: DialFileManagerTabs.MyFiles, label: 'My Files' },
+      { value: DialFileManagerTabs.Shared, label: 'Shared With Me' },
+      { value: DialFileManagerTabs.Organization, label: 'Public Files' },
+      { value: DialFileManagerTabs.Review, label: 'Review files' },
     ]);
   });
 
@@ -58,10 +58,10 @@ describe('Dial UI Kit :: FileManager :: useDialFileManagerTabs', () => {
     const { result } = renderHook(() => useDialFileManagerTabs(tabLabels));
 
     expect(result.current.tabs).toEqual([
-      { id: DialFileManagerTabs.MyFiles, label: 'my files' },
-      { id: DialFileManagerTabs.Shared, label: 'shared' },
-      { id: DialFileManagerTabs.Organization, label: 'organization' },
-      { id: DialFileManagerTabs.Review, label: 'review' },
+      { value: DialFileManagerTabs.MyFiles, label: 'my files' },
+      { value: DialFileManagerTabs.Shared, label: 'shared' },
+      { value: DialFileManagerTabs.Organization, label: 'organization' },
+      { value: DialFileManagerTabs.Review, label: 'review' },
     ]);
   });
 

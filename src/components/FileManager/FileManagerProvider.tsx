@@ -68,7 +68,6 @@ export interface FileManagerProviderProps extends Omit<
  *
  */
 export const FileManagerProvider: FC<FileManagerProviderProps> = ({
-  managerLabel,
   children,
   className,
   items = [],
@@ -328,7 +327,8 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     navigationPanelValue: navigationPanelOptions?.value,
     onNavigationPanelSearchChange: navigationPanelOptions?.onSearchChange,
     allItems: items,
-    activeTab: toolbarOptions?.activeTab,
+    // The tab row moved into the folders panel, next to the tree it scopes.
+    activeTab: treeOptions?.activeTab,
   });
 
   const currentFolder = useMemo(
@@ -874,7 +874,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   }, [forbiddenSymbolsRegExp]);
 
   const value: FileManagerContextValue = {
-    managerLabel,
     className,
     items,
     allowedFileTypes,

@@ -1,9 +1,9 @@
-export const panelBaseClassName =
-  'w-full flex items-center justify-between gap-4 p-px';
+export const panelBaseClassName = 'min-w-0 flex-1 flex items-center';
 
-// 40px is the height of a standard 2.0 field and icon button, so the breadcrumb
-// strip, the search field and the collapse control share one row height.
+/*
+ * 40px is the height of a standard 2.0 field and icon button, so the breadcrumb
+ * strip and the toolbar controls beside it share one row height. The trail
+ * paints no surface of its own: it sits on the page background as plain text.
+ */
 export const breadcrumbContainerClassName =
-  'min-w-0 h-[40px] flex-1 overflow-hidden bg-layer-raised px-3 flex items-center rounded';
-
-export const searchContainerWrapperClassName = 'w-[260px]';
+  'min-w-0 h-[40px] flex-1 overflow-hidden flex items-center';

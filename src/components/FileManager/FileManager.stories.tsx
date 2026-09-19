@@ -58,7 +58,6 @@ const meta = {
     onPathChange: { action: 'onPathChange' },
   },
   args: {
-    managerLabel: <h1 className="text-primary">Title</h1>,
     defaultPath: 'All files',
     items: itemsMock,
     treeOptions: {
@@ -94,7 +93,6 @@ export const Basic: Story = {
 
 export const PreselectedNode: Story = {
   args: {
-    managerLabel: <h1 className="text-primary">Title</h1>,
     defaultPath: 'All files/Design/Icons/SVG/24px',
     gridOptions: {
       selectionMode: GridSelectionMode.MULTIPLE,
@@ -208,8 +206,8 @@ const WithTabsControlledComponent = (args: DialFileManagerProps) => {
     <div className="h-[640px]">
       <DialFileManager
         {...args}
-        toolbarOptions={{
-          ...args.toolbarOptions,
+        treeOptions={{
+          ...args.treeOptions,
           tabs: tabs,
           activeTab: activeTab,
           onTabChange: handleTabChange,
@@ -242,8 +240,8 @@ const WithTabsInitialTabComponent = (args: DialFileManagerProps) => {
     <div className="h-[640px]">
       <DialFileManager
         {...args}
-        toolbarOptions={{
-          ...args.toolbarOptions,
+        treeOptions={{
+          ...args.treeOptions,
           tabs: tabs,
           activeTab: activeTab,
           onTabChange: handleTabChange,
@@ -544,11 +542,14 @@ const PopupComponent = (args: DialFileManagerProps) => {
               rename: 'Rename',
             },
           }}
-          toolbarOptions={{
-            ...(args.toolbarOptions ?? {}),
+          treeOptions={{
+            ...(args.treeOptions ?? {}),
             tabs: tabs,
             activeTab: activeTab,
             onTabChange: handleTabChange,
+          }}
+          toolbarOptions={{
+            ...(args.toolbarOptions ?? {}),
             newActions: {
               newFolder: { label: 'New Folder' },
               uploadFiles: { label: 'Upload Files' },
@@ -1263,14 +1264,11 @@ const WithFileMetadataInPopupComponent = (args: DialFileManagerProps) => {
               rename: 'Rename',
             },
           }}
-          toolbarOptions={{
-            ...(args.toolbarOptions ?? {}),
+          treeOptions={{
+            ...(args.treeOptions ?? {}),
             tabs: tabs,
             activeTab: activeTab,
             onTabChange: handleTabChange,
-          }}
-          treeOptions={{
-            ...(args.treeOptions ?? {}),
             collapsed: false,
             expandedPaths: new Set<string>([rootFolder.path]),
           }}
@@ -1645,8 +1643,8 @@ const EmptyStatePerTabComponent = (args: DialFileManagerProps) => {
         emptyStateIcon={emptyState?.icon}
         emptyStateTitle={emptyState?.title}
         emptyStateDescription={emptyState?.description}
-        toolbarOptions={{
-          ...args.toolbarOptions,
+        treeOptions={{
+          ...args.treeOptions,
           tabs: tabs,
           activeTab: activeTab,
           onTabChange: handleTabChange,

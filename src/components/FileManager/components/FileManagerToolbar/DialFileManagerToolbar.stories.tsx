@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { DialFileManagerToolbar } from './DialFileManagerToolbar';
-import type { TabModel, DropdownItem } from '@epam/ai-dial-ui-kit';
+import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import { ButtonVariant } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { IconFile, IconFileZip, IconFolder } from '@tabler/icons-react';
@@ -15,24 +15,17 @@ const meta: Meta<typeof DialFileManagerToolbar> = {
     docs: {
       description: {
         component:
-          'A toolbar component for a file manager. Contains navigation tabs, a switch for hidden files, refresh button, and an optional new button with dropdown.',
+          'The action cluster at the trailing edge of the File Manager content header: a switch for hidden files and an optional add button with dropdown. The tab row lives in the folders panel, not here.',
       },
     },
   },
   argTypes: {
-    onTabChange: { action: 'onTabChange' },
     onToggleHiddenFiles: { action: 'onToggleHiddenFiles' },
   },
 };
 export default meta;
 
 type Story = StoryObj<typeof meta>;
-
-const mockTabs: TabModel[] = [
-  { id: 'organization', label: 'Organization' },
-  { id: 'shared', label: 'Shared with me' },
-  { id: 'all', label: 'All files' },
-];
 
 const mockCreateItems: DropdownItem[] = [
   {
@@ -62,15 +55,11 @@ const mockCreateItems: DropdownItem[] = [
 export const Default: Story = {
   render: () => {
     const StoryWrapper = () => {
-      const [activeTab, setActiveTab] = useState('organization');
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(false);
 
       return (
         <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
-            tabs={mockTabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
             areHiddenFilesVisible={areHiddenFilesVisible}
             onToggleHiddenFiles={setAreHiddenFilesVisible}
             isNewButtonVisible
@@ -88,15 +77,11 @@ export const Default: Story = {
 export const WithSecondaryNewButton: Story = {
   render: () => {
     const StoryWrapper = () => {
-      const [activeTab, setActiveTab] = useState('shared');
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(true);
 
       return (
         <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
-            tabs={mockTabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
             areHiddenFilesVisible={areHiddenFilesVisible}
             onToggleHiddenFiles={setAreHiddenFilesVisible}
             isNewButtonVisible
@@ -114,15 +99,11 @@ export const WithSecondaryNewButton: Story = {
 export const WithoutNewButton: Story = {
   render: () => {
     const StoryWrapper = () => {
-      const [activeTab, setActiveTab] = useState('organization');
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(false);
 
       return (
         <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
-            tabs={mockTabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
             areHiddenFilesVisible={areHiddenFilesVisible}
             onToggleHiddenFiles={setAreHiddenFilesVisible}
           />
@@ -137,15 +118,11 @@ export const WithoutNewButton: Story = {
 export const WithDisabledNewButton: Story = {
   render: () => {
     const StoryWrapper = () => {
-      const [activeTab, setActiveTab] = useState('organization');
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(false);
 
       return (
         <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
-            tabs={mockTabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
             areHiddenFilesVisible={areHiddenFilesVisible}
             onToggleHiddenFiles={setAreHiddenFilesVisible}
             isNewButtonVisible
@@ -162,7 +139,6 @@ export const WithDisabledNewButton: Story = {
 export const WithTextNewActions: Story = {
   render: () => {
     const StoryWrapper = () => {
-      const [activeTab, setActiveTab] = useState('organization');
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(false);
 
       const mockCreateItems = [
@@ -183,9 +159,6 @@ export const WithTextNewActions: Story = {
       return (
         <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
-            tabs={mockTabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
             areHiddenFilesVisible={areHiddenFilesVisible}
             onToggleHiddenFiles={setAreHiddenFilesVisible}
             isNewButtonVisible
@@ -202,15 +175,11 @@ export const WithTextNewActions: Story = {
 export const WithoutHiddenFilesToggle: Story = {
   render: () => {
     const StoryWrapper = () => {
-      const [activeTab, setActiveTab] = useState('organization');
       const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(false);
 
       return (
         <div className="p-4 border rounded-lg bg-layer-base">
           <DialFileManagerToolbar
-            tabs={mockTabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
             areHiddenFilesVisible={areHiddenFilesVisible}
             onToggleHiddenFiles={setAreHiddenFilesVisible}
             isNewButtonVisible

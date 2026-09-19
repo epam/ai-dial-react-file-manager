@@ -1,18 +1,23 @@
 import { useFlexibleActions } from '@/hooks/use-flexible-actions';
 import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import {
-  ButtonAppearance,
   Dropdown,
+  ElementSize,
   FlexibleActionsDirection,
   GhostIconButton,
   NeutralButton,
-  PrimaryButton,
   type DropdownItem,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { IconDotsVertical, IconX } from '@tabler/icons-react';
-import type { FC } from 'react';
-import { ACTIONS_GAP, CONTAINER_PADDING } from './constants';
+import type { FC, ReactNode } from 'react';
+import {
+  ACTIONS_GAP,
+  CONTAINER_PADDING,
+  bulkActionsContainerClassName,
+  bulkActionsGroupClassName,
+  bulkActionsLabelClassName,
+} from './constants';
 
 export interface DialActionDropdownItem extends DropdownItem {
   title: string;
@@ -20,16 +25,22 @@ export interface DialActionDropdownItem extends DropdownItem {
 }
 
 export interface DialFileManagerBulkActionsToolbarProps {
-  getSelectionLabel: (selectedCount: number) => string;
+  getSelectionLabel: (selectedCount: number) => ReactNode;
   onClearSelection: () => void;
   actions: DialActionDropdownItem[];
   selectedCount: number;
+  /** Accessible name of the control that drops the selection. */
+  clearSelectionLabel?: string;
 }
 
 /**
- * A responsive toolbar component displayed when files or items are selected
- * in the file manager. It shows a label with the number or name of selected
- * items and provides contextual action buttons.
+ * A responsive toolbar displayed when files or items are selected in the file
+ * manager. It shows a label with the number or name of selected items, a
+ * control that drops the selection, and the contextual action buttons.
+ *
+ * The bar floats over the bottom of the grid instead of replacing the content
+ * header, so the breadcrumbs and the header actions stay reachable while a
+ * selection is live. It is sized by its contents; the caller positions it.
  *
  * On smaller screens or when there’s not enough horizontal space,
  * some action buttons are automatically moved into a dropdown menu.
@@ -44,7 +55,7 @@ export interface DialFileManagerBulkActionsToolbarProps {
  * **Layout logic:**
  * - `measureRef`: hidden element used to measure the width of each button.
  * - `containerRef`: visible container where the toolbar is rendered.
- * - `leftSectionRef`: left section containing the "selected items" button.
+ * - `leftSectionRef`: left section containing the selection label and its clear control.
  * - `visibleCount`: dynamically updated number of visible actions.
  * - Uses `ResizeObserver` + `requestAnimationFrame` to update layout on resize.
  *
@@ -61,17 +72,24 @@ export interface DialFileManagerBulkActionsToolbarProps {
  * ```
  *
  * @param {object} props
- * @param {() => string} props.getSelectionLabel - Function to get the label showing current selection status (e.g., "3 files selected").
+ * @param {(count: number) => ReactNode} props.getSelectionLabel - Function to get the label showing current selection status (e.g., "3 files selected"). May return a node, so the count can carry its own styling.
  * @param {() => void} props.onClearSelection - Callback invoked when the clear selection button is clicked.
  * @param {DialActionDropdownItem[]} props.actions - List of available toolbar actions.
  *   Each action defines a title, icon, key, and optional click handler.
  * @param {number} [props.selectedCount] - Count of currently selected items.
+ * @param {string} [props.clearSelectionLabel='Clear selection'] - Accessible name of the control that drops the selection.
  *
  * @returns {JSX.Element} A responsive toolbar that adjusts visible actions based on available width.
  */
 export const DialFileManagerBulkActionsToolbar: FC<
   DialFileManagerBulkActionsToolbarProps
-> = ({ getSelectionLabel, onClearSelection, actions, selectedCount }) => {
+> = ({
+  getSelectionLabel,
+  onClearSelection,
+  actions,
+  selectedCount,
+  clearSelectionLabel = 'Clear selection',
+}) => {
   const isMobile = useIsMobileScreen();
 
   const {
@@ -101,21 +119,22 @@ export const DialFileManagerBulkActionsToolbar: FC<
 
       <div
         ref={containerRef}
-        className="rounded bg-layer-raised p-2 flex justify-between items-center w-full"
+        className={bulkActionsContainerClassName}
         role="toolbar"
         aria-label="File bulk actions"
       >
-        <div ref={leftSectionRef}>
-          <PrimaryButton
-            label={selectionLabel}
+        <div ref={leftSectionRef} className={bulkActionsLabelClassName}>
+          <span className="whitespace-nowrap">{selectionLabel}</span>
+          <GhostIconButton
+            size={ElementSize.Small}
+            aria-label={clearSelectionLabel}
+            tooltipProps={{ tooltip: clearSelectionLabel }}
+            icon={<IconX {...FILE_MANAGER_ICON_PROPS} />}
             onClick={onClearSelection}
-            textClassName="text-accent whitespace-nowrap"
-            appearance={ButtonAppearance.Ghost}
-            iconBefore={<IconX {...FILE_MANAGER_ICON_PROPS} />}
           />
         </div>
 
-        <div className="flex flex-1 w-full gap-3 items-center justify-end">
+        <div className={bulkActionsGroupClassName}>
           {hiddenActions.length > 0 && (
             <Dropdown
               items={hiddenActions}

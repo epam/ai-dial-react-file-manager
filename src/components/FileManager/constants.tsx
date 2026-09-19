@@ -1,29 +1,70 @@
 import { FileManagerColumnKey } from '@/types/file-manager.ts';
 
 export const containerBaseClassName =
-  'w-full h-full grid grid-rows-[auto_1fr] gap-5 p-6 overflow-hidden min-w-0 bg-layer-base';
+  'w-full h-full grid grid-rows-[minmax(0,1fr)] overflow-hidden min-w-0';
 
 export const toolbarBaseClassName =
-  'w-full text-secondary flex items-center gap-2';
+  'ml-auto shrink-0 text-secondary flex items-center gap-2';
 
 export const mainGridClassName =
   'flex min-h-0 min-w-0 h-full gap-4 overflow-hidden';
 
 export const contentGridClassName =
-  'flex flex-col flex-1 min-h-0 min-w-0 h-full gap-4';
+  'flex flex-col flex-1 min-h-0 min-w-0 h-full px-5 gap-5';
 
-export const contentHeaderClassName = 'items-center';
+export const contentHeaderClassName =
+  'flex w-full shrink-0 items-center justify-between gap-4 h-[64px]';
 
-export const treeBaseClassName =
-  'h-full rounded bg-layer-raised text-secondary min-w-0';
+/*
+ * The folders panel holds a fixed width now that it neither resizes nor
+ * collapses: it is the page's left edge, not a pane the user arranges.
+ */
+export const sidebarPanelClassName =
+  'min-h-0 min-w-[360px] h-full bg-layer-raised shadow-sm';
+
+/*
+ * The kit's CollapsibleSidebar only paints its `title` while collapsed, as
+ * vertical text on the rail. The expanded panel's own heading, the tab row and
+ * the tree are the panel's content, so they share one column here: heading and
+ * tabs hold their height and the tree takes the rest and scrolls on its own.
+ */
+export const sidebarContentClassName = 'flex h-full min-h-0 flex-col gap-3';
+
+export const sidebarHeadingClassName = 'dial-h1-text text-primary';
+
+/*
+ * The panel's title row. The kit sidebar used to keep the panel's own controls
+ * — "collapse all", and whatever the host adds — in a footer beside its
+ * collapse toggle; with that sidebar gone they sit at the trailing edge of this
+ * row instead.
+ */
+export const sidebarHeadingRowClassName =
+  'px-4 h-[64px] flex items-center justify-between gap-2';
+
+export const sidebarTreeContainerClassName = 'min-h-0 flex-1 px-3';
+
+/*
+ * Only reached when the panel carries no heading for the filter row to be
+ * named from.
+ */
+export const sidebarTabsAriaLabelDefault = 'File storage sections';
+
+export const gridPanelClassName =
+  'flex flex-1 flex-col w-full min-h-0 min-w-0 gap-5';
 
 export const gridBaseClassName =
-  'flex-1 w-full rounded text-secondary overflow-auto min-h-0 min-w-0';
+  'flex-1 w-full text-secondary overflow-auto min-h-0 min-w-0';
+
+/*
+ * The bulk actions bar floats over the bottom of the card, centered, so it
+ * never covers the header and never pushes a row out of view.
+ */
+export const bulkActionsToolbarWrapperClassName =
+  'absolute bottom-4 left-1/2 z-10 -translate-x-1/2 max-w-[calc(100%-2rem)]';
 
 export const actionsColumnButtonClassName =
   'opacity-0 pointer-events-none group-hover/grid-row:opacity-100 group-hover/grid-row:pointer-events-auto';
 
-export const sidebarWidth = 280;
 export const sidebarTitleDefault = 'Files';
 
 export const BASE_FILE_MANAGER_ICON_SIZE = 20;
@@ -33,10 +74,6 @@ export const FILES_DATA_TRANSFER_TYPE = 'Files';
 export const FOLDER_PLACEHOLDER_FILE_NAME = '.dial_folder';
 
 export const DEFAULT_FOLDER_BASE_NAME = 'New folder';
-
-export const FOLDERS_TREE_PANEL_MIN_WIDTH = 280;
-
-export const FOLDERS_TREE_PANEL_MAX_WIDTH = 460;
 
 /*
  * AG Grid's built-in selection column id. The kit's Grid renders its own
