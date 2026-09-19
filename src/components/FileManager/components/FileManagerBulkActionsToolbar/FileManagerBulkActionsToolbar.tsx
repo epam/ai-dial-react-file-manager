@@ -17,6 +17,7 @@ import {
   ACTIONS_GAP,
   CONTAINER_PADDING,
   bulkActionsContainerClassName,
+  bulkActionsCountClassName,
   bulkActionsGroupClassName,
   bulkActionsLabelClassName,
   bulkActionsStripClassName,
@@ -28,6 +29,11 @@ export interface DialActionDropdownItem extends DropdownItem {
 }
 
 export interface DialFileManagerBulkActionsToolbarProps {
+  /**
+   * The wording beside the count, e.g. `"items selected"`. The bar draws the
+   * count itself as a badge, so this returns the sentence around it rather than
+   * the whole label; the count is passed in for pluralisation.
+   */
   getSelectionLabel: (selectedCount: number) => ReactNode;
   onClearSelection: () => void;
   actions: DialActionDropdownItem[];
@@ -65,8 +71,7 @@ export interface DialFileManagerBulkActionsToolbarProps {
  * @example
  * ```tsx
  * <DialFileManagerSelectionToolbar
- *   // A node, so the count can carry a badge of its own
- *   getSelectionLabel={(count) => <><Badge>{count}</Badge> files selected</>}
+ *   getSelectionLabel={(count) => `file${count === 1 ? '' : 's'} selected`}
  *   onClearSelection={() => console.log('Cleared')}
  *   actions={[
  *     { key: 'download', title: 'Download', icon: <IconDownload {...FILE_MANAGER_ICON_PROPS} />, onClick: () => {} },
@@ -76,7 +81,7 @@ export interface DialFileManagerBulkActionsToolbarProps {
  * ```
  *
  * @param {object} props
- * @param {(count: number) => ReactNode} props.getSelectionLabel - Function to get the label showing current selection status (e.g., "3 files selected"). May return a node, so the count can carry its own styling.
+ * @param {(count: number) => ReactNode} props.getSelectionLabel - The wording beside the count (e.g., "files selected"). The bar draws the count itself as a badge; the count is passed in so the caller can pluralise.
  * @param {() => void} props.onClearSelection - Callback invoked when the clear selection button is clicked.
  * @param {DialActionDropdownItem[]} props.actions - List of available toolbar actions.
  *   Each action defines a title, icon, key, and optional click handler.
@@ -137,6 +142,7 @@ export const DialFileManagerBulkActionsToolbar: FC<
           aria-label="File bulk actions"
         >
           <div ref={leftSectionRef} className={bulkActionsLabelClassName}>
+            <span className={bulkActionsCountClassName}>{selectedCount}</span>
             <span className="whitespace-nowrap">{selectionLabel}</span>
             <GhostIconButton
               size={ElementSize.Small}

@@ -53,6 +53,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
   configuring search needs no change; a host rendering
   `DialFileManagerNavigationPanel` directly does, as the panel is breadcrumbs
   only now.
+- **`getSelectionLabel` returns the wording, not the whole label (breaking)** —
+  the bar draws the count itself, as a badge beside the sentence, so the
+  callback supplies only what goes next to it: `"items selected"`, not
+  `"4 items selected"`. The count is still passed in, for pluralisation. A host
+  that keeps interpolating the count into its string will render it twice.
 - **The bulk actions row follows the design's order and colour (breaking)** —
   it runs Download, Move to, Copy to, Duplicate, Delete, with the destructive
   action last instead of fourth, and the two sharing actions grouped before it.
@@ -63,9 +68,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
   (breaking)** — a live selection used to swap the whole toolbar row for the
   bulk bar, which took the breadcrumbs and the add button away mid-task. The bar
   is now a content-sized bar over the bottom of the grid card, and the header
-  stays put. Its selection label is plain text rather than a button:
-  `getSelectionLabel` may return a node, and the selection is dropped through a
-  close button of its own, named by `clearSelectionLabel`.
+  stays put. Its selection label is plain text rather than a button, and the
+  selection is dropped through a close button of its own, named by
+  `clearSelectionLabel`.
 - **`NavigationPanelOptions` lists only the search props it forwards** — the
   type used to carry the whole input surface through `DialSearchProps`, but
   `readOnly`, `name` and the focus handlers never reached the field. It now

@@ -33,7 +33,7 @@ const meta: Meta<typeof DialFileManagerBulkActionsToolbar> = {
     getSelectionLabel: {
       control: false,
       description:
-        'Function to get the label showing current selection status (e.g., "3 files selected").',
+        'The wording beside the count (e.g., "files selected"); the bar draws the count itself as a badge.',
     },
     selectedCount: {
       control: 'number',
@@ -127,7 +127,7 @@ const extraMockActions = [
 export const Default: Story = {
   args: {
     getSelectionLabel: (selectedCount: number) =>
-      `${selectedCount} items selected`,
+      `item${selectedCount === 1 ? '' : 's'} selected`,
     onClearSelection: () => alert('Selections cleared'),
     actions: mockActions,
     selectedCount: 3,
@@ -138,7 +138,7 @@ export const Default: Story = {
 export const ManyActions: Story = {
   args: {
     getSelectionLabel: (selectedCount: number) =>
-      `${selectedCount} items selected`,
+      `item${selectedCount === 1 ? '' : 's'} selected`,
     onClearSelection: () => alert('Selections cleared'),
     actions: [...mockActions, ...extraMockActions],
     selectedCount: 5,

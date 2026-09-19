@@ -652,7 +652,8 @@ describe('Dial UI Kit :: FileManager', () => {
           selectedPaths={new Set(['/All files/Design'])}
           toolbarOptions={{}}
           bulkActionsToolbarOptions={{
-            getSelectionLabel: (count) => `${count} item(s) selected`,
+            getSelectionLabel: (count) =>
+              `item${count === 1 ? '' : 's'} selected`,
             actionLabels: { download: 'Download', delete: 'Delete' },
           }}
         />,
@@ -663,7 +664,8 @@ describe('Dial UI Kit :: FileManager', () => {
       expect(
         screen.getByRole('toolbar', { name: 'File bulk actions' }),
       ).toBeInTheDocument();
-      expect(screen.getByText('1 item(s) selected')).toBeInTheDocument();
+      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getByText('item selected')).toBeInTheDocument();
 
       expect(
         screen.getByRole('toolbar', { name: 'File Manager Toolbar' }),

@@ -26,7 +26,9 @@ describe('Dial UI Kit :: DialFileManagerBulkActionsToolbar', () => {
   ];
 
   it('renders the selection label', () => {
-    const getLabel = vi.fn((count: number) => `${count} files selected`);
+    const getLabel = vi.fn(
+      (count: number) => `file${count === 1 ? '' : 's'} selected`,
+    );
 
     render(
       <DialFileManagerBulkActionsToolbar
@@ -40,7 +42,8 @@ describe('Dial UI Kit :: DialFileManagerBulkActionsToolbar', () => {
     expect(getLabel).toHaveBeenCalledWith(3);
 
     const toolbar = screen.getByRole('toolbar');
-    expect(within(toolbar).getByText('3 files selected')).toBeInTheDocument();
+    expect(within(toolbar).getByText('3')).toBeInTheDocument();
+    expect(within(toolbar).getByText('files selected')).toBeInTheDocument();
   });
 
   /*
@@ -52,7 +55,7 @@ describe('Dial UI Kit :: DialFileManagerBulkActionsToolbar', () => {
 
     render(
       <DialFileManagerBulkActionsToolbar
-        getSelectionLabel={(count) => `${count} files selected`}
+        getSelectionLabel={(count) => `file${count === 1 ? '' : 's'} selected`}
         onClearSelection={onClear}
         actions={actions}
         selectedCount={3}
@@ -70,7 +73,7 @@ describe('Dial UI Kit :: DialFileManagerBulkActionsToolbar', () => {
   it('names the clear control from clearSelectionLabel', () => {
     render(
       <DialFileManagerBulkActionsToolbar
-        getSelectionLabel={(count) => `${count} files selected`}
+        getSelectionLabel={(count) => `file${count === 1 ? '' : 's'} selected`}
         onClearSelection={vi.fn()}
         actions={actions}
         selectedCount={3}

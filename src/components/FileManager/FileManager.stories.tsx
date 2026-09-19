@@ -101,16 +101,8 @@ export const PreselectedNode: Story = {
     // The story opens with a live selection, so it is where the floating bulk
     // actions bar is seen.
     bulkActionsToolbarOptions: {
-      // The count reads as a badge; the label returns a node, so the count's
-      // styling stays with the host that pluralises the sentence around it.
-      getSelectionLabel: (selectedCount: number) => (
-        <>
-          <span className="rounded bg-layer-sunken px-1.5 py-0.5 dial-small-text font-semibold text-primary">
-            {selectedCount}
-          </span>{' '}
-          items selected
-        </>
-      ),
+      getSelectionLabel: (selectedCount: number) =>
+        `item${selectedCount === 1 ? '' : 's'} selected`,
       actionLabels: {
         [DialFileManagerActions.Duplicate]: 'Duplicate',
         [DialFileManagerActions.Copy]: 'Copy to',
@@ -364,7 +356,7 @@ const DestinationPopupLoadedEmptyFolderComponent = (
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             [DialFileManagerActions.Copy]: 'Copy to',
           },
@@ -579,7 +571,7 @@ const PopupComponent = (args: DialFileManagerProps) => {
           }}
           bulkActionsToolbarOptions={{
             getSelectionLabel: (selectedCount: number) =>
-              `${selectedCount} item(s) selected`,
+              `item${selectedCount === 1 ? '' : 's'} selected`,
             actionLabels: {
               duplicate: 'Duplicate',
               copy: 'Copy to',
@@ -898,7 +890,7 @@ const WithConflictResolutionComponent = (args: DialFileManagerProps) => {
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount: number) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             duplicate: 'Duplicate',
             copy: 'Copy to',
@@ -1059,7 +1051,7 @@ const WithMultipleConflictsComponent = (args: DialFileManagerProps) => {
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount: number) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             copy: 'Copy to',
             move: 'Move to',
@@ -1371,7 +1363,7 @@ export const WithUnshareAction: Story = {
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount: number) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             duplicate: 'Duplicate',
             copy: 'Copy to',
@@ -1422,7 +1414,7 @@ export const WithRemoveAccessAction: Story = {
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount: number) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             duplicate: 'Duplicate',
             copy: 'Copy to',
@@ -2122,7 +2114,7 @@ const WithAllowedFileTypesComponent = (args: DialFileManagerProps) => {
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount: number) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             duplicate: 'Duplicate',
             download: 'Download',
