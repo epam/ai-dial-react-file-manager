@@ -25,14 +25,15 @@ describe('Dial UI Kit :: DialFileManagerBulkActionsToolbar', () => {
     { key: 'share', title: 'Share', onClick: vi.fn() },
   ];
 
-  it('renders selected label button and calls onClearSelection', () => {
-    const onClear = vi.fn();
-    const getLabel = vi.fn((count: number) => `${count} files selected`);
+  it('renders the selection label', () => {
+    const getLabel = vi.fn(
+      (count: number) => `file${count === 1 ? '' : 's'} selected`,
+    );
 
     render(
       <DialFileManagerBulkActionsToolbar
         getSelectionLabel={getLabel}
-        onClearSelection={onClear}
+        onClearSelection={vi.fn()}
         actions={actions}
         selectedCount={3}
       />,
@@ -41,11 +42,48 @@ describe('Dial UI Kit :: DialFileManagerBulkActionsToolbar', () => {
     expect(getLabel).toHaveBeenCalledWith(3);
 
     const toolbar = screen.getByRole('toolbar');
-    const selectedButton = within(toolbar).getByText('3 files selected');
-    expect(selectedButton).toBeInTheDocument();
+    expect(within(toolbar).getByText('3')).toBeInTheDocument();
+    expect(within(toolbar).getByText('files selected')).toBeInTheDocument();
+  });
 
-    fireEvent.click(selectedButton);
+  /*
+   * The label used to double as the clear control. It is plain text now, and
+   * the selection is dropped through a close button of its own.
+   */
+  it('clears the selection from its own close button', () => {
+    const onClear = vi.fn();
+
+    render(
+      <DialFileManagerBulkActionsToolbar
+        getSelectionLabel={(count) => `file${count === 1 ? '' : 's'} selected`}
+        onClearSelection={onClear}
+        actions={actions}
+        selectedCount={3}
+      />,
+    );
+
+    const toolbar = screen.getByRole('toolbar');
+    fireEvent.click(
+      within(toolbar).getByRole('button', { name: 'Clear selection' }),
+    );
+
     expect(onClear).toHaveBeenCalledTimes(1);
+  });
+
+  it('names the clear control from clearSelectionLabel', () => {
+    render(
+      <DialFileManagerBulkActionsToolbar
+        getSelectionLabel={(count) => `file${count === 1 ? '' : 's'} selected`}
+        onClearSelection={vi.fn()}
+        actions={actions}
+        selectedCount={3}
+        clearSelectionLabel="Отменить выбор"
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'Отменить выбор' }),
+    ).toBeInTheDocument();
   });
 
   it('renders all action buttons', () => {

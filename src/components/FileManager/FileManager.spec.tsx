@@ -18,7 +18,10 @@ import {
   type UseFileManagerColumnsArgs,
 } from './hooks/use-file-manager-columns';
 import type { FileManagerGridRow } from './FileManagerContext';
-import { FileManagerColumnKey } from '@/types/file-manager';
+import {
+  DialFileManagerTabs,
+  FileManagerColumnKey,
+} from '@/types/file-manager';
 import { GridSelectionMode } from '@/models/selection-mode';
 import {
   DialFileNodeType,
@@ -54,6 +57,8 @@ interface MockGridProps<Row extends GridRowLike> {
   className?: string;
   additionalGridOptions?: MockAdditionalGridOptions<Row>;
   disabledRowIds?: Set<string>;
+  selectedRowIds?: Set<string>;
+  onSelectionChange?: (ids: Set<string>, rows: Row[]) => void;
 }
 
 vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
@@ -67,6 +72,8 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
       className,
       additionalGridOptions,
       disabledRowIds,
+      selectedRowIds,
+      onSelectionChange,
     } = props;
 
     const rowsArray: Row[] = rowData ?? [];
@@ -90,15 +97,27 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
       clickCell(row, 'name');
     };
 
+    const toggleSelection = (row: Row, key: string): void => {
+      const next = new Set(selectedRowIds ?? []);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      onSelectionChange?.(next, Array.from(next).length ? [row] : []);
+    };
+
     const rows = rowsArray.map((row, index) => {
       const key = getId(row, index);
       const label = row.name ?? row.path ?? String(index);
       const isDisabled = disabledRowIds?.has(key) ?? false;
+      const isSelected = selectedRowIds?.has(key) ?? false;
 
       return (
         <tr
           key={key}
           className="ag-row"
+          aria-selected={isSelected}
           data-disabled={isDisabled || undefined}
           ref={(el: HTMLTableRowElement | null) => {
             if (el) el.setAttribute('row-id', key);
@@ -109,8 +128,11 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
             <input
               type="checkbox"
               aria-label={`Select ${label}`}
+              checked={isSelected}
+              readOnly
               onClick={(event) => {
                 event.stopPropagation();
+                toggleSelection(row, key);
                 clickCell(row, actual.GRID_SELECTION_COLUMN_ID);
               }}
             />
@@ -472,6 +494,186 @@ describe('Dial UI Kit :: FileManager', () => {
     const grid = await waitForGridTable();
     const textboxesInsideGrid = within(grid).queryAllByRole('textbox');
     expect(textboxesInsideGrid.length).toBe(0);
+  });
+
+  describe('content layout', () => {
+    const getFoldersPanel = (name = 'File storage') =>
+      screen.getByRole('complementary', { name });
+
+    const tabsMock = [
+      { value: DialFileManagerTabs.MyFiles, label: 'My files' },
+      { value: DialFileManagerTabs.Shared, label: 'Shared' },
+    ];
+
+    test('renders the filter row inside the folders panel, not the toolbar', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{
+            header: 'File storage',
+            tabs: tabsMock,
+            activeTab: DialFileManagerTabs.MyFiles,
+            onTabChange: vi.fn(),
+          }}
+          toolbarOptions={{}}
+        />,
+      );
+
+      await waitForGridTable();
+
+      const panel = getFoldersPanel();
+      // The chip row is named from the panel's own visible heading.
+      const chipRow = within(panel).getByRole('group', {
+        name: 'File storage',
+      });
+
+      expect(
+        within(chipRow).getByRole('button', { name: 'My files' }),
+      ).toHaveAttribute('aria-pressed', 'true');
+      expect(
+        within(chipRow).getByRole('button', { name: 'Shared' }),
+      ).toHaveAttribute('aria-pressed', 'false');
+
+      const toolbar = screen.getByRole('toolbar', {
+        name: 'File Manager Toolbar',
+      });
+      expect(within(toolbar).queryByRole('group')).not.toBeInTheDocument();
+    });
+
+    test('names the folders panel from its heading', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{ header: 'File storage' }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      expect(getFoldersPanel()).toBeInTheDocument();
+    });
+
+    test('falls back to a landmark label when the panel has no heading', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{ header: null }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      expect(
+        getFoldersPanel('File Manager Tree Navigation'),
+      ).toBeInTheDocument();
+    });
+
+    test('names the filter row from tabsAriaLabel when the panel has no heading', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{
+            header: null,
+            tabs: tabsMock,
+            activeTab: DialFileManagerTabs.MyFiles,
+            onTabChange: vi.fn(),
+          }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      expect(
+        screen.getByRole('group', { name: 'File storage sections' }),
+      ).toBeInTheDocument();
+    });
+
+    test('reports tab changes through treeOptions.onTabChange', async () => {
+      const onTabChange = vi.fn();
+
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{
+            tabs: tabsMock,
+            activeTab: DialFileManagerTabs.MyFiles,
+            onTabChange,
+          }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Shared' }));
+
+      expect(onTabChange).toHaveBeenCalledWith(DialFileManagerTabs.Shared);
+    });
+
+    test('renders no filter row when treeOptions carries no tabs', async () => {
+      renderWithinSizedShell(
+        <DialFileManager items={itemsMock} path="/All files" />,
+      );
+
+      await waitForGridTable();
+
+      expect(screen.queryByRole('group')).not.toBeInTheDocument();
+    });
+
+    test('renders the search field above the grid rather than inside it', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          navigationPanelOptions={{ searchable: true }}
+        />,
+      );
+
+      const grid = await waitForGridTable();
+
+      const search = screen.getByRole('search', { name: 'Search' });
+      expect(search).toBeInTheDocument();
+      expect(grid.contains(search)).toBe(false);
+    });
+
+    /*
+     * The bulk bar used to take the header's place. It floats over the grid
+     * now, so the breadcrumbs and the header actions survive a selection.
+     */
+    test('keeps the content header while a selection is live', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          selectedPaths={new Set(['/All files/Design'])}
+          toolbarOptions={{}}
+          bulkActionsToolbarOptions={{
+            getSelectionLabel: (count) =>
+              `item${count === 1 ? '' : 's'} selected`,
+            actionLabels: { download: 'Download', delete: 'Delete' },
+          }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      expect(
+        screen.getByRole('toolbar', { name: 'File bulk actions' }),
+      ).toBeInTheDocument();
+      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getByText('item selected')).toBeInTheDocument();
+
+      expect(
+        screen.getByRole('toolbar', { name: 'File Manager Toolbar' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('navigation', { name: 'Breadcrumb' }),
+      ).toBeInTheDocument();
+    });
   });
 
   test('actionsRef.createFolder adds a new row to the grid', async () => {
@@ -1116,6 +1318,121 @@ describe('Dial UI Kit :: FileManager', () => {
         context: { hideSearchPathItemName: true },
       }) as React.ReactElement<{ text: string }>;
       expect(result.props.text).toBe('All files/Design/Icons');
+    });
+  });
+
+  describe('selection of server-side search results', () => {
+    const SEARCH_ROOT = 'All files';
+    const SEARCH_RESULT_PATH = 'All files/Archive/2024/report.pdf';
+
+    /* Lives in a folder the tree has never loaded, as a recursive search hit does. */
+    const searchResultFile: DialFile = {
+      id: 'archive-report',
+      name: 'report.pdf',
+      path: SEARCH_RESULT_PATH,
+      parentPath: 'All files/Archive/2024',
+      nodeType: DialFileNodeType.ITEM,
+      resourceType: DialFileResourceType.FILE,
+      extension: 'pdf',
+      contentType: 'application/pdf',
+      folderId: 'archive-2024',
+      updatedAt: '2025-02-01',
+      contentLength: 1024,
+      permissions: [DialFilePermission.READ],
+    };
+
+    interface ControlledManagerProps {
+      searchResults: DialFile[];
+      onSelectionCommit: (paths: Set<string>) => void;
+      onSearchFiles?: (folder: string, query: string) => void;
+      initialSelectedPaths?: Set<string>;
+    }
+
+    const ControlledManager = ({
+      searchResults,
+      onSelectionCommit,
+      onSearchFiles,
+      initialSelectedPaths,
+    }: ControlledManagerProps) => {
+      const [selectedPaths, setSelectedPaths] = React.useState<Set<string>>(
+        () => initialSelectedPaths ?? new Set<string>(),
+      );
+
+      return (
+        <DialFileManager
+          items={itemsMock}
+          path={SEARCH_ROOT}
+          navigationPanelOptions={{ searchable: true }}
+          gridOptions={{
+            selectionMode: GridSelectionMode.MULTIPLE,
+            showFiles: true,
+          }}
+          onSearchFiles={onSearchFiles}
+          searchResults={searchResults}
+          selectedPaths={selectedPaths}
+          onSelectedPathsChange={(paths) => {
+            setSelectedPaths(new Set(paths));
+            onSelectionCommit(new Set(paths));
+          }}
+        />
+      );
+    };
+
+    test('a file selected in the search results stays selected', async () => {
+      const onSearchFiles = vi.fn();
+      const onSelectionCommit = vi.fn();
+
+      const { rerender } = renderWithinSizedShell(
+        <ControlledManager
+          searchResults={[]}
+          onSearchFiles={onSearchFiles}
+          onSelectionCommit={onSelectionCommit}
+        />,
+      );
+
+      const searchRegion = screen.getByRole('search', { name: 'Search' });
+      const searchInput = within(searchRegion).getByRole('textbox');
+      await userEvent.type(searchInput, 'report');
+
+      await waitFor(() => {
+        expect(onSearchFiles).toHaveBeenCalled();
+      });
+
+      rerender(
+        <div style={{ height: 640, width: 1100 }}>
+          <ControlledManager
+            searchResults={[searchResultFile]}
+            onSearchFiles={onSearchFiles}
+            onSelectionCommit={onSelectionCommit}
+          />
+        </div>,
+      );
+
+      const row = (await findInGridByRowText('report.pdf')) as HTMLElement;
+      await userEvent.click(within(row).getByRole('checkbox'));
+
+      await waitFor(() => {
+        expect(row).toHaveAttribute('aria-selected', 'true');
+      });
+      expect(onSelectionCommit).toHaveBeenLastCalledWith(
+        new Set([SEARCH_RESULT_PATH]),
+      );
+    });
+
+    test('a selected path missing from both the tree and the search results is dropped', async () => {
+      const onSelectionCommit = vi.fn();
+
+      renderWithinSizedShell(
+        <ControlledManager
+          searchResults={[]}
+          onSelectionCommit={onSelectionCommit}
+          initialSelectedPaths={new Set(['All files/Ghost/missing.txt'])}
+        />,
+      );
+
+      await waitFor(() => {
+        expect(onSelectionCommit).toHaveBeenLastCalledWith(new Set());
+      });
     });
   });
 

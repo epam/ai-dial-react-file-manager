@@ -40,7 +40,6 @@ import { useItemRenaming } from './hooks/use-item-renaming';
 import { useExpandedPaths } from './components/FoldersTree/hooks/use-expanded-paths';
 import { useNewActions } from './hooks/use-new-actions';
 import { useFolderCreation } from './hooks/use-folder-creation';
-import { useTreeAdditionalButtons } from '@/components/FileManager/hooks/use-tree-additional-buttons';
 import { useFileMetadata } from './hooks/use-file-metadata';
 import { useFileSearch } from './hooks/use-file-search';
 import { usePathsSelection } from './hooks/use-paths-selection';
@@ -68,7 +67,6 @@ export interface FileManagerProviderProps extends Omit<
  *
  */
 export const FileManagerProvider: FC<FileManagerProviderProps> = ({
-  managerLabel,
   children,
   className,
   items = [],
@@ -212,25 +210,47 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     [onUploadArchive, autoSelectUploadedItems],
   );
 
+  /*
+   * Search results are a flat list that lives outside the `items` tree — a
+   * recursive match usually sits in a folder the tree has never loaded. Every
+   * selected path is therefore resolved against the tree first and the search
+   * results second, so a row picked from search results resolves to a node
+   * instead of being treated as stale and pruned away.
+   */
+  const searchResultsByPath = useMemo(() => {
+    const map = new Map<string, DialFile>();
+    searchResults?.forEach((file) => {
+      map.set(file.path, file);
+    });
+    return map;
+  }, [searchResults]);
+
+  const resolveSelectedNode = useCallback(
+    (selectedPath: string): DialFile | undefined =>
+      findNodeByPath(items, selectedPath) ??
+      searchResultsByPath.get(selectedPath),
+    [items, searchResultsByPath],
+  );
+
   const selectedFiles = useMemo(() => {
     const map = new Map<string, DialFile>();
 
     effectiveSelectedPaths.forEach((path) => {
-      const file = findNodeByPath(items, path);
+      const file = resolveSelectedNode(path);
       if (file) {
         map.set(path, file);
       }
     });
 
     return map;
-  }, [effectiveSelectedPaths, items]);
+  }, [effectiveSelectedPaths, resolveSelectedNode]);
 
   useEffect(() => {
     if (effectiveSelectedPaths.size === 0) return;
 
     let hasMissingPaths = false;
     for (const path of effectiveSelectedPaths) {
-      if (!findNodeByPath(items, path)) {
+      if (!resolveSelectedNode(path)) {
         hasMissingPaths = true;
         break;
       }
@@ -239,13 +259,13 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     if (hasMissingPaths) {
       const nextPaths = new Set<string>();
       for (const path of effectiveSelectedPaths) {
-        if (findNodeByPath(items, path)) {
+        if (resolveSelectedNode(path)) {
           nextPaths.add(path);
         }
       }
       setSelectedPaths(nextPaths);
     }
-  }, [items, effectiveSelectedPaths, setSelectedPaths]);
+  }, [effectiveSelectedPaths, resolveSelectedNode, setSelectedPaths]);
 
   const { currentPath, setCurrentPath, handlePathChange } = useCurrentPath({
     path,
@@ -328,7 +348,8 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     navigationPanelValue: navigationPanelOptions?.value,
     onNavigationPanelSearchChange: navigationPanelOptions?.onSearchChange,
     allItems: items,
-    activeTab: toolbarOptions?.activeTab,
+    // The tab row moved into the folders panel, next to the tree it scopes.
+    activeTab: treeOptions?.activeTab,
   });
 
   const currentFolder = useMemo(
@@ -742,15 +763,9 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     [handlePathChange, onTableFileClick],
   );
 
-  const { expandedPaths, setExpandedPaths, collapseAll } = useExpandedPaths({
+  const { expandedPaths, setExpandedPaths } = useExpandedPaths({
     expandedPaths: treeOptions?.expandedPaths,
     onExpandedPathsChange: treeOptions?.onExpandedPathsChange,
-  });
-
-  const { additionalButtons } = useTreeAdditionalButtons({
-    collapseAll,
-    expandedPathsLength: expandedPaths.size,
-    additionalButtons: treeOptions?.additionalButtons,
   });
 
   const handleGridAddSibling = useCallback(
@@ -874,7 +889,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   }, [forbiddenSymbolsRegExp]);
 
   const value: FileManagerContextValue = {
-    managerLabel,
     className,
     items,
     allowedFileTypes,
@@ -885,7 +899,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
       ...treeOptions,
       expandedPaths,
       onExpandedPathsChange: setExpandedPaths,
-      additionalButtons,
     },
     showNavigationPanel,
     navigationPanelOptions,

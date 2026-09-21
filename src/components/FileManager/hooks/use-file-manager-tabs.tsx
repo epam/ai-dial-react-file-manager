@@ -1,4 +1,4 @@
-import type { TabModel } from '@epam/ai-dial-ui-kit';
+import type { FilterChipItem } from '@epam/ai-dial-ui-kit';
 import { DialFileManagerTabs } from '@/types/file-manager';
 import { useMemo, useState } from 'react';
 
@@ -19,13 +19,14 @@ export const useDialFileManagerTabs = (
     setActiveTab(tab);
   };
 
-  const tabs: TabModel[] | undefined = useMemo(() => {
-    if (!tabLabels) return void 0;
-    return Object.values(DialFileManagerTabs).map((tab) => ({
-      id: tab,
-      label: tabLabels?.[tab] || tab.replace('_', ' '),
-    }));
-  }, [tabLabels]);
+  const tabs: FilterChipItem<DialFileManagerTabs>[] | undefined =
+    useMemo(() => {
+      if (!tabLabels) return void 0;
+      return Object.values(DialFileManagerTabs).map((tab) => ({
+        value: tab,
+        label: tabLabels?.[tab] || tab.replace('_', ' '),
+      }));
+    }, [tabLabels]);
 
   return {
     activeTab,

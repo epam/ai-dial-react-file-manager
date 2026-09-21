@@ -1,6 +1,5 @@
 import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
-import { DialFileManagerTabs } from '@/types/file-manager';
-import type { DropdownItem, TabItem } from '@epam/ai-dial-ui-kit';
+import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import {
   ButtonDropdown,
   ButtonVariant,
@@ -9,7 +8,6 @@ import {
   ElementSize,
   GhostIconButton,
   Switch,
-  Tabs,
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
 import {
@@ -20,10 +18,7 @@ import { IconDotsVertical, IconEye, IconEyeOff } from '@tabler/icons-react';
 import { type FC, useMemo } from 'react';
 
 export interface DialFileManagerToolbarProps {
-  tabs?: TabItem[];
-  activeTab?: string;
   areHiddenFilesVisible: boolean;
-  hiddenFilesSwitcherLabel?: string;
   showHiddenFilesLabel?: string;
   hideHiddenFilesLabel?: string;
   isNewButtonVisible?: boolean;
@@ -32,7 +27,6 @@ export interface DialFileManagerToolbarProps {
   newButtonDropdownItems?: DropdownItem[];
   newButtonLabel?: string;
   showHiddenFilesToggle?: boolean;
-  onTabChange?: (id: DialFileManagerTabs) => void;
   onToggleHiddenFiles?: (value: boolean) => void;
   disabledNewButtonTooltip?: string;
 }
@@ -40,26 +34,19 @@ export interface DialFileManagerToolbarProps {
 /**
  * DialFileManagerToolbar — A configurable, responsive toolbar component for file management views.
  *
- * Provides a flexible toolbar interface for file managers or similar UIs, supporting:
- * - Tab navigation for switching between file sections or views
+ * Renders the action cluster that sits at the trailing edge of the File Manager
+ * content header, next to the breadcrumb trail:
  * - A toggle for showing or hiding hidden files
- * - A refresh button for reloading content
- * - An optional "New" button or dropdown for creating new files or folders
+ * - An optional "Add" button or dropdown for creating new files or folders
+ *
+ * Tab navigation is no longer part of this toolbar — it lives in the folders
+ * panel, next to the tree it filters.
  *
  * @example
  * ```tsx
- * const tabs: TabModel[] = [
- *   { id: 'all', name: 'All Files' },
- *   { id: 'favorites', name: 'Favorites' },
- * ];
- *
  * <DialFileManagerToolbar
- *   tabs={tabs}
- *   activeTab="all"
  *   areHiddenFilesVisible={false}
- *   onTabChange={(id) => console.log('Switched to tab:', id)}
  *   onToggleHiddenFiles={(visible) => console.log('Hidden files visible:', visible)}
- *   onRefresh={() => console.log('Refreshed')}
  *   isNewButtonVisible
  *   newButtonDropdownItems={[
  *     { key: 'folder', label: 'New Folder' },
@@ -68,13 +55,9 @@ export interface DialFileManagerToolbarProps {
  * />
  * ```
  *
- * @param [tabs] - List of tab definitions to display, each represented by a `TabModel` containing `id` and `name`.
- * @param [activeTab] - The ID of the currently active tab.
  * @param areHiddenFilesVisible - Whether hidden files are currently visible.
- * @param [hiddenFilesSwitcherLabel='Hidden files'] - Label for the hidden files toggle control.
- * @param [showHiddenFilesLabel='Show hidden'] - Label shown when hidden files are not visible.
- * @param [hideHiddenFilesLabel='Hide hidden'] - Label shown when hidden files are visible.
- * @param [onTabChange] - Callback fired when the user switches between tabs. Receives the selected tab ID.
+ * @param [showHiddenFilesLabel='Show hidden files'] - Label of the toggle while hidden files are not visible.
+ * @param [hideHiddenFilesLabel='Hide hidden files'] - Label of the toggle while hidden files are visible.
  * @param [onToggleHiddenFiles] - Callback fired when the hidden files visibility is toggled. Receives the new visibility state.
  * @param [isNewButtonVisible] - Whether the "New" button or dropdown should be displayed.
  * @param [isNewButtonDisabled] - Whether the "New" button is disabled.
@@ -84,24 +67,19 @@ export interface DialFileManagerToolbarProps {
  * @param [disabledNewButtonTooltip] - Tooltip text to show when the new button is disabled.
  *
  * @remarks
- * - Tabs are rendered via `Tabs`.
  * - The hidden files toggle uses `Switch`.
- * - The refresh and new actions use `GhostIconButton` or dropdown variants for consistency.
+ * - The new actions use `GhostIconButton` or dropdown variants for consistency.
  * - The toolbar automatically adapts its layout for different screen sizes.
  * - When `newButtonDropdownItems` is provided, the new button becomes a dropdown menu.
  */
 export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
-  tabs,
-  activeTab,
-  onTabChange,
   areHiddenFilesVisible,
   onToggleHiddenFiles,
   isNewButtonVisible,
   isNewButtonDisabled,
   newButtonVariant = ButtonVariant.Primary,
   newButtonDropdownItems = [],
-  newButtonLabel = 'New',
-  hiddenFilesSwitcherLabel = 'Hidden files',
+  newButtonLabel = 'Add',
   showHiddenFilesLabel = 'Show hidden files',
   hideHiddenFilesLabel = 'Hide hidden files',
   showHiddenFilesToggle = true,
@@ -133,21 +111,16 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
     onToggleHiddenFiles,
   ]);
 
-  const renderTabs = () =>
-    tabs && activeTab && onTabChange ? (
-      <Tabs
-        tabs={tabs}
-        activeTabId={activeTab}
-        onTabChange={(id: string) => onTabChange(id as DialFileManagerTabs)}
-      />
-    ) : null;
-
   const renderDesktopActions = () => (
     <>
       {showHiddenFilesToggle && (
         <Switch
           id="hidden-files-switch"
-          labelProps={{ label: hiddenFilesSwitcherLabel }}
+          labelProps={{
+            label: !areHiddenFilesVisible
+              ? showHiddenFilesLabel
+              : hideHiddenFilesLabel,
+          }}
           isOn={areHiddenFilesVisible}
           onChange={onToggleHiddenFiles}
         />
@@ -209,11 +182,8 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
   );
 
   return (
-    <div className="flex w-full justify-between gap-4 items-center overflow-x-auto py-[2px] my-[-2px]">
-      <div className="flex-1 min-w-0">{renderTabs()}</div>
-      <div className="flex gap-2 shrink-0 items-center">
-        {isMobile ? renderMobileActions() : renderDesktopActions()}
-      </div>
+    <div className="flex gap-4 shrink-0 items-center">
+      {isMobile ? renderMobileActions() : renderDesktopActions()}
     </div>
   );
 };

@@ -1,53 +1,13 @@
 import { render, fireEvent, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { DialFileManagerToolbar } from './DialFileManagerToolbar';
-import type { TabModel } from '@epam/ai-dial-ui-kit';
 
 describe('Dial UI Kit :: DialFileManagerToolbar', () => {
-  const mockTabs: TabModel[] = [
-    { id: 'tab1', label: 'Tab 1' },
-    { id: 'tab2', label: 'Tab 2' },
-  ];
-
-  it('renders tabs passed via props', () => {
-    render(
-      <DialFileManagerToolbar
-        tabs={mockTabs}
-        activeTab="tab1"
-        areHiddenFilesVisible={false}
-        onTabChange={vi.fn()}
-        onToggleHiddenFiles={vi.fn()}
-      />,
-    );
-
-    expect(screen.getByText('Tab 1')).toBeInTheDocument();
-    expect(screen.getByText('Tab 2')).toBeInTheDocument();
-  });
-
-  it('calls onTabChange when tab is clicked', () => {
-    const onTabChange = vi.fn();
-    render(
-      <DialFileManagerToolbar
-        tabs={mockTabs}
-        activeTab="tab1"
-        areHiddenFilesVisible={false}
-        onTabChange={onTabChange}
-        onToggleHiddenFiles={vi.fn()}
-      />,
-    );
-
-    fireEvent.click(screen.getByText('Tab 2'));
-    expect(onTabChange).toHaveBeenCalledWith('tab2');
-  });
-
   it('manages hidden files switch state via props', () => {
     const onToggleHiddenFiles = vi.fn();
     render(
       <DialFileManagerToolbar
-        tabs={mockTabs}
-        activeTab="tab1"
         areHiddenFilesVisible={true}
-        onTabChange={vi.fn()}
         onToggleHiddenFiles={onToggleHiddenFiles}
       />,
     );
@@ -62,10 +22,7 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
   it('shows new button only when isNewButtonVisible is true', () => {
     const { rerender } = render(
       <DialFileManagerToolbar
-        tabs={mockTabs}
-        activeTab="tab1"
         areHiddenFilesVisible={false}
-        onTabChange={vi.fn()}
         onToggleHiddenFiles={vi.fn()}
         isNewButtonVisible={false}
         newButtonLabel="New"
@@ -78,10 +35,7 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
 
     rerender(
       <DialFileManagerToolbar
-        tabs={mockTabs}
-        activeTab="tab1"
         areHiddenFilesVisible={false}
-        onTabChange={vi.fn()}
         onToggleHiddenFiles={vi.fn()}
         isNewButtonVisible={true}
         newButtonLabel="New"
@@ -93,13 +47,10 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
   });
 
   it('renders new button with custom label', () => {
-    const customLabel = 'Create New';
+    const customLabel = 'Add';
     render(
       <DialFileManagerToolbar
-        tabs={mockTabs}
-        activeTab="tab1"
         areHiddenFilesVisible={false}
-        onTabChange={vi.fn()}
         onToggleHiddenFiles={vi.fn()}
         isNewButtonVisible={true}
         newButtonLabel={customLabel}
@@ -107,47 +58,62 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
       />,
     );
 
-    expect(
-      screen.getByRole('button', { name: /create new/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument();
   });
 
-  it('does not render tabs when not provided', () => {
-    render(
+  /*
+   * The toggle is labelled by the action it offers, so the label names the
+   * state the click leads to rather than the one it is in.
+   */
+  it('labels the hidden files switch with the action it offers', () => {
+    const { rerender } = render(
       <DialFileManagerToolbar
         areHiddenFilesVisible={false}
-        onToggleHiddenFiles={vi.fn()}
-      />,
-    );
-
-    expect(screen.queryByText('Tab 1')).not.toBeInTheDocument();
-    expect(screen.queryByText('Tab 2')).not.toBeInTheDocument();
-  });
-
-  it('renders with correct hidden files switch label', () => {
-    const customLabel = 'Show System Files';
-    render(
-      <DialFileManagerToolbar
-        tabs={mockTabs}
-        activeTab="tab1"
-        areHiddenFilesVisible={false}
-        hiddenFilesSwitcherLabel={customLabel}
-        onTabChange={vi.fn()}
+        showHiddenFilesLabel="Show system files"
+        hideHiddenFilesLabel="Hide system files"
         onToggleHiddenFiles={vi.fn()}
       />,
     );
 
     expect(screen.getByRole('switch')).toBeInTheDocument();
-    expect(screen.getByText(customLabel)).toBeInTheDocument();
+    expect(screen.getByText('Show system files')).toBeInTheDocument();
+
+    rerender(
+      <DialFileManagerToolbar
+        areHiddenFilesVisible={true}
+        showHiddenFilesLabel="Show system files"
+        hideHiddenFilesLabel="Hide system files"
+        onToggleHiddenFiles={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('Hide system files')).toBeInTheDocument();
+  });
+
+  it('falls back to the default switch labels', () => {
+    const { rerender } = render(
+      <DialFileManagerToolbar
+        areHiddenFilesVisible={false}
+        onToggleHiddenFiles={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('Show hidden files')).toBeInTheDocument();
+
+    rerender(
+      <DialFileManagerToolbar
+        areHiddenFilesVisible={true}
+        onToggleHiddenFiles={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('Hide hidden files')).toBeInTheDocument();
   });
 
   it('disables new button when isNewButtonDisabled is true', () => {
     render(
       <DialFileManagerToolbar
-        tabs={mockTabs}
-        activeTab="tab1"
         areHiddenFilesVisible={false}
-        onTabChange={vi.fn()}
         onToggleHiddenFiles={vi.fn()}
         isNewButtonVisible={true}
         isNewButtonDisabled={true}
@@ -158,5 +124,20 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
 
     const newButton = screen.getByRole('button', { name: /new/i });
     expect(newButton).toBeDisabled();
+  });
+
+  /*
+   * The tab row moved into the folders panel; the toolbar is now only the
+   * hidden-files switch and the add button.
+   */
+  it('renders no tablist of its own', () => {
+    render(
+      <DialFileManagerToolbar
+        areHiddenFilesVisible={false}
+        onToggleHiddenFiles={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
   });
 });

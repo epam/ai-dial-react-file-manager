@@ -50,41 +50,14 @@ describe('Dial UI Kit :: DialFileManagerNavigationPanel', () => {
     expect(onItemClick).toHaveBeenCalledWith('Org/Dept');
   });
 
-  test('renders search when `searchable` is true and reflects controlled value', () => {
-    render(
-      <DialFileManagerNavigationPanel
-        path="Root"
-        searchable
-        elementId="fm-search"
-        value="diagram"
-      />,
-    );
-    expect(screen.getByRole('search', { name: 'Search' })).toBeInTheDocument();
-    const input = screen.getByPlaceholderText('Search...') as HTMLInputElement;
-    expect(input.value).toBe('diagram');
-    expect(input).toHaveAttribute('id', 'fm-search');
-  });
-
-  test('hides search when `searchable` is false', () => {
-    render(<DialFileManagerNavigationPanel path="Root" searchable={false} />);
+  /*
+   * The search field it used to carry now heads the grid card; see
+   * FileManagerSearchBar.spec.tsx.
+   */
+  test('carries no search field', () => {
+    render(<DialFileManagerNavigationPanel path="Root" />);
     expect(screen.queryByRole('search')).not.toBeInTheDocument();
-  });
-
-  test('calls `onSearchChange` with new text', () => {
-    const onSearchChange = vi.fn();
-    render(
-      <DialFileManagerNavigationPanel
-        path="Root"
-        searchable
-        elementId="fm-search-2"
-        value=""
-        onSearchChange={onSearchChange}
-      />,
-    );
-    const input = screen.getByRole('textbox');
-    fireEvent.change(input, { target: { value: 'abc' } });
-    expect(onSearchChange).toHaveBeenCalledTimes(1);
-    expect(onSearchChange).toHaveBeenCalledWith('abc');
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
   test('applies container className to the root element', () => {
@@ -107,44 +80,6 @@ describe('Dial UI Kit :: DialFileManagerNavigationPanel', () => {
       screen.getByRole('navigation', { name: 'Breadcrumb' }),
     ).toBeInTheDocument();
     expect(screen.getByText('/')).toBeInTheDocument();
-  });
-
-  test('search container has small width initially in compact view', () => {
-    render(
-      <DialFileManagerNavigationPanel path="Root" isCompactView searchable />,
-    );
-    const searchContainer = screen.getByRole('search');
-    expect(searchContainer).toHaveClass('w-[40px]');
-  });
-
-  test('search container expands to full width when clicked in compact view', () => {
-    render(
-      <DialFileManagerNavigationPanel path="Root" isCompactView searchable />,
-    );
-    const searchContainer = screen.getByRole('search');
-
-    fireEvent.click(searchContainer);
-    expect(searchContainer).toHaveClass('w-full');
-  });
-
-  test('renders back button instead of breadcrumb when compact view & search expanded', () => {
-    render(
-      <DialFileManagerNavigationPanel
-        path="Root/Folder"
-        isCompactView
-        searchable
-      />,
-    );
-    const searchContainer = screen.getByRole('search');
-
-    fireEvent.click(searchContainer);
-
-    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
-    const backButton = screen.getByRole('button', { name: 'Back' });
-    expect(backButton).toBeInTheDocument();
-
-    fireEvent.click(backButton);
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
   });
 
   test('hides breadcrumbHiddenPathPart from breadcrumb segments', () => {

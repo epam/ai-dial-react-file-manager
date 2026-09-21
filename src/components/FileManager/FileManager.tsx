@@ -16,10 +16,9 @@ import type {
 import classNames from 'classnames';
 import {
   useCallback,
+  useId,
   useImperativeHandle,
   useMemo,
-  useRef,
-  useState,
   type FC,
   type ReactNode,
   type Ref,
@@ -32,8 +31,6 @@ import CopyToIcon from '@/assets/icons/copy-to.svg?react';
 import MoveToIcon from '@/assets/icons/move-to.svg?react';
 import IconUnshare from '@/assets/icons/unshare.svg?react';
 import {
-  CollapsibleSidebar,
-  ConditionalResizableContainer,
   Grid,
   GRID_SELECTION_COLUMN_ID,
   type GridProps,
@@ -41,6 +38,8 @@ import {
   type DropdownItem,
   DropdownItemType,
   mergeClasses,
+  FilterChips,
+  type FilterChipItem,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import {
@@ -90,6 +89,10 @@ import {
   type DialFileManagerNavigationPanelProps,
 } from './components/FileManagerNavigationPanel/FileManagerNavigationPanel';
 import {
+  DialFileManagerSearchBar,
+  type DialFileManagerSearchBarProps,
+} from './components/FileManagerSearchBar/FileManagerSearchBar';
+import {
   DialFileManagerToolbar,
   type DialFileManagerToolbarProps,
 } from './components/FileManagerToolbar/DialFileManagerToolbar';
@@ -101,19 +104,24 @@ import {
 import {
   actionsColumnButtonClassName,
   AG_GRID_SELECTION_COLUMN_ID,
+  bulkActionsToolbarWrapperClassName,
   COMPACT_VIEW_HEADER_HEIGHT,
   containerBaseClassName,
   contentGridClassName,
+  contentHeaderClassName,
   DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT,
   DEFAULT_VISIBLE_COLUMN,
-  FOLDERS_TREE_PANEL_MAX_WIDTH,
-  FOLDERS_TREE_PANEL_MIN_WIDTH,
   gridBaseClassName,
+  gridPanelClassName,
   mainGridClassName,
+  sidebarContentClassName,
+  sidebarHeadingClassName,
+  sidebarHeadingRowClassName,
+  sidebarPanelClassName,
+  sidebarTabsAriaLabelDefault,
   sidebarTitleDefault,
-  sidebarWidth,
+  sidebarTreeContainerClassName,
   toolbarBaseClassName,
-  treeBaseClassName,
 } from './constants';
 import { useBulkActions } from './hooks/use-bulk-actions';
 import {
@@ -170,10 +178,23 @@ export interface FileTreeOptions extends Omit<
   DialFoldersTreeProps,
   'items' | 'selectedPath' | 'onItemClick'
 > {
-  width?: number;
   header?: ReactNode;
   containerClassName?: string;
+  /** Panel controls rendered beside the heading, before "collapse all". */
   additionalButtons?: ReactNode;
+  /**
+   * The filter row shown above the tree. The tabs scope the tree and the grid
+   * to a section of the storage — a subset of one list rather than separate
+   * panels — so they are chips in this panel rather than tabs in the content
+   * toolbar.
+   */
+  tabs?: FilterChipItem<DialFileManagerTabs>[];
+  activeTab?: DialFileManagerTabs;
+  onTabChange?: (id: DialFileManagerTabs) => void;
+  /**
+   * Names the filter row when the panel carries no `header` to name it from.
+   */
+  tabsAriaLabel?: string;
   collapsed?: boolean;
   onCollapseChange?: (collapsed: boolean) => void;
   expandedPaths?: Set<string>;
@@ -201,10 +222,37 @@ export interface DeleteConfirmationOptions {
   contentRenderer?: (fileNames: string[]) => ReactNode;
 }
 
+/**
+ * The breadcrumb trail and the search field are configured together but render
+ * apart: the trail heads the content column, the search heads the grid card.
+ */
 export type NavigationPanelOptions = Omit<
   DialFileManagerNavigationPanelProps,
   'path' | 'makeHref' | 'onItemClick'
->;
+> &
+  /*
+   * Only the search props the manager actually forwards. The rest of the
+   * input's surface — readOnly, name, focus handlers — never reached the field
+   * and is left out rather than advertised as a no-op.
+   */
+  Pick<
+    DialFileManagerSearchBarProps,
+    | 'elementId'
+    | 'placeholder'
+    | 'size'
+    | 'withoutBorder'
+    | 'disabled'
+    | 'invalid'
+    | 'searchClassName'
+    | 'searchContainerClassName'
+  > & {
+    /** Whether to render the search field above the grid. */
+    searchable?: boolean;
+    /** Controlled value for the search input (parent-managed). */
+    value?: string | number | null;
+    /** Callback fired when the search value changes. */
+    onSearchChange?: (value: string) => void;
+  };
 
 export interface GridOptions extends Omit<
   GridProps<GridRow>,
@@ -284,7 +332,6 @@ export interface DialFileManagerProps {
   path?: string;
   defaultPath?: string;
   className?: string;
-  managerLabel?: ReactNode;
   gridClassName?: string;
 
   allowedFileTypes?: DialFileAcceptType[];
@@ -417,8 +464,14 @@ export interface DialFileManagerProps {
 }
 
 /**
- * File Manager layout with a collapsible folders tree, breadcrumb/search header, and a data grid.
+ * File Manager layout with a collapsible folders panel, a breadcrumb header, and a data grid.
  * aliases: FileExplorer|FileBrowser
+ *
+ * The panel on the left carries the tab row and the folders tree. The content
+ * column beside it opens with the breadcrumb trail and the toolbar actions, and
+ * below them a card holding the search field over the grid. A live selection
+ * raises the bulk actions bar over the bottom of that card, leaving the header
+ * in place.
  *
  * Features:
  * - Global `path` drives both the breadcrumb trail and the visible folder in the grid.
@@ -448,10 +501,23 @@ export interface DialFileManagerProps {
  *   gridOptions={{ filterable: false }}
  * />
  *
- * // With custom tree width and title
+ * // With a custom panel title
  * <DialFileManager
  *   items={files}
- *   treeOptions={{ width: 300, title: 'Explorer', showFiles: true }}
+ *   treeOptions={{ header: 'Explorer', showFiles: true }}
+ * />
+ *
+ * // With the tab row that scopes the tree and the grid
+ * <DialFileManager
+ *   items={files}
+ *   treeOptions={{
+ *     tabs: [
+ *       { id: 'my-files', label: 'My files' },
+ *       { id: 'shared', label: 'Shared' },
+ *     ],
+ *     activeTab: activeTab,
+ *     onTabChange: setActiveTab,
+ *   }}
  * />
  *
  * // With explicit provider (advanced apps)
@@ -472,10 +538,10 @@ export interface DialFileManagerProps {
  * @param [selectedPaths] - Controlled set of selected item paths
  * @param [defaultSelectedPaths] - Initial selected paths used in uncontrolled mode
  *
- * @param [treeOptions] - Options that configure the collapsible sidebar and folders tree
- * @param [showNavigationPanel] - Determines whether to display the navigation panel.
- * @param [navigationPanelOptions] - Options for the breadcrumb and search panel (value/onSearchChange for controlled search)
- * @param [toolbarOptions] - Options for the file manager toolbar
+ * @param [treeOptions] - Options that configure the collapsible sidebar, its tab row, and the folders tree
+ * @param [showNavigationPanel] - Determines whether to display the breadcrumb trail.
+ * @param [navigationPanelOptions] - Options for the breadcrumb trail and the search field above the grid (searchable, value/onSearchChange for controlled search)
+ * @param [toolbarOptions] - Options for the header actions: the hidden-files switch and the add button
  * @param [gridOptions] - Options forwarded to `Grid`; supports `columnDefs` override and `filterable` flag and date locale/options
  * @param [bulkActionsToolbarOptions] - Options for the bulk actions toolbar shown when items are selected
  * @param [deleteConfirmationOptions] - Options for the delete confirmation popup
@@ -537,7 +603,6 @@ export const DialFileManager: FC<DialFileManagerProps> = (props) => {
  */
 export const DialFileManagerView: FC = () => {
   const {
-    managerLabel,
     className,
     items,
     rootItem,
@@ -561,9 +626,6 @@ export const DialFileManagerView: FC = () => {
 
     areHiddenFilesVisible,
     toggleHiddenFilesVisibility,
-
-    isTreeCollapsed,
-    toggleTreeCollapse,
 
     currentPath,
     gridRows,
@@ -683,14 +745,33 @@ export const DialFileManagerView: FC = () => {
   } = useFileManagerContext();
 
   const {
-    width = sidebarWidth,
     header = sidebarTitleDefault,
-    containerClassName = treeBaseClassName,
+    containerClassName = sidebarPanelClassName,
     additionalButtons,
+    tabs,
+    activeTab,
+    onTabChange,
+    tabsAriaLabel = sidebarTabsAriaLabelDefault,
     ...forwardedTreeProps
   } = treeOptions ?? {};
 
-  const [sidebarCurrentWidth, setSidebarCurrentWidth] = useState(width);
+  const {
+    searchable = true,
+    // Owned by the provider and reached through effectiveSearchValue below.
+    value: __searchValue,
+    onSearchChange: __onSearchChange,
+    elementId: searchElementId,
+    placeholder: searchPlaceholder,
+    size: searchSize,
+    withoutBorder: searchWithoutBorder,
+    disabled: searchDisabled,
+    invalid: searchInvalid,
+    searchClassName,
+    searchContainerClassName,
+    ...breadcrumbPanelOptions
+  } = navigationPanelOptions ?? {};
+
+  const sidebarHeadingId = useId();
 
   const { renameTriggerView, onGridRename, onTreeRename } =
     useTriggerViewRename({ onRename });
@@ -707,17 +788,6 @@ export const DialFileManagerView: FC = () => {
     onTreeAddSibling: handleTreeAddSibling,
     onTreeAddChild: handleTreeAddChild,
   });
-
-  const sidebarThrottledRef = useRef<number | null>(null);
-
-  const sidebarResizingHandler = (width: number) => {
-    if (sidebarThrottledRef.current === null) {
-      sidebarThrottledRef.current = requestAnimationFrame(() => {
-        setSidebarCurrentWidth(width);
-        sidebarThrottledRef.current = null;
-      });
-    }
-  };
 
   const {
     columnDefs: userColumnDefs,
@@ -1074,68 +1144,56 @@ export const DialFileManagerView: FC = () => {
     forbiddenSymbolsRegExp,
   });
 
-  const handleToolbarTabChange = useCallback(
+  const handleTabChange = useCallback(
     (id: DialFileManagerTabs) => {
-      toolbarOptions?.onTabChange?.(id);
+      onTabChange?.(id);
       cancelFolderCreation();
     },
-    [toolbarOptions, cancelFolderCreation],
+    [onTabChange, cancelFolderCreation],
   );
 
   const renderToolbar = useCallback(() => {
-    if (toolbarOptions && selectedPaths.size === 0) {
-      return (
-        <div
-          className={toolbarBaseClassName}
-          role="toolbar"
-          aria-label="File Manager Toolbar"
-        >
-          {managerLabel}
-          <DialFileManagerToolbar
-            {...toolbarOptions}
-            onTabChange={handleToolbarTabChange}
-            areHiddenFilesVisible={areHiddenFilesVisible}
-            onToggleHiddenFiles={toggleHiddenFilesVisibility}
-            isNewButtonVisible={isNewButtonVisible}
-            isNewButtonDisabled={isNewButtonDisabled}
-            newButtonDropdownItems={newActions}
-          />
-        </div>
-      );
-    }
+    if (!toolbarOptions) return null;
 
-    if (selectedPaths.size > 0 && bulkActionsToolbarOptions) {
-      return (
-        <div
-          className={toolbarBaseClassName}
-          role="toolbar"
-          aria-label="File Manager Toolbar"
-        >
-          <DialFileManagerBulkActionsToolbar
-            {...bulkActionsToolbarOptions}
-            selectedCount={selectedPaths.size}
-            onClearSelection={clearSelection}
-            actions={bulkActions}
-          />
-        </div>
-      );
-    }
-
-    return null;
+    return (
+      <div
+        className={toolbarBaseClassName}
+        role="toolbar"
+        aria-label="File Manager Toolbar"
+      >
+        <DialFileManagerToolbar
+          {...toolbarOptions}
+          areHiddenFilesVisible={areHiddenFilesVisible}
+          onToggleHiddenFiles={toggleHiddenFilesVisibility}
+          isNewButtonVisible={isNewButtonVisible}
+          isNewButtonDisabled={isNewButtonDisabled}
+          newButtonDropdownItems={newActions}
+        />
+      </div>
+    );
   }, [
-    handleToolbarTabChange,
-    bulkActionsToolbarOptions,
-    selectedPaths,
-    clearSelection,
-    bulkActions,
     areHiddenFilesVisible,
     toggleHiddenFilesVisibility,
     toolbarOptions,
     isNewButtonVisible,
     isNewButtonDisabled,
     newActions,
-    managerLabel,
   ]);
+
+  const renderBulkActionsToolbar = useCallback(() => {
+    if (!bulkActionsToolbarOptions || selectedPaths.size === 0) return null;
+
+    return (
+      <div className={bulkActionsToolbarWrapperClassName}>
+        <DialFileManagerBulkActionsToolbar
+          {...bulkActionsToolbarOptions}
+          selectedCount={selectedPaths.size}
+          onClearSelection={clearSelection}
+          actions={bulkActions}
+        />
+      </div>
+    );
+  }, [bulkActionsToolbarOptions, selectedPaths, clearSelection, bulkActions]);
 
   useImperativeHandle(
     actionsRef,
@@ -1148,30 +1206,48 @@ export const DialFileManagerView: FC = () => {
   const renderFoldersTree = useCallback(() => {
     if (isCompactView) return null;
 
-    // The 2.0 sidebar is itself the named landmark for this panel, so the
-    // wrapper below is a plain layout box: an `aside` around it would announce
-    // the tree twice.
+    /*
+     * The panel is its own landmark: the kit sidebar used to carry that role,
+     * and without it the tree would sit in the page with nothing naming it.
+     * Its heading names it where there is one.
+     */
     return (
-      <div className="min-h-0 min-w-0 h-full flex-none">
-        <ConditionalResizableContainer
-          defaultWidth={sidebarCurrentWidth}
-          width={sidebarCurrentWidth}
-          onResizeStop={setSidebarCurrentWidth}
-          onResize={sidebarResizingHandler}
-          minWidth={FOLDERS_TREE_PANEL_MIN_WIDTH}
-          maxWidth={FOLDERS_TREE_PANEL_MAX_WIDTH}
-          enabled={!isTreeCollapsed}
-        >
-          <CollapsibleSidebar
-            width={sidebarCurrentWidth}
-            title={header}
-            ariaLabel="File Manager Tree Navigation"
-            className={containerClassName}
-            titleClassName="dial-body-text text-primary"
-            additionalButtons={additionalButtons}
-            isOpened={!isTreeCollapsed}
-            onToggle={toggleTreeCollapse}
-          >
+      <aside
+        className={containerClassName}
+        aria-labelledby={header ? sidebarHeadingId : undefined}
+        aria-label={header ? undefined : 'File Manager Tree Navigation'}
+      >
+        <div className={sidebarContentClassName}>
+          {header || additionalButtons ? (
+            <div className={sidebarHeadingRowClassName}>
+              {header ? (
+                <h1 id={sidebarHeadingId} className={sidebarHeadingClassName}>
+                  {header}
+                </h1>
+              ) : null}
+
+              {additionalButtons ? (
+                <div className="flex shrink-0 items-center gap-1">
+                  {additionalButtons}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {tabs?.length && activeTab ? (
+            <div className="px-3 py-2">
+              <FilterChips
+                items={tabs}
+                value={activeTab}
+                onChange={handleTabChange}
+                aria-labelledby={header ? sidebarHeadingId : undefined}
+                aria-label={header ? undefined : tabsAriaLabel}
+                className="shrink-0"
+              />
+            </div>
+          ) : null}
+
+          <div className={sidebarTreeContainerClassName}>
             <DialFoldersTree
               {...forwardedTreeProps}
               items={items}
@@ -1202,18 +1278,20 @@ export const DialFileManagerView: FC = () => {
               onCreateFolderSave={saveFolderCreation}
               newFolderDefaultName={newFolderDefaultName}
             />
-          </CollapsibleSidebar>
-        </ConditionalResizableContainer>
-      </div>
+          </div>
+        </div>
+      </aside>
     );
   }, [
     isCompactView,
-    sidebarCurrentWidth,
-    isTreeCollapsed,
-    header,
     containerClassName,
     additionalButtons,
-    toggleTreeCollapse,
+    header,
+    sidebarHeadingId,
+    tabs,
+    activeTab,
+    tabsAriaLabel,
+    handleTabChange,
     forwardedTreeProps,
     items,
     rootItem?.path,
@@ -1380,7 +1458,7 @@ export const DialFileManagerView: FC = () => {
       defaultColDef: {
         comparator: baseColumnComparator,
         ...forwardedGridOptions.additionalGridOptions?.defaultColDef,
-        floatingFilter: navigationPanelOptions?.searchable
+        floatingFilter: searchable
           ? false
           : forwardedGridOptions.additionalGridOptions?.defaultColDef
               ?.floatingFilter,
@@ -1411,7 +1489,7 @@ export const DialFileManagerView: FC = () => {
     [
       forwardedGridOptions.additionalGridOptions,
       cellClickHandler,
-      navigationPanelOptions?.searchable,
+      searchable,
       cancelFolderCreation,
       saveFolderCreation,
       getDisplayName,
@@ -1492,17 +1570,11 @@ export const DialFileManagerView: FC = () => {
         className={mergeClasses(
           containerBaseClassName,
           {
-            'gap-3 pt-4': bulkActionsToolbarOptions && selectedPaths.size > 0,
-            'gap-4 p-3 pt-4': isCompactView,
-            'gap-2 pt-2':
-              isCompactView &&
-              bulkActionsToolbarOptions &&
-              selectedPaths.size > 0,
+            'p-3 pt-4': isCompactView,
           },
           className,
         )}
       >
-        {renderToolbar()}
         <div className={mergeClasses(mainGridClassName, gridClassName)}>
           {renderFoldersTree()}
           <div
@@ -1510,31 +1582,57 @@ export const DialFileManagerView: FC = () => {
               'gap-3': isCompactView,
             })}
           >
-            {showNavigationPanel && (
-              <DialFileManagerNavigationPanel
-                {...(navigationPanelOptions ?? {})}
-                makeHref={(segments) => segments.join('/')}
-                path={currentPath}
-                onItemClick={handleBreadcrumbItemClick}
-                rootItemPath={rootItem?.path}
-                rootItemLabel={rootItem?.label}
-                value={effectiveSearchValue}
-                onSearchChange={handleSearchChange}
-                isCompactView={isCompactView}
-                labelClassName="dial-tiny-text"
-              />
-            )}
+            <div className={contentHeaderClassName}>
+              {showNavigationPanel && (
+                <DialFileManagerNavigationPanel
+                  {...breadcrumbPanelOptions}
+                  makeHref={(segments) => segments.join('/')}
+                  path={currentPath}
+                  onItemClick={handleBreadcrumbItemClick}
+                  rootItemPath={rootItem?.path}
+                  rootItemLabel={rootItem?.label}
+                  labelClassName="dial-tiny-text"
+                />
+              )}
 
-            <section
-              role="region"
-              aria-label="File Manager Grid View"
-              className={mergeClasses(gridBaseClassName, 'relative')}
+              {renderToolbar()}
+            </div>
+
+            {/*
+             * The card is a plain box: the search row heads it but is not part
+             * of the grid view, so the region lands on the table below. A file
+             * dropped anywhere on the card, search row included, still uploads.
+             */}
+            <div
+              className={mergeClasses(gridPanelClassName, 'relative')}
               onDragEnter={handleDragEnter}
               onDragLeave={handleDragLeave}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
             >
-              {memoizedGridContent}
+              {searchable && (
+                <DialFileManagerSearchBar
+                  elementId={searchElementId}
+                  placeholder={searchPlaceholder}
+                  size={searchSize}
+                  withoutBorder={searchWithoutBorder}
+                  disabled={searchDisabled}
+                  invalid={searchInvalid}
+                  searchClassName={searchClassName}
+                  searchContainerClassName={searchContainerClassName}
+                  value={effectiveSearchValue}
+                  onSearchChange={handleSearchChange}
+                />
+              )}
+
+              <section
+                role="region"
+                aria-label="File Manager Grid View"
+                className={gridBaseClassName}
+              >
+                {memoizedGridContent}
+              </section>
+
               <FileManagerTooltip
                 disabledGridRowIds={disabledGridRowIds}
                 gridRows={gridRows}
@@ -1543,7 +1641,9 @@ export const DialFileManagerView: FC = () => {
                 allowedFileTypes={allowedFileTypes}
                 maxSelectableFileSize={maxSelectableFileSize}
               />
-            </section>
+
+              {renderBulkActionsToolbar()}
+            </div>
           </div>
         </div>
 

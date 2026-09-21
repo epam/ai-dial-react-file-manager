@@ -58,7 +58,6 @@ const meta = {
     onPathChange: { action: 'onPathChange' },
   },
   args: {
-    managerLabel: <h1 className="text-primary">Title</h1>,
     defaultPath: 'All files',
     items: itemsMock,
     treeOptions: {
@@ -94,12 +93,24 @@ export const Basic: Story = {
 
 export const PreselectedNode: Story = {
   args: {
-    managerLabel: <h1 className="text-primary">Title</h1>,
     defaultPath: 'All files/Design/Icons/SVG/24px',
     gridOptions: {
       selectionMode: GridSelectionMode.MULTIPLE,
     },
     defaultSelectedPaths: new Set(['All files/Design/Icons/SVG/24px/logo.svg']),
+    // The story opens with a live selection, so it is where the floating bulk
+    // actions bar is seen.
+    bulkActionsToolbarOptions: {
+      getSelectionLabel: (selectedCount: number) =>
+        `item${selectedCount === 1 ? '' : 's'} selected`,
+      actionLabels: {
+        [DialFileManagerActions.Duplicate]: 'Duplicate',
+        [DialFileManagerActions.Copy]: 'Copy to',
+        [DialFileManagerActions.Move]: 'Move to',
+        [DialFileManagerActions.Download]: 'Download',
+        [DialFileManagerActions.Delete]: 'Delete',
+      },
+    },
     treeOptions: {
       expandedPaths: new Set<string>([
         'All files',
@@ -208,8 +219,8 @@ const WithTabsControlledComponent = (args: DialFileManagerProps) => {
     <div className="h-[640px]">
       <DialFileManager
         {...args}
-        toolbarOptions={{
-          ...args.toolbarOptions,
+        treeOptions={{
+          ...args.treeOptions,
           tabs: tabs,
           activeTab: activeTab,
           onTabChange: handleTabChange,
@@ -242,8 +253,8 @@ const WithTabsInitialTabComponent = (args: DialFileManagerProps) => {
     <div className="h-[640px]">
       <DialFileManager
         {...args}
-        toolbarOptions={{
-          ...args.toolbarOptions,
+        treeOptions={{
+          ...args.treeOptions,
           tabs: tabs,
           activeTab: activeTab,
           onTabChange: handleTabChange,
@@ -345,7 +356,7 @@ const DestinationPopupLoadedEmptyFolderComponent = (
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             [DialFileManagerActions.Copy]: 'Copy to',
           },
@@ -544,11 +555,14 @@ const PopupComponent = (args: DialFileManagerProps) => {
               rename: 'Rename',
             },
           }}
-          toolbarOptions={{
-            ...(args.toolbarOptions ?? {}),
+          treeOptions={{
+            ...(args.treeOptions ?? {}),
             tabs: tabs,
             activeTab: activeTab,
             onTabChange: handleTabChange,
+          }}
+          toolbarOptions={{
+            ...(args.toolbarOptions ?? {}),
             newActions: {
               newFolder: { label: 'New Folder' },
               uploadFiles: { label: 'Upload Files' },
@@ -557,7 +571,7 @@ const PopupComponent = (args: DialFileManagerProps) => {
           }}
           bulkActionsToolbarOptions={{
             getSelectionLabel: (selectedCount: number) =>
-              `${selectedCount} item(s) selected`,
+              `item${selectedCount === 1 ? '' : 's'} selected`,
             actionLabels: {
               duplicate: 'Duplicate',
               copy: 'Copy to',
@@ -876,7 +890,7 @@ const WithConflictResolutionComponent = (args: DialFileManagerProps) => {
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount: number) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             duplicate: 'Duplicate',
             copy: 'Copy to',
@@ -1037,7 +1051,7 @@ const WithMultipleConflictsComponent = (args: DialFileManagerProps) => {
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount: number) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             copy: 'Copy to',
             move: 'Move to',
@@ -1263,14 +1277,11 @@ const WithFileMetadataInPopupComponent = (args: DialFileManagerProps) => {
               rename: 'Rename',
             },
           }}
-          toolbarOptions={{
-            ...(args.toolbarOptions ?? {}),
+          treeOptions={{
+            ...(args.treeOptions ?? {}),
             tabs: tabs,
             activeTab: activeTab,
             onTabChange: handleTabChange,
-          }}
-          treeOptions={{
-            ...(args.treeOptions ?? {}),
             collapsed: false,
             expandedPaths: new Set<string>([rootFolder.path]),
           }}
@@ -1352,7 +1363,7 @@ export const WithUnshareAction: Story = {
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount: number) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             duplicate: 'Duplicate',
             copy: 'Copy to',
@@ -1403,7 +1414,7 @@ export const WithRemoveAccessAction: Story = {
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount: number) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             duplicate: 'Duplicate',
             copy: 'Copy to',
@@ -1645,8 +1656,8 @@ const EmptyStatePerTabComponent = (args: DialFileManagerProps) => {
         emptyStateIcon={emptyState?.icon}
         emptyStateTitle={emptyState?.title}
         emptyStateDescription={emptyState?.description}
-        toolbarOptions={{
-          ...args.toolbarOptions,
+        treeOptions={{
+          ...args.treeOptions,
           tabs: tabs,
           activeTab: activeTab,
           onTabChange: handleTabChange,
@@ -2103,7 +2114,7 @@ const WithAllowedFileTypesComponent = (args: DialFileManagerProps) => {
         }}
         bulkActionsToolbarOptions={{
           getSelectionLabel: (selectedCount: number) =>
-            `${selectedCount} item(s) selected`,
+            `item${selectedCount === 1 ? '' : 's'} selected`,
           actionLabels: {
             duplicate: 'Duplicate',
             download: 'Download',

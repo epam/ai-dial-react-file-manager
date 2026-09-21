@@ -1,46 +1,18 @@
-import {
-  type FC,
-  type MouseEvent,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
+import { type FC, type MouseEvent, useMemo } from 'react';
 
 import { getSegments } from '@/utils/path';
 import {
   DialBreadcrumb,
   type DialBreadcrumbPathItem,
   type DialBreadcrumbProps,
-  type DialSearchProps,
-  ElementSize,
-  GhostIconButton,
   mergeClasses,
-  Search,
 } from '@epam/ai-dial-ui-kit';
-import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
-import { IconArrowLeft } from '@tabler/icons-react';
-import {
-  breadcrumbContainerClassName,
-  panelBaseClassName,
-  searchContainerWrapperClassName,
-} from './constants';
+import { breadcrumbContainerClassName, panelBaseClassName } from './constants';
 
-export interface DialFileManagerNavigationPanelProps
-  extends
-    Omit<
-      DialBreadcrumbProps,
-      'pathItems' | 'children' | 'className' | 'separator'
-    >,
-    Omit<
-      DialSearchProps,
-      | 'onChange'
-      | 'elementId'
-      | 'value'
-      | 'className'
-      | 'containerClassName'
-      | 'placeholder'
-      | 'size'
-    > {
+export interface DialFileManagerNavigationPanelProps extends Omit<
+  DialBreadcrumbProps,
+  'pathItems' | 'children' | 'className' | 'separator'
+> {
   path?: string;
   makeHref?: (segments: string[], index: number) => string | undefined;
   className?: string;
@@ -49,35 +21,20 @@ export interface DialFileManagerNavigationPanelProps
   rootItemPath?: string;
   rootItemLabel?: string;
   breadcrumbsHiddenPathPart?: string;
-
-  searchable?: boolean;
-  value?: string | number | null;
-  elementId?: string;
-  onSearchChange?: (value: string) => void;
-  searchClassName?: string;
-  searchContainerClassName?: string;
-  isCompactView?: boolean;
-  backButtonLabel?: string;
 }
 
 /**
  * FileManagerNavigationPanel
  *
- * A navigation header for the File Manager that displays a breadcrumb trail on the left
- * and an optional, controlled Search on the right.
+ * The breadcrumb trail of the File Manager, shown at the leading edge of the
+ * content header next to the toolbar actions. The search field it used to carry
+ * on its right now heads the grid card as {@link DialFileManagerSearchBar}.
  *
- * Uses the shared {@link DialBreadcrumb} for navigation and the shared {@link DialSearch}
- * for the controlled search input.
+ * Uses the shared {@link DialBreadcrumb} for navigation.
  *
  * @example
  * ```tsx
- * <FileManagerNavigationPanel
- *   path="Organization/Folder 4"
- *   searchable
- *   elementId="file-manager-search"
- *   value={query}
- *   onSearchChange={(val) => setQuery(val)}
- * />
+ * <FileManagerNavigationPanel path="Organization/Folder 4" />
  *
  * // With clickable parents
  * <FileManagerNavigationPanel
@@ -94,15 +51,6 @@ export interface DialFileManagerNavigationPanelProps
  * @param [className] - Additional classes for the panel container
  * @param [breadcrumbClassName] - ClassName forwarded to inner `DialBreadcrumb`
  * @param [breadcrumbsHiddenPathPart] - A slash-separated path fragment whose segments will be omitted from the rendered breadcrumb trail.
- * @param [searchable=true] - Whether to render the search control
- * @param [value] - Controlled value for the search input (parent-managed)
- * @param [elementId="file-manager-search"] - DOM id for the internal DialSearch input
- * @param [size=ElementSize.Standard] - Size of the search input (from DialSearchProps)
- * @param [onSearchChange] - Callback fired when the search value changes
- * @param [searchClassName] - Extra classes for the search input element
- * @param [searchContainerClassName] - Extra classes for the search container
- * @param [isCompactView=false] - Whether the component should render in compact mode
- * @param [backButtonLabel="Back"] - Accessible name of the control that collapses the expanded search in compact mode
  */
 export const DialFileManagerNavigationPanel: FC<
   DialFileManagerNavigationPanelProps
@@ -119,17 +67,6 @@ export const DialFileManagerNavigationPanel: FC<
 
   className,
   breadcrumbClassName,
-
-  searchable = true,
-  value,
-  elementId = 'file-manager-search',
-  disabled,
-  invalid,
-  onSearchChange,
-  searchClassName,
-  searchContainerClassName,
-  isCompactView = false,
-  backButtonLabel = 'Back',
 }) => {
   const breadcrumbPathItems: DialBreadcrumbPathItem[] | undefined =
     useMemo(() => {
@@ -219,44 +156,11 @@ export const DialFileManagerNavigationPanel: FC<
       onItemClick,
     ]);
 
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-
-  const handleSearch = (value?: string) => {
-    onSearchChange?.(value ?? '');
-  };
-
-  const expandSearch = useCallback(() => {
-    if (isCompactView && !isSearchExpanded) {
-      setIsSearchExpanded(true);
-      const searchElement = document.getElementById(elementId);
-      if (searchElement) {
-        searchElement.focus();
-      }
-    }
-  }, [elementId, isSearchExpanded, isCompactView]);
-
-  const handleSearchBlur = useCallback(() => {
-    if (!value || String(value).trim() === '') {
-      onSearchChange?.('');
-    }
-  }, [value, onSearchChange]);
-
-  const renderNavigation = useCallback(() => {
-    if (isCompactView && isSearchExpanded) {
-      return (
-        <GhostIconButton
-          size={ElementSize.Standard}
-          aria-label={backButtonLabel}
-          icon={<IconArrowLeft {...FILE_MANAGER_ICON_PROPS} />}
-          onClick={() => {
-            setIsSearchExpanded(false);
-            onSearchChange?.('');
-          }}
-        />
-      );
-    }
-
-    return (
+  return (
+    <div
+      className={mergeClasses(panelBaseClassName, className)}
+      aria-label="navigation-panel"
+    >
       <div className={breadcrumbContainerClassName}>
         <DialBreadcrumb
           pathItems={breadcrumbPathItems}
@@ -265,55 +169,6 @@ export const DialFileManagerNavigationPanel: FC<
           className={breadcrumbClassName}
         />
       </div>
-    );
-  }, [
-    ariaLabel,
-    backButtonLabel,
-    breadcrumbClassName,
-    breadcrumbPathItems,
-    isSearchExpanded,
-    isCompactView,
-    labelClassName,
-    onSearchChange,
-  ]);
-
-  return (
-    <div
-      className={mergeClasses(
-        panelBaseClassName,
-        {
-          'gap-3': isCompactView,
-        },
-        className,
-      )}
-      aria-label="navigation-panel"
-    >
-      {renderNavigation()}
-      {searchable && (
-        <div
-          className={mergeClasses(searchContainerWrapperClassName, {
-            'w-[40px]': isCompactView && !isSearchExpanded,
-            'w-full': isCompactView && isSearchExpanded,
-          })}
-          role="search"
-          aria-label="Search"
-          onClick={expandSearch}
-        >
-          <Search
-            id={elementId}
-            value={value ?? ''}
-            onChange={handleSearch}
-            disabled={disabled}
-            onBlur={handleSearchBlur}
-            invalid={invalid}
-            className={searchClassName}
-            wrapperClassName={
-              isCompactView && !isSearchExpanded ? 'pl-2.5' : ''
-            }
-            containerClassName={searchContainerClassName}
-          />
-        </div>
-      )}
     </div>
   );
 };

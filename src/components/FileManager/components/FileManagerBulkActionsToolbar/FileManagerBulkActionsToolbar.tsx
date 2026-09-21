@@ -2,17 +2,26 @@ import { useFlexibleActions } from '@/hooks/use-flexible-actions';
 import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import {
   ButtonAppearance,
+  DangerButton,
   Dropdown,
+  ElementSize,
   FlexibleActionsDirection,
   GhostIconButton,
-  NeutralButton,
   PrimaryButton,
   type DropdownItem,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { IconDotsVertical, IconX } from '@tabler/icons-react';
-import type { FC } from 'react';
-import { ACTIONS_GAP, CONTAINER_PADDING } from './constants';
+import type { FC, ReactNode } from 'react';
+import {
+  ACTIONS_GAP,
+  CONTAINER_PADDING,
+  bulkActionsContainerClassName,
+  bulkActionsCountClassName,
+  bulkActionsGroupClassName,
+  bulkActionsLabelClassName,
+  bulkActionsStripClassName,
+} from './constants';
 
 export interface DialActionDropdownItem extends DropdownItem {
   title: string;
@@ -20,16 +29,27 @@ export interface DialActionDropdownItem extends DropdownItem {
 }
 
 export interface DialFileManagerBulkActionsToolbarProps {
-  getSelectionLabel: (selectedCount: number) => string;
+  /**
+   * The wording beside the count, e.g. `"items selected"`. The bar draws the
+   * count itself as a badge, so this returns the sentence around it rather than
+   * the whole label; the count is passed in for pluralisation.
+   */
+  getSelectionLabel: (selectedCount: number) => ReactNode;
   onClearSelection: () => void;
   actions: DialActionDropdownItem[];
   selectedCount: number;
+  /** Accessible name of the control that drops the selection. */
+  clearSelectionLabel?: string;
 }
 
 /**
- * A responsive toolbar component displayed when files or items are selected
- * in the file manager. It shows a label with the number or name of selected
- * items and provides contextual action buttons.
+ * A responsive toolbar displayed when files or items are selected in the file
+ * manager. It shows a label with the number or name of selected items, a
+ * control that drops the selection, and the contextual action buttons.
+ *
+ * The bar floats over the bottom of the grid instead of replacing the content
+ * header, so the breadcrumbs and the header actions stay reachable while a
+ * selection is live. It is sized by its contents; the caller positions it.
  *
  * On smaller screens or when there’s not enough horizontal space,
  * some action buttons are automatically moved into a dropdown menu.
@@ -44,14 +64,14 @@ export interface DialFileManagerBulkActionsToolbarProps {
  * **Layout logic:**
  * - `measureRef`: hidden element used to measure the width of each button.
  * - `containerRef`: visible container where the toolbar is rendered.
- * - `leftSectionRef`: left section containing the "selected items" button.
+ * - `leftSectionRef`: left section containing the selection label and its clear control.
  * - `visibleCount`: dynamically updated number of visible actions.
  * - Uses `ResizeObserver` + `requestAnimationFrame` to update layout on resize.
  *
  * @example
  * ```tsx
  * <DialFileManagerSelectionToolbar
- *   getSelectionLabel={(count) => `${count} files selected`}
+ *   getSelectionLabel={(count) => `file${count === 1 ? '' : 's'} selected`}
  *   onClearSelection={() => console.log('Cleared')}
  *   actions={[
  *     { key: 'download', title: 'Download', icon: <IconDownload {...FILE_MANAGER_ICON_PROPS} />, onClick: () => {} },
@@ -61,17 +81,24 @@ export interface DialFileManagerBulkActionsToolbarProps {
  * ```
  *
  * @param {object} props
- * @param {() => string} props.getSelectionLabel - Function to get the label showing current selection status (e.g., "3 files selected").
+ * @param {(count: number) => ReactNode} props.getSelectionLabel - The wording beside the count (e.g., "files selected"). The bar draws the count itself as a badge; the count is passed in so the caller can pluralise.
  * @param {() => void} props.onClearSelection - Callback invoked when the clear selection button is clicked.
  * @param {DialActionDropdownItem[]} props.actions - List of available toolbar actions.
  *   Each action defines a title, icon, key, and optional click handler.
  * @param {number} [props.selectedCount] - Count of currently selected items.
+ * @param {string} [props.clearSelectionLabel='Clear selection'] - Accessible name of the control that drops the selection.
  *
  * @returns {JSX.Element} A responsive toolbar that adjusts visible actions based on available width.
  */
 export const DialFileManagerBulkActionsToolbar: FC<
   DialFileManagerBulkActionsToolbarProps
-> = ({ getSelectionLabel, onClearSelection, actions, selectedCount }) => {
+> = ({
+  getSelectionLabel,
+  onClearSelection,
+  actions,
+  selectedCount,
+  clearSelectionLabel = 'Clear selection',
+}) => {
   const isMobile = useIsMobileScreen();
 
   const {
@@ -94,53 +121,74 @@ export const DialFileManagerBulkActionsToolbar: FC<
         ref={measureRef}
         className="absolute top-0 left-0 invisible pointer-events-none overflow-hidden whitespace-nowrap flex gap-3"
       >
-        {actions.map(({ key, icon, title }) => (
-          <NeutralButton key={key} iconBefore={icon} label={title} />
-        ))}
+        {actions.map(({ key, icon, title, danger }) => {
+          const MeasuredButton = danger ? DangerButton : PrimaryButton;
+
+          return (
+            <MeasuredButton
+              key={key}
+              appearance={ButtonAppearance.Ghost}
+              iconBefore={icon}
+              label={title}
+            />
+          );
+        })}
       </div>
 
-      <div
-        ref={containerRef}
-        className="rounded bg-layer-raised p-2 flex justify-between items-center w-full"
-        role="toolbar"
-        aria-label="File bulk actions"
-      >
-        <div ref={leftSectionRef}>
-          <PrimaryButton
-            label={selectionLabel}
-            onClick={onClearSelection}
-            textClassName="text-accent whitespace-nowrap"
-            appearance={ButtonAppearance.Ghost}
-            iconBefore={<IconX {...FILE_MANAGER_ICON_PROPS} />}
-          />
-        </div>
+      <div ref={containerRef} className={bulkActionsStripClassName}>
+        <div
+          className={bulkActionsContainerClassName}
+          role="toolbar"
+          aria-label="File bulk actions"
+        >
+          <div ref={leftSectionRef} className={bulkActionsLabelClassName}>
+            <span className={bulkActionsCountClassName}>{selectedCount}</span>
+            <span className="whitespace-nowrap">{selectionLabel}</span>
+            <GhostIconButton
+              size={ElementSize.Small}
+              aria-label={clearSelectionLabel}
+              tooltipProps={{ tooltip: clearSelectionLabel }}
+              icon={<IconX {...FILE_MANAGER_ICON_PROPS} />}
+              onClick={onClearSelection}
+            />
+          </div>
 
-        <div className="flex flex-1 w-full gap-3 items-center justify-end">
-          {hiddenActions.length > 0 && (
-            <Dropdown
-              items={hiddenActions}
-              allowedPlacements={['bottom', 'bottom-start']}
-            >
-              <GhostIconButton
-                className="h-[38px]"
-                icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
-              />
-            </Dropdown>
-          )}
+          <div className={bulkActionsGroupClassName}>
+            {hiddenActions.length > 0 && (
+              <Dropdown
+                items={hiddenActions}
+                allowedPlacements={['bottom', 'bottom-start']}
+              >
+                <GhostIconButton
+                  className="h-[38px]"
+                  icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
+                />
+              </Dropdown>
+            )}
 
-          {visibleActions.map(
-            ({ key, icon, tooltip, title, onClick, disabled }) => (
-              <NeutralButton
-                className="!p-[9px]"
-                key={key}
-                iconBefore={icon}
-                label={title}
-                disabled={disabled}
-                tooltipProps={{ tooltip }}
-                onClick={(domEvent) => onClick?.({ key, domEvent })}
-              />
-            ),
-          )}
+            {visibleActions.map(
+              ({ key, icon, tooltip, title, onClick, disabled, danger }) => {
+                /*
+                 * The row reads as a set of links rather than filled buttons:
+                 * no fill, accent labels, and the one destructive action in the
+                 * danger colour.
+                 */
+                const ActionButton = danger ? DangerButton : PrimaryButton;
+
+                return (
+                  <ActionButton
+                    key={key}
+                    appearance={ButtonAppearance.Ghost}
+                    iconBefore={icon}
+                    label={title}
+                    disabled={disabled}
+                    tooltipProps={{ tooltip }}
+                    onClick={(domEvent) => onClick?.({ key, domEvent })}
+                  />
+                );
+              },
+            )}
+          </div>
         </div>
       </div>
     </>
