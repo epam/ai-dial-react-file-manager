@@ -4,15 +4,16 @@ import {
   DialFileName,
   DialFolderName,
   Grid,
-  DIAL_ICON_SIZE,
   Dropdown,
   DropdownTrigger,
   Popup,
   PopupSize,
   RadioGroup,
+  ElementSize,
+  InlineSelectTrigger,
+  mergeClasses,
 } from '@epam/ai-dial-ui-kit';
 import { BASE_FILE_MANAGER_ICON_SIZE } from '@/components/FileManager/constants';
-import { FILE_MANAGER_ICON_STROKE } from '@/constants/icon';
 import type { DropdownItem, RadioGroupItem } from '@epam/ai-dial-ui-kit';
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
@@ -20,9 +21,8 @@ import {
   DialFileManagerConflictActions,
   DialFileManagerConflictStrategies,
 } from '@/types/file-manager';
-import { IconChevronDown, IconCircleFilled } from '@tabler/icons-react';
+import { IconCircleFilled } from '@tabler/icons-react';
 import type { ColDef } from 'ag-grid-community';
-import classNames from 'classnames';
 import { type FC, useCallback, useMemo, useState } from 'react';
 
 export interface FileConflictDecision {
@@ -278,9 +278,17 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
             },
           ];
 
-          const activeItem = dropdownItems.find(
-            (item) => item.key === params.data.action,
-          );
+          /*
+           * The trigger renders the chosen action as plain text, so its label
+           * comes from the source strings rather than from the dropdown item,
+           * whose own `label` is a ReactNode.
+           */
+          const triggerLabels: Record<DialFileManagerConflictActions, string> =
+            {
+              [DialFileManagerConflictActions.Replace]: replaceLabel,
+              [DialFileManagerConflictActions.Duplicate]: duplicateLabel,
+              [DialFileManagerConflictActions.Cancel]: cancelActionLabel,
+            };
 
           const isOpen = openDropdownPath === params.data.path;
 
@@ -308,20 +316,12 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
                   setOpenDropdownPath(open ? params.data.path : undefined);
                 }}
               >
-                <button type="button" className="flex items-center gap-2">
-                  <span className="flex items-center gap-2">
-                    {activeItem?.icon}
-                    {activeItem?.label ?? replaceLabel}
-                  </span>
-                  <IconChevronDown
-                    size={DIAL_ICON_SIZE.SM}
-                    stroke={FILE_MANAGER_ICON_STROKE}
-                    className={classNames(
-                      'text-secondary transition-transform',
-                      isOpen && 'rotate-180',
-                    )}
-                  />
-                </button>
+                <InlineSelectTrigger
+                  size={ElementSize.Small}
+                  isOpen={isOpen}
+                  aria-label={actionColumnLabel}
+                  label={triggerLabels[params.data.action]}
+                />
               </Dropdown>
             </div>
           );
@@ -438,7 +438,7 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
       open={open}
       onClose={handleClose}
       size={isSingleFile ? PopupSize.Sm : PopupSize.Md}
-      className={classNames([!isSingleFile && 'w-[600px]'])}
+      className={mergeClasses([!isSingleFile && 'w-[600px]'])}
       header={title}
       preventKeyboardOnOpen
       footer={

@@ -3,12 +3,12 @@ import { createPortal } from 'react-dom';
 import type { FileManagerGridRow } from './FileManagerContext';
 import type { DialFileAcceptType } from '@/models/file-manager';
 import {
+  mergeClasses,
   TooltipContainer,
   TooltipContent,
   TooltipPlacement,
   TooltipTrigger,
 } from '@epam/ai-dial-ui-kit';
-import classNames from 'classnames';
 
 interface FileManagerTooltipProps {
   disabledGridRowIds: Set<string>;
@@ -122,7 +122,7 @@ export const FileManagerTooltip = ({
           <TooltipContainer open={true} placement={TooltipPlacement.Top}>
             <TooltipTrigger asChild>
               <div
-                className={classNames(
+                className={mergeClasses(
                   'fixed z-[-1]',
                   hoveredRowTooltipContent && 'pointer-events-none',
                 )}

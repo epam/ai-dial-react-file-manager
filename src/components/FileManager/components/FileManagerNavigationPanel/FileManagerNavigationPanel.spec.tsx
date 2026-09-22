@@ -67,11 +67,12 @@ describe('Dial UI Kit :: DialFileManagerNavigationPanel', () => {
     expect(container.firstChild).toHaveClass('bg-red-500');
   });
 
-  test('renders breadcrumb even when `path` is undefined (empty trail allowed)', () => {
+  test('falls back to the root item when `path` is undefined', () => {
     render(<DialFileManagerNavigationPanel />);
     expect(
       screen.getByRole('navigation', { name: 'Breadcrumb' }),
     ).toBeInTheDocument();
+    expect(screen.getByText('/')).toBeInTheDocument();
   });
 
   test('renders single "/" item when path resolves to no segments', () => {

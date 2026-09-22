@@ -10,7 +10,9 @@ const meta = {
   parameters: { layout: 'fullscreen' },
   argTypes: {
     ariaLabel: { control: { type: 'text' } },
-    labelClassName: { control: { type: 'text' } },
+    size: { control: { type: 'inline-radio' }, options: ['small', 'heading'] },
+    maxVisibleItems: { control: { type: 'number' } },
+    itemClassName: { control: { type: 'text' } },
     breadcrumbClassName: { control: { type: 'text' } },
 
     path: { control: 'text' },

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { DialFileAcceptType } from '@/models/file-manager';
 import { DialFileNodeType, type DialFile } from '@/models/file';
+import { baseColumnComparator } from '@epam/ai-dial-ui-kit';
 import {
   formatAllowedFileTypesForTooltip,
   collectAllDescendants,
@@ -9,7 +10,6 @@ import {
   normalizeExtensionWithoutDot,
   splitPathAndName,
   getNextFolderName,
-  baseColumnComparator,
   excludePathsFromTree,
 } from './utils';
 

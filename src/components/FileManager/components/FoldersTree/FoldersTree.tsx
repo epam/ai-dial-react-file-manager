@@ -12,7 +12,6 @@ import {
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
-import classNames from 'classnames';
 import {
   CARET_ICON_PROPS,
   FOLDER_LEVEL_PADDING,
@@ -283,7 +282,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                     {isFolder && (
                       <IconCaretRightFilled
                         {...CARET_ICON_PROPS}
-                        className={classNames(
+                        className={mergeClasses(
                           'flex-shrink-0',
                           isExpanded && 'rotate-90 transition-all',
                           isLoaded && !hasValidItems && 'text-transparent',
