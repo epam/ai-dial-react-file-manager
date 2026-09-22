@@ -7,7 +7,6 @@ import type { DialFileManagerActionsRef } from '@/models/file-manager';
 import { DestinationFolderMode } from '@/types/file-manager';
 import {
   ButtonAppearance,
-  type DialNotificationProps,
   Dropdown,
   type DropdownItem,
   ElementSize,
@@ -24,6 +23,7 @@ import {
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { IconDotsVertical, IconEye, IconFolderPlus } from '@tabler/icons-react';
 import {
+  type ComponentProps,
   type FC,
   type ReactNode,
   useCallback,
@@ -50,7 +50,7 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
   sourceFolder?: string;
   disabledPathTooltip?: string;
   collapsedFileTree?: boolean;
-  alertProps?: DialNotificationProps;
+  alertProps?: ComponentProps<typeof Notification>;
   onFolderPopupPathChange?: (newPath?: string) => void;
   processDestinationFolderPath?: (path: string) => string;
   excludedPaths?: string[];

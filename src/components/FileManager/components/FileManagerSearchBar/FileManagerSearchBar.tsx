@@ -1,17 +1,13 @@
 import { useCallback, type FC } from 'react';
 
-import {
-  type DialSearchProps,
-  mergeClasses,
-  Search,
-} from '@epam/ai-dial-ui-kit';
+import { type SearchProps, mergeClasses, Search } from '@epam/ai-dial-ui-kit';
 import {
   searchBarBaseClassName,
   searchInputContainerClassName,
 } from './constants';
 
 export interface DialFileManagerSearchBarProps extends Omit<
-  DialSearchProps,
+  SearchProps,
   'onChange' | 'id' | 'value' | 'className' | 'containerClassName'
 > {
   /** Controlled value for the search input (parent-managed). */

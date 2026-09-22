@@ -23,11 +23,25 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- **UI Kit moved to `0.15.0-dev.9`** — it brings `FilterChips`, the row the
-  folders panel needs, and the public `DIAL_KIT_CLASS` names for the 2.0
-  components. The peer range moved with it: `FilterChips` did not exist in
-  `0.15.0-dev.0`, so a host on an earlier dev build would crash rather than
-  render a filter row.
+- **UI Kit moved to `0.15.0-dev.11`** — it brings `FilterChips`, the row the
+  folders panel needs, the 2.0 `Breadcrumbs` the content header now heads with,
+  and the public `DIAL_KIT_CLASS` names for the 2.0 components. The peer range
+  moved with it: neither component existed in `0.15.0-dev.0`, so a host on an
+  earlier dev build would crash rather than render them.
+- **The breadcrumb trail is the 2.0 `Breadcrumbs`, drawn as the page heading
+  (breaking)** — `DialFileManagerNavigationPanel` was still built on the 1.0
+  `DialBreadcrumb`, which scrolls horizontally on overflow and carries no type
+  scale of its own. It now renders the kit's `Breadcrumbs` at
+  `BreadcrumbsSize.Heading` (`dial-h2-text`), so the trail reads as the content
+  column's title rather than as a strip of small text above one. A trail
+  longer than `maxVisibleItems` (4) collapses its middle behind an ellipsis
+  menu instead of scrolling, and a clipped segment reveals its full label in a
+  tooltip. The panel's prop surface follows the new component:
+  `labelClassName` is now `itemClassName`, `size`, `maxVisibleItems` and
+  `overflowAriaLabel` are new, and `onBeforeNavigate` is gone — the 2.0 trail
+  has no navigation guard, so a host that needs one blocks in `onItemClick`.
+  An undefined `path` now draws the root `/` item, since `Breadcrumbs` renders
+  nothing at all when handed an empty trail.
 - **The storage sections are filter chips, not tabs (breaking)** — the row
   scopes one list to a subset of itself, which is what `FilterChips` is for;
   `Tabs` underlines an option and reads as navigation between panels. The row

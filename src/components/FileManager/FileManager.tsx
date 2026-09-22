@@ -13,7 +13,6 @@ import type {
   ColDef,
   GridApi,
 } from 'ag-grid-community';
-import classNames from 'classnames';
 import {
   useCallback,
   useId,
@@ -31,6 +30,7 @@ import CopyToIcon from '@/assets/icons/copy-to.svg?react';
 import MoveToIcon from '@/assets/icons/move-to.svg?react';
 import IconUnshare from '@/assets/icons/unshare.svg?react';
 import {
+  baseColumnComparator,
   Grid,
   GRID_SELECTION_COLUMN_ID,
   type GridProps,
@@ -130,7 +130,7 @@ import {
 } from './hooks/use-file-manager-columns';
 import { useFileManagerContext } from './hooks/use-file-manager-context';
 import { useGridContextMenu } from './hooks/use-grid-context-menu';
-import { baseColumnComparator, findNodeByPath, getRowTooltip } from './utils';
+import { findNodeByPath, getRowTooltip } from './utils';
 import { useTriggerViewCreateFolder } from './hooks/use-trigger-view-create-folder';
 
 type GridRow = FileManagerGridRow;
@@ -1438,7 +1438,7 @@ export const DialFileManagerView: FC = () => {
 
   const dialGridClassName = useMemo(
     () =>
-      classNames(
+      mergeClasses(
         'min-h-[248px] overflow-auto md:min-h-[266px]',
         isDragging ? 'border border-dashed border-info' : '',
         isDraggingOverWindow && !isDragging
@@ -1591,7 +1591,6 @@ export const DialFileManagerView: FC = () => {
                   onItemClick={handleBreadcrumbItemClick}
                   rootItemPath={rootItem?.path}
                   rootItemLabel={rootItem?.label}
-                  labelClassName="dial-tiny-text"
                 />
               )}
 
