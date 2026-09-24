@@ -1450,7 +1450,6 @@ export const DialFileManagerView: FC = () => {
 
   const gridAdditionalOptions = useMemo<AgGridOptions<GridRow>>(
     () => ({
-      
       headerHeight: COMPACT_VIEW_HEADER_HEIGHT,
       rowHeight: COMPACT_VIEW_HEADER_HEIGHT,
       ...forwardedGridOptions.additionalGridOptions,
