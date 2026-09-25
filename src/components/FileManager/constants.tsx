@@ -9,7 +9,7 @@ export const mainGridClassName =
   'flex min-h-0 min-w-0 h-full gap-4 overflow-hidden';
 
 export const contentGridClassName =
-  'flex flex-col flex-1 min-h-0 min-w-0 h-full px-5 gap-5';
+  'flex flex-col flex-1 min-h-0 min-w-0 h-full px-5 gap-5 pb-4';
 
 export const contentHeaderClassName =
   'flex w-full shrink-0 items-center justify-between gap-4 h-[64px]';
