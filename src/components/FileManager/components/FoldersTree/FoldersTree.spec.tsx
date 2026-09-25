@@ -153,8 +153,6 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
       />,
     );
 
-    expect(
-      screen.queryByText('Shared'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Shared')).not.toBeInTheDocument();
   });
 });

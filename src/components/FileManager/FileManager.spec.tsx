@@ -954,7 +954,9 @@ describe('Dial UI Kit :: FileManager', () => {
     await userEvent.type(searchInput, 'inside-hidden');
 
     expect(await screen.findByText('No data')).toBeInTheDocument();
-    expect(within(getGridRegion()).queryByRole('table')).not.toBeInTheDocument();
+    expect(
+      within(getGridRegion()).queryByRole('table'),
+    ).not.toBeInTheDocument();
   });
 
   test('search with no results hides the grid and shows only the empty-state title', async () => {
@@ -974,7 +976,9 @@ describe('Dial UI Kit :: FileManager', () => {
 
     expect(await screen.findByText('Nothing matches')).toBeInTheDocument();
     expect(screen.queryByText('Folder description')).not.toBeInTheDocument();
-    expect(within(getGridRegion()).queryByRole('table')).not.toBeInTheDocument();
+    expect(
+      within(getGridRegion()).queryByRole('table'),
+    ).not.toBeInTheDocument();
   });
 
   test('search DOES show files from hidden folders when hidden files toggle is on', async () => {
