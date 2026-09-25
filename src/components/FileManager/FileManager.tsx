@@ -1089,12 +1089,8 @@ export const DialFileManagerView: FC = () => {
           elements.push({
             key: 'delete',
             label: treeOptions.actionLabels[DialFileManagerActions.Delete],
-            icon: (
-              <IconTrashX
-                {...FILE_MANAGER_ICON_PROPS}
-                className="text-secondary"
-              />
-            ),
+            icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
+            danger: true,
             onClick: () =>
               openDeleteConfirmation([file], file.parentPath ?? ''),
           });
