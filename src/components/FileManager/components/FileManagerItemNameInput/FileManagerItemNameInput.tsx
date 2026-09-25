@@ -146,8 +146,8 @@ export const DialFileManagerItemNameInput: FC<
         sharedIndicatorTooltip={sharedIndicatorTooltip}
       />
       <Input
-        containerClassName={mergeClasses(
-          '!h-5 !py-[1px] !pl-[7px] pr-[7px]',
+        wrapperClassName={mergeClasses(
+          '!h-5 !py-[1px] !pl-[7px] !pr-[7px]',
           inputContainerClassName,
         )}
         id={elementId}
