@@ -427,6 +427,31 @@ describe('Dial UI Kit :: useGridContextMenu', () => {
     expect(onDelete).toHaveBeenCalledWith(testFile, '/test');
   });
 
+  test('marks only the delete action as danger', () => {
+    const { result } = renderHook(() =>
+      useGridContextMenu({
+        actionLabels: defaultActionLabels,
+        onDuplicate: vi.fn(),
+        onCopy: vi.fn(),
+        onMove: vi.fn(),
+        onDownload: vi.fn(),
+        onRename: vi.fn(),
+        onDelete: vi.fn(),
+        onInfo: vi.fn(),
+        onUnshare: vi.fn(),
+        onGridCreateSiblingFolder: vi.fn(),
+        onGridCreateChildFolder: vi.fn(),
+      }),
+    );
+
+    const dangerKeys = result
+      .current(testFile)
+      .filter((item) => item.danger)
+      .map((item) => item.key);
+
+    expect(dangerKeys).toEqual([DialFileManagerActions.Delete]);
+  });
+
   test('delete action uses empty string when parentPath is undefined', () => {
     const onDelete = vi.fn();
     const fileWithoutParent: DialFile = {
