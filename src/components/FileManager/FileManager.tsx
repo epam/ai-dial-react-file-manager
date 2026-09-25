@@ -17,6 +17,8 @@ import {
   useId,
   useImperativeHandle,
   useMemo,
+  useRef,
+  useState,
   type FC,
   type ReactNode,
   type Ref,
@@ -70,6 +72,9 @@ import {
   FileManagerColumnKey,
   FileManagerRenameTriggerView,
   FileManagerCreateFolderTriggerView,
+  type FileManagerSort,
+  FileManagerSortDirection,
+  FileManagerSortField,
 } from '@/types/file-manager';
 import type { FileManagerGridRow } from './FileManagerContext';
 import { FileManagerProvider } from './FileManagerProvider';
@@ -92,6 +97,10 @@ import {
   type DialFileManagerSearchBarProps,
 } from './components/FileManagerSearchBar/FileManagerSearchBar';
 import {
+  DialFileManagerSortDropdown,
+  type DialFileManagerSortDropdownProps,
+} from './components/FileManagerSortDropdown/FileManagerSortDropdown';
+import {
   DialFileManagerToolbar,
   type DialFileManagerToolbarProps,
 } from './components/FileManagerToolbar/DialFileManagerToolbar';
@@ -112,6 +121,7 @@ import {
   DEFAULT_VISIBLE_COLUMN,
   gridBaseClassName,
   gridPanelClassName,
+  searchRowClassName,
   mainGridClassName,
   sidebarContentClassName,
   sidebarHeadingClassName,
@@ -129,10 +139,15 @@ import {
 } from './hooks/use-file-manager-columns';
 import { useFileManagerContext } from './hooks/use-file-manager-context';
 import { useGridContextMenu } from './hooks/use-grid-context-menu';
-import { findNodeByPath, getRowTooltip } from './utils';
+import { findNodeByPath, getRowTooltip, sortGridRows } from './utils';
 import { useTriggerViewCreateFolder } from './hooks/use-trigger-view-create-folder';
 
 type GridRow = FileManagerGridRow;
+
+const DEFAULT_SORT: FileManagerSort = {
+  field: FileManagerSortField.Name,
+  direction: FileManagerSortDirection.Asc,
+};
 
 export type DialFileManagerConflictResolutionPopupOptions = Omit<
   ConflictResolutionPopupProps,
@@ -253,6 +268,24 @@ export type NavigationPanelOptions = Omit<
     onSearchChange?: (value: string) => void;
   };
 
+/**
+ * The "Sort" menu at the trailing edge of the search row. The sort is
+ * uncontrolled unless `sort` is passed.
+ */
+export type SortOptions = Omit<
+  DialFileManagerSortDropdownProps,
+  'sort' | 'onSortChange'
+> & {
+  /** Whether to render the sort menu. */
+  sortable?: boolean;
+  /** Controlled sort. */
+  sort?: FileManagerSort;
+  /** Initial sort while uncontrolled. */
+  defaultSort?: FileManagerSort;
+  /** Fired with the next sort when a field or a direction is picked. */
+  onSortChange?: (sort: FileManagerSort) => void;
+};
+
 export interface GridOptions extends Omit<
   GridProps<GridRow>,
   'rowData' | 'columnDefs'
@@ -352,6 +385,7 @@ export interface DialFileManagerProps {
 
   showNavigationPanel?: boolean;
   navigationPanelOptions?: NavigationPanelOptions;
+  sortOptions?: SortOptions;
 
   gridOptions?: GridOptions;
   bulkActionsToolbarOptions?: BulkActionsToolbarOptions;
@@ -541,6 +575,7 @@ export interface DialFileManagerProps {
  * @param [treeOptions] - Options that configure the collapsible sidebar, its tab row, and the folders tree
  * @param [showNavigationPanel] - Determines whether to display the breadcrumb trail.
  * @param [navigationPanelOptions] - Options for the breadcrumb trail and the search field above the grid (searchable, value/onSearchChange for controlled search)
+ * @param [sortOptions] - Options for the "Sort" menu beside the search field (sortable, sort/defaultSort/onSortChange, labels). Defaults to name, ascending
  * @param [toolbarOptions] - Options for the header actions: the hidden-files switch and the add button
  * @param [gridOptions] - Options forwarded to `Grid`; supports `columnDefs` override and `filterable` flag and date locale/options
  * @param [bulkActionsToolbarOptions] - Options for the bulk actions toolbar shown when items are selected
@@ -612,6 +647,7 @@ export const DialFileManagerView: FC = () => {
 
     showNavigationPanel,
     navigationPanelOptions,
+    sortOptions,
 
     gridOptions,
     toolbarOptions,
@@ -772,6 +808,47 @@ export const DialFileManagerView: FC = () => {
     searchContainerClassName,
     ...breadcrumbPanelOptions
   } = navigationPanelOptions ?? {};
+
+  const {
+    sortable = true,
+    sort: controlledSort,
+    defaultSort = DEFAULT_SORT,
+    onSortChange,
+    ...sortDropdownProps
+  } = sortOptions ?? {};
+
+  const [uncontrolledSort, setUncontrolledSort] =
+    useState<FileManagerSort>(defaultSort);
+  const sort = controlledSort ?? uncontrolledSort;
+
+  const gridApiRef = useRef<GridApi | null>(null);
+
+  const handleGridApiChange = useCallback(
+    (api: GridApi) => {
+      gridApiRef.current = api;
+      onGridApiChange?.(api);
+    },
+    [onGridApiChange],
+  );
+
+  /*
+   * The menu's order is applied to the row data, so it holds even when the
+   * sorted column is hidden. A header sort the user clicked earlier would sit
+   * on top of it, so picking from the menu clears the column sort.
+   */
+  const handleSortChange = useCallback(
+    (nextSort: FileManagerSort) => {
+      gridApiRef.current?.applyColumnState({ defaultState: { sort: null } });
+      if (!controlledSort) setUncontrolledSort(nextSort);
+      onSortChange?.(nextSort);
+    },
+    [controlledSort, onSortChange],
+  );
+
+  const sortedGridRows = useMemo(
+    () => (sortable ? sortGridRows(gridRows, sort) : gridRows),
+    [gridRows, sort, sortable],
+  );
 
   const sidebarHeadingId = useId();
 
@@ -1535,12 +1612,12 @@ export const DialFileManagerView: FC = () => {
       ) : (
         <Grid<GridRow>
           columnDefs={columnDefs}
-          rowData={gridRows}
+          rowData={sortedGridRows}
           getRowId={gridRowIdGetter}
           loading={filesLoading || searchInProgress}
           getContextMenuItems={getGridContextMenuItems}
           withoutHeaderBorders={isCompactView}
-          onGridApiChange={onGridApiChange}
+          onGridApiChange={handleGridApiChange}
           className={dialGridClassName}
           {...forwardedGridOptions}
           selectionMode={selectionMode}
@@ -1555,7 +1632,7 @@ export const DialFileManagerView: FC = () => {
       ),
     [
       isEmptyStateShown,
-      gridRows,
+      sortedGridRows,
       filesLoading,
       emptyStateRenderer,
       columnDefs,
@@ -1563,7 +1640,7 @@ export const DialFileManagerView: FC = () => {
       searchInProgress,
       getGridContextMenuItems,
       isCompactView,
-      onGridApiChange,
+      handleGridApiChange,
       dialGridClassName,
       forwardedGridOptions,
       selectionMode,
@@ -1623,19 +1700,35 @@ export const DialFileManagerView: FC = () => {
               onDragOver={handleDragOver}
               onDrop={handleDrop}
             >
-              {searchable && (
-                <DialFileManagerSearchBar
-                  elementId={searchElementId}
-                  placeholder={searchPlaceholder}
-                  size={searchSize}
-                  withoutBorder={searchWithoutBorder}
-                  disabled={searchDisabled}
-                  invalid={searchInvalid}
-                  searchClassName={searchClassName}
-                  searchContainerClassName={searchContainerClassName}
-                  value={effectiveSearchValue}
-                  onSearchChange={handleSearchChange}
-                />
+              {(searchable || sortable) && (
+                <div className={searchRowClassName}>
+                  {searchable && (
+                    <DialFileManagerSearchBar
+                      className="flex-1 min-w-0"
+                      elementId={searchElementId}
+                      placeholder={searchPlaceholder}
+                      size={searchSize}
+                      withoutBorder={searchWithoutBorder}
+                      disabled={searchDisabled}
+                      invalid={searchInvalid}
+                      searchClassName={searchClassName}
+                      searchContainerClassName={searchContainerClassName}
+                      value={effectiveSearchValue}
+                      onSearchChange={handleSearchChange}
+                    />
+                  )}
+                  {sortable && (
+                    <DialFileManagerSortDropdown
+                      {...sortDropdownProps}
+                      className={mergeClasses(
+                        'ml-auto shrink-0',
+                        sortDropdownProps.className,
+                      )}
+                      sort={sort}
+                      onSortChange={handleSortChange}
+                    />
+                  )}
+                </div>
               )}
 
               <section

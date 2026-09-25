@@ -3,6 +3,11 @@ import type { DialFileAcceptType } from '@/models/file-manager';
 import { DialFileNodeType, type DialFile } from '@/models/file';
 import { baseColumnComparator } from '@epam/ai-dial-ui-kit';
 import {
+  FileManagerSortDirection,
+  FileManagerSortField,
+} from '@/types/file-manager';
+import type { FileManagerGridRow } from './FileManagerContext';
+import {
   formatAllowedFileTypesForTooltip,
   collectAllDescendants,
   getFolderNestingDepth,
@@ -10,6 +15,7 @@ import {
   normalizeExtensionWithoutDot,
   splitPathAndName,
   getNextFolderName,
+  sortGridRows,
   excludePathsFromTree,
 } from './utils';
 
@@ -382,5 +388,100 @@ describe('Dial UI Kit :: baseColumnComparator', () => {
     expect(
       baseColumnComparator('a', undefined, undefined, undefined, true),
     ).toBe(1);
+  });
+});
+
+describe('Dial UI Kit :: sortGridRows', () => {
+  const row = (
+    name: string,
+    nodeType: DialFileNodeType,
+    extra: Partial<FileManagerGridRow> = {},
+  ): FileManagerGridRow => ({
+    id: name,
+    name,
+    path: `root/${name}`,
+    nodeType,
+    ...extra,
+  });
+
+  const rows: FileManagerGridRow[] = [
+    row('b.txt', DialFileNodeType.ITEM, {
+      contentLength: 300,
+      updatedAt: '2026-01-03T00:00:00Z',
+    }),
+    row('Zeta', DialFileNodeType.FOLDER, { updatedAt: '2026-01-01T00:00:00Z' }),
+    row('a.txt', DialFileNodeType.ITEM, {
+      contentLength: 100,
+      updatedAt: '2026-01-02T00:00:00Z',
+    }),
+    row('alpha', DialFileNodeType.FOLDER, {
+      updatedAt: '2026-01-05T00:00:00Z',
+    }),
+    row('c.txt', DialFileNodeType.ITEM, {
+      contentLength: 200,
+      updatedAt: '2026-01-04T00:00:00Z',
+    }),
+  ];
+
+  const names = (sorted: FileManagerGridRow[]) => sorted.map((r) => r.name);
+
+  it('sorts by name ascending with folders first', () => {
+    expect(
+      names(
+        sortGridRows(rows, {
+          field: FileManagerSortField.Name,
+          direction: FileManagerSortDirection.Asc,
+        }),
+      ),
+    ).toEqual(['alpha', 'Zeta', 'a.txt', 'b.txt', 'c.txt']);
+  });
+
+  it('reverses each group for descending but keeps folders first', () => {
+    expect(
+      names(
+        sortGridRows(rows, {
+          field: FileManagerSortField.Name,
+          direction: FileManagerSortDirection.Desc,
+        }),
+      ),
+    ).toEqual(['Zeta', 'alpha', 'c.txt', 'b.txt', 'a.txt']);
+  });
+
+  it('sorts by modified date', () => {
+    expect(
+      names(
+        sortGridRows(rows, {
+          field: FileManagerSortField.UpdatedAt,
+          direction: FileManagerSortDirection.Desc,
+        }),
+      ),
+    ).toEqual(['alpha', 'Zeta', 'c.txt', 'b.txt', 'a.txt']);
+  });
+
+  it('sorts by size', () => {
+    expect(
+      names(
+        sortGridRows(rows, {
+          field: FileManagerSortField.Size,
+          direction: FileManagerSortDirection.Asc,
+        }),
+      ),
+    ).toEqual(['alpha', 'Zeta', 'a.txt', 'c.txt', 'b.txt']);
+  });
+
+  it('keeps a temporary row on top and does not mutate the input', () => {
+    const input = [
+      ...rows,
+      row('New folder', DialFileNodeType.FOLDER, { isTemporary: true }),
+    ];
+    const snapshot = [...input];
+
+    const sorted = sortGridRows(input, {
+      field: FileManagerSortField.Name,
+      direction: FileManagerSortDirection.Desc,
+    });
+
+    expect(sorted[0].name).toBe('New folder');
+    expect(input).toEqual(snapshot);
   });
 });

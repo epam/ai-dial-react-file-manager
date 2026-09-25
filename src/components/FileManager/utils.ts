@@ -4,6 +4,12 @@ import { extensions } from 'mime-types';
 import type { ReactNode } from 'react';
 import { DEFAULT_FOLDER_BASE_NAME } from './constants';
 import type { FileManagerGridRow } from './FileManagerContext';
+import { baseColumnComparator } from '@epam/ai-dial-ui-kit';
+import {
+  type FileManagerSort,
+  FileManagerSortDirection,
+  FileManagerSortField,
+} from '@/types/file-manager';
 
 export const findNodeByPath = (
   nodes: DialFile[] | undefined,
@@ -332,4 +338,54 @@ export const getNextFolderName = (existingFolders: DialFile[]): string => {
   }
 
   return candidate;
+};
+
+const getRowTime = (row: FileManagerGridRow): number => {
+  const time = row.updatedAt ? new Date(row.updatedAt).getTime() : NaN;
+  return Number.isNaN(time) ? 0 : time;
+};
+
+const getRowSize = (row: FileManagerGridRow): number =>
+  row.contentLength ?? row.size ?? 0;
+
+const compareRowsByField = (
+  a: FileManagerGridRow,
+  b: FileManagerGridRow,
+  field: FileManagerSortField,
+): number => {
+  switch (field) {
+    case FileManagerSortField.UpdatedAt:
+      return getRowTime(a) - getRowTime(b);
+    case FileManagerSortField.Size:
+      return getRowSize(a) - getRowSize(b);
+    case FileManagerSortField.Name:
+    default:
+      return baseColumnComparator(a.name, b.name);
+  }
+};
+
+/**
+ * Orders grid rows for the sort menu. A row still being created stays on top
+ * so its name input never jumps away, and folders lead files the way every
+ * file browser lists them; the chosen field and direction order each group.
+ * Ties fall back to the name so equal dates or sizes keep a stable order.
+ */
+export const sortGridRows = (
+  rows: FileManagerGridRow[],
+  sort: FileManagerSort,
+): FileManagerGridRow[] => {
+  const sign = sort.direction === FileManagerSortDirection.Desc ? -1 : 1;
+
+  return [...rows].sort((a, b) => {
+    if (!!a.isTemporary !== !!b.isTemporary) return a.isTemporary ? -1 : 1;
+
+    const aIsFolder = a.nodeType === DialFileNodeType.FOLDER;
+    const bIsFolder = b.nodeType === DialFileNodeType.FOLDER;
+    if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
+
+    const byField = compareRowsByField(a, b, sort.field);
+    if (byField !== 0) return sign * byField;
+
+    return sign * baseColumnComparator(a.name, b.name);
+  });
 };

@@ -10,6 +10,7 @@ import { DialFileNodeType } from '@/models/file';
 import type {
   FileTreeOptions,
   NavigationPanelOptions,
+  SortOptions,
   GridOptions,
   ToolbarOptions,
   BulkActionsToolbarOptions,
@@ -60,6 +61,7 @@ export interface FileManagerContextValue {
   treeOptions?: FileTreeOptions;
   showNavigationPanel?: boolean;
   navigationPanelOptions?: NavigationPanelOptions;
+  sortOptions?: SortOptions;
   gridOptions?: GridOptions;
   toolbarOptions?: ToolbarOptions;
   bulkActionsToolbarOptions?: BulkActionsToolbarOptions;

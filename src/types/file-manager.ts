@@ -66,3 +66,19 @@ export enum FileManagerColumnKey {
   Actions = '__actions',
   Version = 'version',
 }
+
+export enum FileManagerSortField {
+  Name = 'name',
+  UpdatedAt = 'updatedAt',
+  Size = 'size',
+}
+
+export enum FileManagerSortDirection {
+  Asc = 'asc',
+  Desc = 'desc',
+}
+
+export interface FileManagerSort {
+  field: FileManagerSortField;
+  direction: FileManagerSortDirection;
+}

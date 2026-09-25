@@ -78,3 +78,9 @@ export const DEFAULT_VISIBLE_COLUMN = [
   FileManagerColumnKey.Author,
   FileManagerColumnKey.Actions,
 ];
+
+/*
+ * The search field and the sort menu share one row at the top of the grid
+ * card; the menu keeps its width and the field takes the rest.
+ */
+export const searchRowClassName = 'flex w-full shrink-0 items-center gap-3';
