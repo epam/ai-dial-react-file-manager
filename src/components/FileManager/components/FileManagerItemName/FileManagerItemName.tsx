@@ -6,8 +6,7 @@ import {
 import {
   useEditableItem,
   DialItemType,
-  DialFileName,
-  DialFolderName,
+  FileName,
   BASE_ICON_SIZE,
 } from '@epam/ai-dial-ui-kit';
 import { getForbiddenSymbolsTooltip } from '../../utils';
@@ -36,9 +35,8 @@ export interface DialFileManagerItemNameProps extends DialFileManagerItemNameInp
 /**
  * A component that renders a file or folder name with optional edit mode.
  *
- * When `editing` is `false`, it displays a read-only name via:
- * - `DialFolderName` for folders
- * - `DialFileName` for files
+ * When `editing` is `false`, it displays a read-only name via `FileName`,
+ * which draws the folder or file-type icon by `type`.
  *
  * When `editing` is `true`, it renders an editable input using `DialItemNameInput`,
  * driven by validation and change logic from the `useEditableItem` hook.
@@ -87,7 +85,7 @@ export const DialFileManagerItemName: FC<DialFileManagerItemNameProps> = ({
   hideTooltip = false,
   forbiddenSymbolsRegExp,
   forbiddenSymbolsTooltip,
-  ...restProps
+  details,
 }) => {
   const { value, invalid, invalidMessage, onChange, inputRef } =
     useEditableItem({
@@ -113,30 +111,18 @@ export const DialFileManagerItemName: FC<DialFileManagerItemNameProps> = ({
     );
     const hasRestrictedSymbolsInName = !!tooltipContent;
 
-    if (type === DialItemType.Folder) {
-      return (
-        <DialFolderName
-          name={name}
-          loading={loading}
-          shared={shared}
-          iconSize={iconSize}
-          className="max-w-[428px] truncate"
-          sharedIndicatorClassName={sharedIndicatorClassName}
-          hideTooltip={hideTooltip}
-          isInvalidName={hasRestrictedSymbolsInName}
-          tooltipContent={tooltipContent}
-        />
-      );
-    }
-
     return (
-      <DialFileName
+      <FileName
         className="max-w-[428px]"
-        {...restProps}
         name={name}
+        type={type}
+        fileExtension={fileExtension}
+        details={details}
+        loading={loading}
         shared={shared}
         iconSize={iconSize}
         sharedIndicatorClassName={sharedIndicatorClassName}
+        sharedIndicatorTooltip={sharedIndicatorTooltip}
         hideTooltip={hideTooltip}
         isInvalidName={hasRestrictedSymbolsInName}
         tooltipContent={tooltipContent}
