@@ -16,7 +16,7 @@ describe('Dial UI Kit :: DialFileManagerItemNameInput', () => {
   test('renders icon and input with correct props', () => {
     render(<DialFileManagerItemNameInput {...defaultProps} />);
 
-    const icon = screen.getByLabelText('File type icon');
+    const icon = screen.getByRole('img', { name: 'File' });
     const input = screen.getByDisplayValue('My Item');
 
     expect(icon).toBeInTheDocument();

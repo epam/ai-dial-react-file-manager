@@ -11,12 +11,15 @@ export type {
   GridOptions,
   NavigationPanelOptions,
   NewAction,
+  SortOptions,
   ToolbarOptions,
 } from './components/FileManager/FileManager';
 export { DialDestinationFolderPopup } from './components/FileManager/components/DestinationFolderPopup/DestinationFolderPopup';
 export type { DestinationFolderPopupProps } from './components/FileManager/components/DestinationFolderPopup/DestinationFolderPopup';
 export { DialFoldersTree } from './components/FileManager/components/FoldersTree/FoldersTree';
 export type { DialFoldersTreeProps } from './components/FileManager/components/FoldersTree/FoldersTree';
+export { DialFileManagerSortDropdown } from './components/FileManager/components/FileManagerSortDropdown/FileManagerSortDropdown';
+export type { DialFileManagerSortDropdownProps } from './components/FileManager/components/FileManagerSortDropdown/FileManagerSortDropdown';
 export type {
   FileManagerContextValue,
   FileManagerGridRow,
@@ -52,6 +55,9 @@ export {
   FileManagerCreateFolderTriggerView,
   FileManagerCreateFolderType,
   FileManagerRenameTriggerView,
+  FileManagerSortDirection,
+  FileManagerSortField,
+  type FileManagerSort,
 } from './types/file-manager';
 
 export {

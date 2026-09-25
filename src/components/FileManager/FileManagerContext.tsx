@@ -10,6 +10,7 @@ import { DialFileNodeType } from '@/models/file';
 import type {
   FileTreeOptions,
   NavigationPanelOptions,
+  SortOptions,
   GridOptions,
   ToolbarOptions,
   BulkActionsToolbarOptions,
@@ -60,6 +61,7 @@ export interface FileManagerContextValue {
   treeOptions?: FileTreeOptions;
   showNavigationPanel?: boolean;
   navigationPanelOptions?: NavigationPanelOptions;
+  sortOptions?: SortOptions;
   gridOptions?: GridOptions;
   toolbarOptions?: ToolbarOptions;
   bulkActionsToolbarOptions?: BulkActionsToolbarOptions;
@@ -206,6 +208,7 @@ export interface FileManagerContextValue {
   emptyStateIcon?: ReactNode;
   emptyStateTitle?: string;
   emptyStateDescription?: string;
+  searchEmptyStateTitle?: string;
 
   sharedWithMeIds?: string[];
   onFolderPopupPathChange?: (newPath?: string) => void;

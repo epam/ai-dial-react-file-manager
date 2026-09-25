@@ -4,8 +4,8 @@ import {
   DEFAULT_DATE_LOCALE,
   DateCellRenderer,
   mergeClasses,
-  DialFileName,
-  DialFolderName,
+  FileName,
+  FolderName,
   DialItemType,
   type DateCellRendererProps,
 } from '@epam/ai-dial-ui-kit';
@@ -162,7 +162,7 @@ export const NAME_COLUMN =
         );
 
         return type === DialFileNodeType.FOLDER ? (
-          <DialFolderName
+          <FolderName
             name={params.data.name}
             shared={isSharedByMe}
             sharedIndicatorClassName={sharedIndicatorClassName}
@@ -172,7 +172,7 @@ export const NAME_COLUMN =
             tooltipContent={tooltipContent}
           />
         ) : (
-          <DialFileName
+          <FileName
             name={params.data.name}
             shared={isSharedByMe}
             sharedIndicatorClassName={sharedIndicatorClassName}

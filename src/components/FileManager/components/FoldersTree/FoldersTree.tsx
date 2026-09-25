@@ -240,7 +240,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       const validateHandler =
         onRenameValidate && ((value: string) => onRenameValidate(value, node));
 
-      const selectedClass = isSelected ? 'bg-control-accent-alpha rounded' : '';
+      const selectedClass = isSelected ? 'bg-control-accent-alpha' : '';
 
       const menuItems = isRootFolder ? [] : (getContextMenuItems?.(node) ?? []);
       const tooltipContent = forbiddenSymbolsRegExp
@@ -252,10 +252,12 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
         : undefined;
 
       return (
-        <div key={`${path}-children`} className="cursor-pointer text-secondary">
+        <div key={`${path}-children`} className="cursor-pointer">
           <div className="flex flex-col w-full gap-1" aria-label="folder">
             <Dropdown
-              trigger={[DropdownTrigger.ContextMenu]}
+              trigger={
+                menuItems.length > 0 ? [DropdownTrigger.ContextMenu] : []
+              }
               className="w-full h-[32px]"
               anchorToMouse
               items={menuItems}
@@ -263,7 +265,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
               <div
                 style={{ paddingLeft: `${level * FOLDER_LEVEL_PADDING}px` }}
                 className={mergeClasses(
-                  'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover rounded group/item w-full relative',
+                  'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover rounded-full group/item w-full relative',
                   selectedClass,
                 )}
                 aria-selected={isSelected}
@@ -283,7 +285,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       <IconCaretRightFilled
                         {...CARET_ICON_PROPS}
                         className={mergeClasses(
-                          'flex-shrink-0',
+                          'flex-shrink-0 text-secondary',
                           isExpanded && 'rotate-90 transition-all',
                           isLoaded && !hasValidItems && 'text-transparent',
                         )}
@@ -346,7 +348,10 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   };
 
   return (
-    <div className="flex-1 size-full overflow-y-auto" aria-label="folders-tree">
+    <div
+      className="flex-1 size-full overflow-y-auto pb-6"
+      aria-label="folders-tree"
+    >
       {items.length > 0 ? (
         renderTree(items, 0)
       ) : (

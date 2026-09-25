@@ -5,7 +5,7 @@ import { DialItemType } from '@epam/ai-dial-ui-kit';
 import userEvent from '@testing-library/user-event';
 
 describe('Dial UI Kit :: DialFileManagerItemName', () => {
-  test('renders DialFileName when not editing and type=File', () => {
+  test('renders FileName when not editing and type=File', () => {
     render(
       <DialFileManagerItemName
         name="file.ts"
@@ -19,7 +19,7 @@ describe('Dial UI Kit :: DialFileManagerItemName', () => {
     expect(file).toBeInTheDocument();
   });
 
-  test('renders DialFolderName when not editing and type=Folder', () => {
+  test('renders FolderName when not editing and type=Folder', () => {
     render(
       <DialFileManagerItemName
         name="Project"

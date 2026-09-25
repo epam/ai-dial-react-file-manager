@@ -1612,8 +1612,8 @@ const EmptyStatePerTabComponent = (args: DialFileManagerProps) => {
         return {
           icon: (
             <IconFileDescription
-              size={100}
-              stroke={0.5}
+              size={32}
+              stroke={1}
               className="text-secondary"
             />
           ),
@@ -1623,9 +1623,7 @@ const EmptyStatePerTabComponent = (args: DialFileManagerProps) => {
 
       case DialFileManagerTabs.Shared:
         return {
-          icon: (
-            <IconUsers size={100} stroke={0.5} className="text-secondary" />
-          ),
+          icon: <IconUsers size={32} stroke={1} className="text-secondary" />,
           title: 'Nothing has been shared with you',
           description: 'Ask teammates to share files or upload your own',
         };
@@ -1634,8 +1632,8 @@ const EmptyStatePerTabComponent = (args: DialFileManagerProps) => {
         return {
           icon: (
             <IconBuildingCommunity
-              size={100}
-              stroke={0.5}
+              size={32}
+              stroke={1}
               className="text-secondary"
             />
           ),

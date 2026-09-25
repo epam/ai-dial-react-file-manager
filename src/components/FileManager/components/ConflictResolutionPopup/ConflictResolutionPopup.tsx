@@ -1,8 +1,8 @@
 import {
   NeutralButton,
   PrimaryButton,
-  DialFileName,
-  DialFolderName,
+  FileName,
+  FolderName,
   Grid,
   Dropdown,
   DropdownTrigger,
@@ -236,12 +236,12 @@ export const ConflictResolutionPopup: FC<ConflictResolutionPopupProps> = ({
         resizable: false,
         cellRenderer: (params: { data: ConflictGridRow }) => {
           return params.data?.nodeType === DialFileNodeType.FOLDER ? (
-            <DialFolderName
+            <FolderName
               name={params.data.name}
               iconSize={BASE_FILE_MANAGER_ICON_SIZE}
             />
           ) : (
-            <DialFileName
+            <FileName
               name={params.data.name}
               iconSize={BASE_FILE_MANAGER_ICON_SIZE}
             />

@@ -139,8 +139,8 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
 
     expect(screen.getByText('Subfolder')).toBeInTheDocument();
 
-    const sharedIcon = screen.getByRole('img', { name: 'Shared entity' });
-    expect(sharedIcon).toBeInTheDocument();
+    const sharedLabel = screen.getByText('Shared');
+    expect(sharedLabel).toBeInTheDocument();
   });
 
   test('does not render shared icon when folder is not shared', () => {
@@ -153,8 +153,6 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
       />,
     );
 
-    expect(
-      screen.queryByRole('img', { name: 'Shared entity' }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Shared')).not.toBeInTheDocument();
   });
 });

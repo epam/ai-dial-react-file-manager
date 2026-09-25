@@ -1,7 +1,7 @@
 import type { FC, ReactNode, Ref } from 'react';
-import { DialFileManagerItemIcon } from '@/components/FileManager/components/FileManagerItemIcon/FileManagerItemIcon';
 import type { DialItemType } from '@epam/ai-dial-ui-kit';
 import {
+  FileIcon,
   Input,
   Tooltip,
   mergeClasses,
@@ -21,10 +21,8 @@ export interface DialFileManagerItemNameInputProps {
   loading?: boolean;
   elementId: string;
   iconSize?: number;
-  iconStroke?: number;
   iconClassName?: string;
   iconLabel?: string;
-  iconIndicator?: ReactNode;
   inputInvalid?: boolean;
   inputInvalidMessage?: string;
   inputContainerClassName?: string;
@@ -71,10 +69,8 @@ export interface DialFileManagerItemNameInputProps {
  * @param {boolean} [props.shared=false] - Whether the entity is shared.
  * @param {boolean} [props.loading=false] - Whether the icon is loading.
  * @param {number} [props.iconSize] - Optional size override for the icon.
- * @param {number} [props.iconStroke] - Optional stroke width override for the icon.
  * @param {string} [props.iconClassName] - Optional CSS class for the icon.
  * @param {string} [props.iconLabel] - Optional accessible label for the icon.
- * @param {ReactNode} [props.iconIndicator] - Optional indicator to render over the icon.
  * @param {boolean} [props.inputInvalid=false] - Marks the input as invalid.
  * @param {string} [props.inputInvalidMessage] - Tooltip message shown when invalid.
  * @param {ReactNode} [props.inputIconAfter] - Optional icon shown after the input (defaults to an error icon).
@@ -92,10 +88,8 @@ export const DialFileManagerItemNameInput: FC<
   loading = false,
   shared = false,
   iconClassName,
-  iconIndicator,
   iconLabel,
   iconSize,
-  iconStroke,
   inputInvalid,
   inputInvalidMessage,
   inputContainerClassName,
@@ -139,14 +133,12 @@ export const DialFileManagerItemNameInput: FC<
 
   return (
     <div className="flex gap-2 items-center" {...editableContainerProps}>
-      <DialFileManagerItemIcon
+      <FileIcon
         name={name}
         type={type}
         label={iconLabel}
         className={iconClassName}
-        indicator={iconIndicator}
-        size={iconSize}
-        stroke={iconStroke}
+        size={iconSize ?? FILE_MANAGER_ICON_PROPS.size}
         loading={loading}
         shared={shared}
         fileExtension={fileExtension}
