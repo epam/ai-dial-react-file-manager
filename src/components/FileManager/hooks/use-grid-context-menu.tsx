@@ -284,12 +284,8 @@ export const useGridContextMenu = ({
         items.push({
           key: DialFileManagerActions.Delete,
           label: actionLabels[DialFileManagerActions.Delete],
-          icon: (
-            <IconTrashX
-              {...FILE_MANAGER_ICON_PROPS}
-              className="text-secondary"
-            />
-          ),
+          icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
+          danger: true,
           onClick: () => onDelete(file, file.parentPath ?? ''),
         });
       }
