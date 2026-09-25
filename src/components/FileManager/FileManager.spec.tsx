@@ -644,6 +644,37 @@ describe('Dial UI Kit :: FileManager', () => {
      * The bulk bar used to take the header's place. It floats over the grid
      * now, so the breadcrumbs and the header actions survive a selection.
      */
+    test('hides the bulk actions toolbar while a search has no results', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          selectedPaths={new Set(['/All files/Design'])}
+          navigationPanelOptions={{ searchable: true }}
+          bulkActionsToolbarOptions={{
+            getSelectionLabel: () => 'selected',
+            actionLabels: { download: 'Download', delete: 'Delete' },
+          }}
+        />,
+      );
+
+      await waitForGridTable();
+      expect(
+        screen.getByRole('toolbar', { name: 'File bulk actions' }),
+      ).toBeInTheDocument();
+
+      const searchRegion = screen.getByRole('search', { name: 'Search' });
+      await userEvent.type(
+        within(searchRegion).getByRole('textbox'),
+        'no-such-file-xyz',
+      );
+
+      expect(await screen.findByText('No data')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('toolbar', { name: 'File bulk actions' }),
+      ).not.toBeInTheDocument();
+    });
+
     test('keeps the content header while a selection is live', async () => {
       renderWithinSizedShell(
         <DialFileManager
@@ -718,10 +749,7 @@ describe('Dial UI Kit :: FileManager', () => {
       />,
     );
 
-    expect(screen.getByText("You don't have any files")).toBeInTheDocument();
-    expect(
-      screen.getByText('Upload or drag and drop files'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('This folder is empty')).toBeInTheDocument();
   });
 
   test('custom title + description override default empty state for active tab', async () => {
@@ -744,12 +772,7 @@ describe('Dial UI Kit :: FileManager', () => {
     expect(screen.getByText('Custom title goes here')).toBeInTheDocument();
     expect(screen.getByText('Custom description text')).toBeInTheDocument();
 
-    expect(
-      screen.queryByText("You don't have any files"),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('Upload or drag and drop files'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('This folder is empty')).not.toBeInTheDocument();
   });
 
   describe('disabled-row tooltips', () => {
@@ -930,7 +953,28 @@ describe('Dial UI Kit :: FileManager', () => {
     await userEvent.clear(searchInput);
     await userEvent.type(searchInput, 'inside-hidden');
 
-    expect((await queryAllInGridByRowText('inside-hidden')).length).toBe(0);
+    expect(await screen.findByText('No data')).toBeInTheDocument();
+    expect(within(getGridRegion()).queryByRole('table')).not.toBeInTheDocument();
+  });
+
+  test('search with no results hides the grid and shows only the empty-state title', async () => {
+    renderWithinSizedShell(
+      <DialFileManager
+        items={itemsMock}
+        defaultPath="All files"
+        emptyStateDescription="Folder description"
+        searchEmptyStateTitle="Nothing matches"
+        navigationPanelOptions={{ searchable: true }}
+      />,
+    );
+
+    const searchRegion = screen.getByRole('search', { name: 'Search' });
+    const searchInput = within(searchRegion).getByRole('textbox');
+    await userEvent.type(searchInput, 'no-such-file-xyz');
+
+    expect(await screen.findByText('Nothing matches')).toBeInTheDocument();
+    expect(screen.queryByText('Folder description')).not.toBeInTheDocument();
+    expect(within(getGridRegion()).queryByRole('table')).not.toBeInTheDocument();
   });
 
   test('search DOES show files from hidden folders when hidden files toggle is on', async () => {

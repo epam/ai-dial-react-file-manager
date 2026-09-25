@@ -129,6 +129,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   emptyStateIcon,
   emptyStateTitle,
   emptyStateDescription,
+  searchEmptyStateTitle,
 
   sharedWithMeIds,
   onFolderPopupPathChange,
@@ -1048,6 +1049,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     emptyStateIcon,
     emptyStateTitle,
     emptyStateDescription,
+    searchEmptyStateTitle,
     gridClassName,
 
     sharedWithMeIds,

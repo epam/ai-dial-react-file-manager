@@ -240,7 +240,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       const validateHandler =
         onRenameValidate && ((value: string) => onRenameValidate(value, node));
 
-      const selectedClass = isSelected ? 'bg-control-accent-alpha rounded' : '';
+      const selectedClass = isSelected ? 'bg-control-accent-alpha' : '';
 
       const menuItems = isRootFolder ? [] : (getContextMenuItems?.(node) ?? []);
       const tooltipContent = forbiddenSymbolsRegExp

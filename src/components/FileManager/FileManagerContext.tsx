@@ -206,6 +206,7 @@ export interface FileManagerContextValue {
   emptyStateIcon?: ReactNode;
   emptyStateTitle?: string;
   emptyStateDescription?: string;
+  searchEmptyStateTitle?: string;
 
   sharedWithMeIds?: string[];
   onFolderPopupPathChange?: (newPath?: string) => void;

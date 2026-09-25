@@ -2,7 +2,6 @@ import {
   IconCopy,
   IconDownload,
   IconExternalLink,
-  IconFileDescription,
   IconPencilMinus,
   IconTrashX,
   IconUserX,
@@ -430,6 +429,7 @@ export interface DialFileManagerProps {
   emptyStateIcon?: ReactNode;
   emptyStateTitle?: string;
   emptyStateDescription?: string;
+  searchEmptyStateTitle?: string;
 
   sharedWithMeIds?: string[];
   onFolderPopupPathChange?: (newPath?: string) => void;
@@ -580,9 +580,10 @@ export interface DialFileManagerProps {
  *
  * @param [maxSelectableFileSize] - Maximum allowed file size for selection in bytes
  *
- * @param [emptyStateIcon] - Optional icon for empty state
- * @param [emptyStateTitle] - Optional title text displayed when there are no files.
+ * @param [emptyStateIcon] - Optional icon for empty state. Defaults to the UI Kit empty-state mark.
+ * @param [emptyStateTitle='This folder is empty'] - Optional title text displayed when there are no files.
  * @param [emptyStateDescription] - Optional description text displayed below the empty state title.
+ * @param [searchEmptyStateTitle='No data'] - Optional title text displayed when a search returns no results.
  *
  * @param [sharedWithMeIds] - Optional list of file IDs that are shared with the current user.
  * @param [unsupportedFileTypeTooltip] - Optional tooltip text displayed when an unsupported file type is selected.
@@ -721,8 +722,9 @@ export const DialFileManagerView: FC = () => {
     isSearchMode,
 
     emptyStateIcon,
-    emptyStateTitle = "You don't have any files",
-    emptyStateDescription = 'Upload or drag and drop files',
+    emptyStateTitle = 'This folder is empty',
+    emptyStateDescription,
+    searchEmptyStateTitle = 'No data',
 
     sharedWithMeIds,
 
@@ -1180,8 +1182,16 @@ export const DialFileManagerView: FC = () => {
     newActions,
   ]);
 
+  const isEmptyStateShown =
+    gridRows.length === 0 && !filesLoading && !searchInProgress;
+
   const renderBulkActionsToolbar = useCallback(() => {
-    if (!bulkActionsToolbarOptions || selectedPaths.size === 0) return null;
+    if (
+      !bulkActionsToolbarOptions ||
+      selectedPaths.size === 0 ||
+      isEmptyStateShown
+    )
+      return null;
 
     return (
       <div className={bulkActionsToolbarWrapperClassName}>
@@ -1193,7 +1203,13 @@ export const DialFileManagerView: FC = () => {
         />
       </div>
     );
-  }, [bulkActionsToolbarOptions, selectedPaths, clearSelection, bulkActions]);
+  }, [
+    bulkActionsToolbarOptions,
+    selectedPaths,
+    isEmptyStateShown,
+    clearSelection,
+    bulkActions,
+  ]);
 
   useImperativeHandle(
     actionsRef,
@@ -1411,25 +1427,23 @@ export const DialFileManagerView: FC = () => {
   );
 
   const emptyStateRenderer = useCallback(
-    () => (
-      <NoDataContent
-        title={emptyStateTitle}
-        description={emptyStateDescription}
-        descriptionClassName="text-sm"
-        className="gap-3 size-full bg-layer-sunken border rounded border-primary"
-        titleClassName="mt-2 !text-lg"
-        icon={
-          emptyStateIcon || (
-            <IconFileDescription
-              size={100}
-              stroke={0.5}
-              className="text-secondary"
-            />
-          )
-        }
-      />
-    ),
-    [emptyStateDescription, emptyStateIcon, emptyStateTitle],
+    () =>
+      isSearchMode ? (
+        <NoDataContent title={searchEmptyStateTitle} icon={emptyStateIcon} />
+      ) : (
+        <NoDataContent
+          title={emptyStateTitle}
+          description={emptyStateDescription}
+          icon={emptyStateIcon}
+        />
+      ),
+    [
+      isSearchMode,
+      searchEmptyStateTitle,
+      emptyStateDescription,
+      emptyStateIcon,
+      emptyStateTitle,
+    ],
   );
 
   const gridRowIdGetter = useMemo(() => {
@@ -1516,7 +1530,7 @@ export const DialFileManagerView: FC = () => {
   // Memoize grid content to prevent re-renders when tooltip state changes
   const memoizedGridContent = useMemo(
     () =>
-      gridRows.length === 0 && !isSearchMode && !filesLoading ? (
+      isEmptyStateShown ? (
         emptyStateRenderer()
       ) : (
         <Grid<GridRow>
@@ -1540,8 +1554,8 @@ export const DialFileManagerView: FC = () => {
         />
       ),
     [
+      isEmptyStateShown,
       gridRows,
-      isSearchMode,
       filesLoading,
       emptyStateRenderer,
       columnDefs,
