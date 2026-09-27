@@ -121,6 +121,7 @@ export interface FileManagerContextValue {
   getDisplayName: (item: DialFile) => string;
   forbiddenSymbolsRegExp?: RegExp;
   forbiddenSymbolsTooltip?: ReactNode;
+  skipForbiddenSymbolsCheckForActions?: boolean;
 
   openDeleteConfirmation: (items: DialFile[], parentFolderPath: string) => void;
   closeDeleteConfirmation: () => void;
