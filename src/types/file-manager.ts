@@ -1,4 +1,6 @@
 export enum DialFileManagerTabs {
+  /** Combined view with one top-level folder per source tab. */
+  All = 'all',
   MyFiles = 'my_files',
   Shared = 'shared',
   Organization = 'organization',
