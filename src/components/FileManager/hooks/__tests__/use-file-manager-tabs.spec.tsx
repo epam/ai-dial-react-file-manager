@@ -30,6 +30,7 @@ describe('Dial UI Kit :: FileManager :: useDialFileManagerTabs', () => {
 
   it('generates tabs from provided labels', () => {
     const tabLabels = {
+      [DialFileManagerTabs.All]: 'All',
       [DialFileManagerTabs.MyFiles]: 'My Files',
       [DialFileManagerTabs.Shared]: 'Shared With Me',
       [DialFileManagerTabs.Organization]: 'Public Files',
@@ -38,8 +39,9 @@ describe('Dial UI Kit :: FileManager :: useDialFileManagerTabs', () => {
 
     const { result } = renderHook(() => useDialFileManagerTabs(tabLabels));
 
-    expect(result.current.tabs).toHaveLength(4);
+    expect(result.current.tabs).toHaveLength(5);
     expect(result.current.tabs).toEqual([
+      { value: DialFileManagerTabs.All, label: 'All' },
       { value: DialFileManagerTabs.MyFiles, label: 'My Files' },
       { value: DialFileManagerTabs.Shared, label: 'Shared With Me' },
       { value: DialFileManagerTabs.Organization, label: 'Public Files' },
@@ -49,6 +51,7 @@ describe('Dial UI Kit :: FileManager :: useDialFileManagerTabs', () => {
 
   it('uses fallback name when label is missing', () => {
     const tabLabels = {
+      [DialFileManagerTabs.All]: '',
       [DialFileManagerTabs.MyFiles]: '',
       [DialFileManagerTabs.Shared]: '',
       [DialFileManagerTabs.Organization]: '',
@@ -58,6 +61,7 @@ describe('Dial UI Kit :: FileManager :: useDialFileManagerTabs', () => {
     const { result } = renderHook(() => useDialFileManagerTabs(tabLabels));
 
     expect(result.current.tabs).toEqual([
+      { value: DialFileManagerTabs.All, label: 'all' },
       { value: DialFileManagerTabs.MyFiles, label: 'my files' },
       { value: DialFileManagerTabs.Shared, label: 'shared' },
       { value: DialFileManagerTabs.Organization, label: 'organization' },
@@ -83,6 +87,7 @@ describe('Dial UI Kit :: FileManager :: useDialFileManagerTabs', () => {
 
   it('memoizes tabs when labels do not change', () => {
     const tabLabels = {
+      [DialFileManagerTabs.All]: 'All',
       [DialFileManagerTabs.MyFiles]: 'My Files',
       [DialFileManagerTabs.Shared]: 'Shared With Me',
       [DialFileManagerTabs.Organization]: 'Public Files',
@@ -109,6 +114,7 @@ describe('Dial UI Kit :: FileManager :: useDialFileManagerTabs', () => {
 
   it('respects initialTab with custom labels', () => {
     const tabLabels = {
+      [DialFileManagerTabs.All]: 'All',
       [DialFileManagerTabs.MyFiles]: 'My Files',
       [DialFileManagerTabs.Shared]: 'Shared With Me',
       [DialFileManagerTabs.Organization]: 'Public Files',
@@ -120,5 +126,29 @@ describe('Dial UI Kit :: FileManager :: useDialFileManagerTabs', () => {
     );
 
     expect(result.current.activeTab).toBe(DialFileManagerTabs.Organization);
+  });
+
+  it('lists the All tab first', () => {
+    const tabLabels = {
+      [DialFileManagerTabs.All]: 'All',
+      [DialFileManagerTabs.MyFiles]: 'My Files',
+      [DialFileManagerTabs.Shared]: 'Shared With Me',
+      [DialFileManagerTabs.Organization]: 'Public Files',
+      [DialFileManagerTabs.Review]: 'Review files',
+    };
+
+    const { result } = renderHook(() => useDialFileManagerTabs(tabLabels));
+
+    expect(result.current.tabs?.[0]).toEqual({
+      value: DialFileManagerTabs.All,
+      label: 'All',
+    });
+  });
+
+  it('accepts All as the initial tab', () => {
+    const { result } = renderHook(() =>
+      useDialFileManagerTabs(undefined, DialFileManagerTabs.All),
+    );
+    expect(result.current.activeTab).toBe(DialFileManagerTabs.All);
   });
 });
