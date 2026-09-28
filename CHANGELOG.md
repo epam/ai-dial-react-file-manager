@@ -20,6 +20,17 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - **`DialFileManagerBulkActionsToolbar` — `clearSelectionLabel`** — accessible
   name of the control that drops the selection, defaulting to
   `"Clear selection"`.
+- **`DialFoldersTree` — tree semantics and keyboard navigation** — the tree
+  was click-only. Its root is now `role="tree"` (named by the new `ariaLabel`,
+  default `"Folders"`) and each row a `role="treeitem"` carrying
+  `aria-level`, `aria-expanded` (folders) and `aria-selected`, with a roving
+  tabIndex. Arrow Up/Down and Home/End move focus, Arrow Right/Left expand,
+  collapse or step to the parent (mirrored under `dir="rtl"`), and Enter/Space
+  activate a row as a click does. New `autoFocus` focuses the selected row on
+  mount and `onEscape` fires on Escape, so a host can render the tree inside a
+  dismissible overlay. The root's `aria-label="folders-tree"` and each row
+  wrapper's `aria-label="folder"` are gone — both were names on generic
+  elements that no assistive technology announced.
 
 ### Changed
 
