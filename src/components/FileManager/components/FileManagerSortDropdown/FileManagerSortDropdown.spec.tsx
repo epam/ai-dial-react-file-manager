@@ -41,6 +41,16 @@ describe('Dial UI Kit :: DialFileManagerSortDropdown', () => {
     ]);
   });
 
+  test('opens the menu at least 240px wide instead of the trigger width', async () => {
+    render(<DialFileManagerSortDropdown sort={NAME_ASC} />);
+
+    await openMenu();
+
+    const menu = await screen.findByRole('menu');
+    expect(menu).toHaveClass('min-w-[240px]');
+    expect(menu.style.minWidth).toBe('');
+  });
+
   test('reports a picked field and keeps the direction', async () => {
     const onSortChange = vi.fn();
     render(

@@ -17,6 +17,12 @@ import {
   FileManagerSortField,
 } from '@/types/file-manager';
 
+// The sort menu keeps the design's width rather than following the compact trigger.
+const SORT_DROPDOWN_PROPS = {
+  listClassName: 'min-w-[240px]',
+  matchReferenceWidth: false,
+};
+
 export interface DialFileManagerSortDropdownProps {
   /** The sort currently applied to the grid. */
   sort: FileManagerSort;
@@ -112,6 +118,7 @@ export const DialFileManagerSortDropdown: FC<
       appearance={ButtonAppearance.Ghost}
       iconBefore={<IconArrowsSort {...FILE_MANAGER_ICON_PROPS} />}
       items={items}
+      dropdownProps={SORT_DROPDOWN_PROPS}
       disabled={disabled}
       className={className}
     />
