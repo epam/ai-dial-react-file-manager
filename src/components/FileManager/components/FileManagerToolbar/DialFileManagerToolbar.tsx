@@ -17,6 +17,12 @@ import {
 import { IconDotsVertical, IconEye, IconEyeOff } from '@tabler/icons-react';
 import { type FC, useMemo } from 'react';
 
+// The Add menu keeps the design's own width rather than shrinking to a short button label.
+const NEW_BUTTON_DROPDOWN_PROPS = {
+  listClassName: 'min-w-[108px]',
+  matchReferenceWidth: false,
+};
+
 export interface DialFileManagerToolbarProps {
   areHiddenFilesVisible: boolean;
   showHiddenFilesLabel?: string;
@@ -138,6 +144,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
             label={newButtonLabel}
             variant={newButtonVariant}
             items={newButtonDropdownItems}
+            dropdownProps={NEW_BUTTON_DROPDOWN_PROPS}
             disabled={isNewButtonDisabled}
           />
         </Tooltip>
@@ -174,6 +181,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
             label={newButtonLabel}
             variant={newButtonVariant}
             items={newButtonDropdownItems}
+            dropdownProps={NEW_BUTTON_DROPDOWN_PROPS}
             disabled={isNewButtonDisabled}
           />
         </Tooltip>

@@ -61,6 +61,24 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
     expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument();
   });
 
+  it('opens the Add menu at least 108px wide instead of the button width', () => {
+    render(
+      <DialFileManagerToolbar
+        areHiddenFilesVisible={false}
+        onToggleHiddenFiles={vi.fn()}
+        isNewButtonVisible={true}
+        newButtonLabel="Add"
+        newButtonDropdownItems={[{ key: '1', label: 'Folder' }]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /add/i }));
+
+    const menu = screen.getByRole('menu');
+    expect(menu).toHaveClass('min-w-[108px]');
+    expect(menu.style.minWidth).toBe('');
+  });
+
   /*
    * The toggle is labelled by the action it offers, so the label names the
    * state the click leads to rather than the one it is in.
