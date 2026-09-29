@@ -61,6 +61,18 @@ interface MockGridProps<Row extends GridRowLike> {
   onSelectionChange?: (ids: Set<string>, rows: Row[]) => void;
 }
 
+const widthBreakpoint = vi.hoisted(() => ({ isBelowBreakpoint: false }));
+
+vi.mock('@/hooks/use-width-breakpoint', async () => {
+  const { useRef } = await import('react');
+  return {
+    useWidthBreakpoint: () => ({
+      containerRef: useRef<HTMLElement | null>(null),
+      isBelowBreakpoint: widthBreakpoint.isBelowBreakpoint,
+    }),
+  };
+});
+
 vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@epam/ai-dial-ui-kit')>();
 
@@ -612,6 +624,70 @@ describe('Dial UI Kit :: FileManager', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Shared' }));
 
       expect(onTabChange).toHaveBeenCalledWith(DialFileManagerTabs.Shared);
+    });
+
+    describe('compact view', () => {
+      beforeEach(() => {
+        widthBreakpoint.isBelowBreakpoint = true;
+        return () => {
+          widthBreakpoint.isBelowBreakpoint = false;
+        };
+      });
+
+      test('keeps the filter row in the content column once the folders panel is gone', async () => {
+        const onTabChange = vi.fn();
+
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            treeOptions={{
+              header: 'File storage',
+              tabs: tabsMock,
+              activeTab: DialFileManagerTabs.MyFiles,
+              onTabChange,
+            }}
+          />,
+        );
+
+        await waitForGridTable();
+
+        expect(
+          screen.queryByRole('complementary', { name: 'File storage' }),
+        ).not.toBeInTheDocument();
+
+        const chipRow = screen.getByRole('group', { name: 'File storage' });
+        expect(
+          within(chipRow).getByRole('button', { name: 'My files' }),
+        ).toHaveAttribute('aria-pressed', 'true');
+
+        await userEvent.click(
+          within(chipRow).getByRole('button', { name: 'Shared' }),
+        );
+
+        expect(onTabChange).toHaveBeenCalledWith(DialFileManagerTabs.Shared);
+      });
+
+      test('names the compact filter row from tabsAriaLabel when the header is not text', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            treeOptions={{
+              header: <span>File storage</span>,
+              tabs: tabsMock,
+              activeTab: DialFileManagerTabs.MyFiles,
+              onTabChange: vi.fn(),
+            }}
+          />,
+        );
+
+        await waitForGridTable();
+
+        expect(
+          screen.getByRole('group', { name: 'File storage sections' }),
+        ).toBeInTheDocument();
+      });
     });
 
     test('renders no filter row when treeOptions carries no tabs', async () => {

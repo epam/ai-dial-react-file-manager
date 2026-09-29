@@ -1407,6 +1407,26 @@ export const DialFileManagerView: FC = () => {
     newFolderDefaultName,
   ]);
 
+  /*
+   * The compact view drops the folders panel, and the filter row with it, so
+   * the row moves to the top of the content column — otherwise a narrow host
+   * has no way to switch sections. The panel heading is not rendered here, so
+   * a plain-text header names the row directly.
+   */
+  const renderCompactTabs = useCallback(() => {
+    if (!isCompactView || !tabs?.length || !activeTab) return null;
+
+    return (
+      <FilterChips
+        items={tabs}
+        value={activeTab}
+        onChange={handleTabChange}
+        aria-label={typeof header === 'string' ? header : tabsAriaLabel}
+        className="shrink-0 flex-wrap"
+      />
+    );
+  }, [isCompactView, tabs, activeTab, handleTabChange, header, tabsAriaLabel]);
+
   const gridContextMenu = useGridContextMenu({
     actionLabels: gridOptions?.actionLabels,
     onDuplicate: (file) => handleDuplicate([file]),
@@ -1673,6 +1693,7 @@ export const DialFileManagerView: FC = () => {
               'gap-3': isCompactView,
             })}
           >
+            {renderCompactTabs()}
             <div className={contentHeaderClassName}>
               {showNavigationPanel && (
                 <DialFileManagerNavigationPanel
