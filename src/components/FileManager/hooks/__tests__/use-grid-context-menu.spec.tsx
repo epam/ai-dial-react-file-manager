@@ -127,10 +127,10 @@ describe('Dial UI Kit :: useGridContextMenu', () => {
       DialFileManagerActions.Copy,
       DialFileManagerActions.Move,
       DialFileManagerActions.Download,
-      DialFileManagerActions.Delete,
       DialFileManagerActions.Rename,
       DialFileManagerActions.Info,
       DialFileManagerActions.Unshare,
+      DialFileManagerActions.Delete,
     ]);
   });
 
@@ -159,9 +159,9 @@ describe('Dial UI Kit :: useGridContextMenu', () => {
       DialFileManagerActions.Copy,
       DialFileManagerActions.Move,
       DialFileManagerActions.Download,
-      DialFileManagerActions.Delete,
       DialFileManagerActions.Rename,
       DialFileManagerActions.Unshare,
+      DialFileManagerActions.Delete,
     ]);
   });
 
@@ -248,8 +248,8 @@ describe('Dial UI Kit :: useGridContextMenu', () => {
     expect(menuItems).toHaveLength(3);
     expect(menuItems.map((item) => item.key)).toEqual([
       DialFileManagerActions.Copy,
-      DialFileManagerActions.Delete,
       DialFileManagerActions.Rename,
+      DialFileManagerActions.Delete,
     ]);
   });
 
@@ -1090,16 +1090,16 @@ describe('Dial UI Kit :: useGridContextMenu', () => {
 
     expect(fileMenuItems).toHaveLength(2);
     expect(fileMenuItems.map((item) => item.key)).toEqual([
-      DialFileManagerActions.Delete,
       DialFileManagerActions.Rename,
+      DialFileManagerActions.Delete,
     ]);
-    expect(fileMenuItems[0].key).toBe(DialFileManagerActions.Delete);
-    expect(fileMenuItems[1].key).toBe(DialFileManagerActions.Rename);
+    expect(fileMenuItems[0].key).toBe(DialFileManagerActions.Rename);
+    expect(fileMenuItems[1].key).toBe(DialFileManagerActions.Delete);
 
     const folderMenuItems = result.current(testFolderWithForbiddenSymbols);
 
     expect(folderMenuItems).toHaveLength(2);
-    expect(folderMenuItems[0].key).toBe(DialFileManagerActions.Delete);
-    expect(folderMenuItems[1].key).toBe(DialFileManagerActions.Rename);
+    expect(folderMenuItems[0].key).toBe(DialFileManagerActions.Rename);
+    expect(folderMenuItems[1].key).toBe(DialFileManagerActions.Delete);
   });
 });
