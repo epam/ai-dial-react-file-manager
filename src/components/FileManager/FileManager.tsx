@@ -1083,20 +1083,7 @@ export const DialFileManagerView: FC = () => {
             onClick: () => onManagePermissions?.(file.path),
           });
         }
-        if (
-          treeOptions.actionLabels[DialFileManagerActions.Delete] &&
-          file.permissions?.includes(DialFilePermission.WRITE) &&
-          !isRootNode
-        ) {
-          elements.push({
-            key: 'delete',
-            label: treeOptions.actionLabels[DialFileManagerActions.Delete],
-            icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
-            danger: true,
-            onClick: () =>
-              openDeleteConfirmation([file], file.parentPath ?? ''),
-          });
-        }
+
         if (
           treeOptions.actionLabels[DialFileManagerActions.Rename] &&
           !isRootNode
@@ -1147,6 +1134,20 @@ export const DialFileManagerView: FC = () => {
               />
             ),
             onClick: () => onRemoveFilesAccess?.([file]),
+          });
+        }
+        if (
+          treeOptions.actionLabels[DialFileManagerActions.Delete] &&
+          file.permissions?.includes(DialFilePermission.WRITE) &&
+          !isRootNode
+        ) {
+          elements.push({
+            key: 'delete',
+            label: treeOptions.actionLabels[DialFileManagerActions.Delete],
+            icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
+            danger: true,
+            onClick: () =>
+              openDeleteConfirmation([file], file.parentPath ?? ''),
           });
         }
       }
