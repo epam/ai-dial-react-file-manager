@@ -279,19 +279,6 @@ export const useGridContextMenu = ({
         !file.permissions ||
         file.permissions.includes(DialFilePermission.WRITE);
 
-      if (
-        actionLabels[DialFileManagerActions.Delete] &&
-        emptyOrWritePermissions
-      ) {
-        items.push({
-          key: DialFileManagerActions.Delete,
-          label: actionLabels[DialFileManagerActions.Delete],
-          icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
-          danger: true,
-          onClick: () => onDelete(file, file.parentPath ?? ''),
-        });
-      }
-
       const isRenameAvailable =
         file.nodeType === DialFileNodeType.FOLDER ||
         (file.nodeType === DialFileNodeType.ITEM && isRenameFileAvailable);
@@ -364,6 +351,19 @@ export const useGridContextMenu = ({
             />
           ),
           onClick: () => onRemoveAccess(file),
+        });
+      }
+
+      if (
+        actionLabels[DialFileManagerActions.Delete] &&
+        emptyOrWritePermissions
+      ) {
+        items.push({
+          key: DialFileManagerActions.Delete,
+          label: actionLabels[DialFileManagerActions.Delete],
+          icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
+          danger: true,
+          onClick: () => onDelete(file, file.parentPath ?? ''),
         });
       }
 
