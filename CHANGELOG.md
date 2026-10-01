@@ -10,6 +10,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Initial standalone AI DIAL React File Manager package.
+- **Layout class hooks** — `DialFileManager.contentClassName` replaces the
+  central content-column classes, and `gridOptions.containerClassName`
+  replaces the grid-panel container classes. These complement the existing
+  root, layout, tree-panel, and underlying-grid class hooks.
 - **`DialFileManagerSearchBar`** — the search field as a component of its own,
   full width at the head of the grid card. It takes the search props the
   navigation panel used to carry, plus `placeholder`, which the panel omitted,
@@ -34,6 +38,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The grid panel is a card by default (breaking)** — it now uses the raised
+  background, rounded corners, and a small shadow, while the underlying UI Kit
+  grid renders without its wrapper border. `gridOptions.wrapperBorder` is no
+  longer exposed; consumers that configured it should remove that option.
 - **UI Kit moved to `0.15.0-dev.11`** — it brings `FilterChips`, the row the
   folders panel needs, the 2.0 `Breadcrumbs` the content header now heads with,
   and the public `DIAL_KIT_CLASS` names for the 2.0 components. The peer range
