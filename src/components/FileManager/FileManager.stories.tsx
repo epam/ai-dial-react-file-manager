@@ -19,6 +19,7 @@ import {
   FileManagerColumnKey,
 } from '@/types/file-manager';
 import {
+  ButtonVariant,
   Checkbox,
   DateCellRenderer,
   Switch,
@@ -391,12 +392,19 @@ export const DestinationPopupLoadedEmptyFolder: Story = {
 
 const PopupComponent = (args: DialFileManagerProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { activeTab, handleTabChange, tabs } = useDialFileManagerTabs({
-    my_files: 'My Files',
-    shared: 'Shared with Me',
-    organization: 'Organization',
-    review: 'Review',
-  });
+  const { activeTab, handleTabChange, tabs } = useDialFileManagerTabs(
+    {
+      all: 'All',
+      my_files: 'My Files',
+      shared: 'Shared with Me',
+      organization: 'Organization',
+      review: 'Review',
+    },
+    DialFileManagerTabs.All,
+  );
+  const popupTabs = tabs?.filter(
+    ({ value }) => value !== DialFileManagerTabs.Review,
+  );
   const [destinationPath, setDestinationPath] = useState<string | undefined>();
   const [loadedPaths, setLoadedPaths] = useState<Set<string>>(new Set());
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>();
@@ -500,141 +508,158 @@ const PopupComponent = (args: DialFileManagerProps) => {
       <Popup
         open={isOpen}
         onClose={() => setIsOpen(false)}
-        className="w-[1000px] !h-[600px]"
+        header="Attach files"
+        className="flex !h-[min(800px,100dvh)] w-full flex-col !bg-layer-sunken"
+        headerClassName="pb-0"
+        footerClassName="pt-0"
         size={PopupSize.Lg}
         ariaLabel="File manager"
+        mainButtons={[
+          {
+            label: 'Attach',
+            variant: ButtonVariant.Primary,
+            disabled: selectedPaths == null || selectedPaths.size === 0,
+            onClick: () => setIsOpen(false),
+          },
+        ]}
       >
-        <DialFileManager
-          {...args}
-          allowedFileTypes={['.ico', '.svg', 'text/plain', 'application/pdf']}
-          onPathChange={(path) => {
-            if (path) {
-              setLoadedPaths((prev) => new Set(prev).add(path));
+        <div className="flex h-full min-h-0 flex-col">
+          <DialFileManager
+            {...args}
+            className="min-h-0 w-full grow bg-layer-sunken"
+            gridClassName="size-full px-5 py-4"
+            contentClassName="pb-0"
+            allowedFileTypes={['.ico', '.svg', 'text/plain', 'application/pdf']}
+            onPathChange={(path) => {
+              if (path) {
+                setLoadedPaths((prev) => new Set(prev).add(path));
+              }
+              args.onPathChange?.(path);
+            }}
+            items={itemsMock}
+            sharedByMePaths={
+              new Set([
+                'All files/Design/Icons/SVG/24px/alert.svg',
+                'All files/Empty folder',
+                'All files/This is a very long folder name designed to test the maximum width limit in the folders tree component and see how text overflow is handled in the UI',
+                '/All files/Design/ThisIsAVeryLongFolderNameWithoutSpacesToTestTheUIBehaviorInDifferentComponents',
+                'All files/Deep Nest',
+              ])
             }
-            args.onPathChange?.(path);
-          }}
-          items={itemsMock}
-          sharedByMePaths={
-            new Set([
-              'All files/Design/Icons/SVG/24px/alert.svg',
-              'All files/Empty folder',
-              'All files/This is a very long folder name designed to test the maximum width limit in the folders tree component and see how text overflow is handled in the UI',
-              '/All files/Design/ThisIsAVeryLongFolderNameWithoutSpacesToTestTheUIBehaviorInDifferentComponents',
-              'All files/Deep Nest',
-            ])
-          }
-          selectedPaths={selectedPaths}
-          onSelectedPathsChange={setSelectedPaths}
-          destinationFolderPopupOptions={{
-            destinationFolderPath: destinationPath,
-            setDestinationFolderPath: setDestinationPath,
-            getCopyHeader: (itemsCount, itemName) =>
-              itemsCount === 1 && itemName
-                ? `Copy "${itemName}"`
-                : `Copy ${itemsCount} item(s)`,
-            getMoveHeader: (itemsCount, itemName) =>
-              itemsCount === 1 && itemName
-                ? `Move "${itemName}"`
-                : `Move ${itemsCount} item(s)`,
-          }}
-          gridOptions={{
-            ...(args.gridOptions ?? {}),
-            filterable: false,
-            dateLocale: 'en-US',
-            dateOptions: {
-              year: 'numeric',
-              month: 'short',
-              day: '2-digit',
-            },
-            actionLabels: {
-              duplicate: 'Duplicate',
-              copy: 'Copy to',
-              move: 'Move to',
-              download: 'Download',
-              delete: 'Delete',
-              rename: 'Rename',
-            },
-          }}
-          treeOptions={{
-            ...(args.treeOptions ?? {}),
-            tabs: tabs,
-            activeTab: activeTab,
-            onTabChange: handleTabChange,
-          }}
-          toolbarOptions={{
-            ...(args.toolbarOptions ?? {}),
-            newActions: {
-              newFolder: { label: 'New Folder' },
-              uploadFiles: { label: 'Upload Files' },
-              uploadArchive: { label: 'Upload Archive' },
-            },
-          }}
-          bulkActionsToolbarOptions={{
-            getSelectionLabel: (selectedCount: number) =>
-              `item${selectedCount === 1 ? '' : 's'} selected`,
-            actionLabels: {
-              duplicate: 'Duplicate',
-              copy: 'Copy to',
-              move: 'Move to',
-              download: 'Download',
-              delete: 'Delete',
-            },
-          }}
-          treeOptions={{
-            ...(args.treeOptions ?? {}),
-            collapsed: false,
-            expandedPaths: new Set<string>([rootFolder.path]),
-            header: 'Folder tree',
-            loadedPaths,
-            actionLabels: {
-              ...(args.treeOptions?.actionLabels ?? {}),
-              duplicate: 'Duplicate',
-              copy: 'Copy to',
-              move: 'Move to',
-              rename: 'Rename',
-              download: 'Download',
-              delete: 'Delete',
-            },
-          }}
-          onCopyFiles={(items, destinationFolder) => {
-            alert(
-              `Copying files: ${items
-                .map((f) => f.sourceUrl)
-                .join(', ')} to ${destinationFolder}`,
-            );
-          }}
-          onMoveToFiles={(items, sourceFolder, destinationFolder) => {
-            alert(
-              `Moving files from ${sourceFolder} to ${destinationFolder}: ${items
-                .map((f) => f.sourceUrl)
-                .join(', ')}`,
-            );
-          }}
-          onDeleteFiles={(items, sourceFolder) => {
-            alert(
-              `Deleting ${items.length} file(s) from ${sourceFolder}: ${items.map((f) => f.sourceUrl).join(', ')}`,
-            );
-          }}
-          onDownloadFiles={(items) => {
-            alert(
-              `Downloading ${items.length} file(s): ${items.map((f) => f.name).join(', ')}`,
-            );
-          }}
-          onRenameValidate={handleRenameValidation}
-          onUploadFiles={handleUploadFiles}
-          onUploadArchive={(file, destinationFolder) => {
-            alert(`Uploaded archive ${file.name} to ${destinationFolder}`);
-          }}
-          onCreateFolder={handleCreateFolder}
-          onCreateFolderValidate={handleCreateFolderValidate}
-          folderCreationValidationMessages={{
-            emptyName: 'Please enter a folder name',
-            duplicateName:
-              'A folder with this name already exists in this location',
-          }}
-          maxFileSize={10 * 1024 * 1024} // 10MB
-          rootItem={rootFolder}
-        />
+            selectedPaths={selectedPaths}
+            onSelectedPathsChange={setSelectedPaths}
+            destinationFolderPopupOptions={{
+              destinationFolderPath: destinationPath,
+              setDestinationFolderPath: setDestinationPath,
+              getCopyHeader: (itemsCount, itemName) =>
+                itemsCount === 1 && itemName
+                  ? `Copy "${itemName}"`
+                  : `Copy ${itemsCount} item(s)`,
+              getMoveHeader: (itemsCount, itemName) =>
+                itemsCount === 1 && itemName
+                  ? `Move "${itemName}"`
+                  : `Move ${itemsCount} item(s)`,
+            }}
+            gridOptions={{
+              ...(args.gridOptions ?? {}),
+              selectionMode: GridSelectionMode.MULTIPLE,
+              filterable: false,
+              dateLocale: 'en-US',
+              dateOptions: {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+              },
+              actionLabels: {
+                duplicate: 'Duplicate',
+                copy: 'Copy to',
+                move: 'Move to',
+                download: 'Download',
+                delete: 'Delete',
+                rename: 'Rename',
+              },
+            }}
+            toolbarOptions={{
+              ...(args.toolbarOptions ?? {}),
+              newActions: {
+                newFolder: { label: 'New Folder' },
+                uploadFiles: { label: 'Upload Files' },
+                uploadArchive: { label: 'Upload Archive' },
+              },
+            }}
+            bulkActionsToolbarOptions={{
+              getSelectionLabel: (selectedCount: number) =>
+                `item${selectedCount === 1 ? '' : 's'} selected`,
+              actionLabels: {
+                duplicate: 'Duplicate',
+                copy: 'Copy to',
+                move: 'Move to',
+                download: 'Download',
+                delete: 'Delete',
+              },
+            }}
+            treeOptions={{
+              ...(args.treeOptions ?? {}),
+              collapsed: false,
+              expandedPaths: new Set<string>([rootFolder.path]),
+              header: null,
+              containerClassName:
+                'min-h-0 h-full rounded-xl bg-layer-raised shadow-sm',
+              tabs: popupTabs,
+              activeTab,
+              onTabChange: handleTabChange,
+              tabsAriaLabel: 'File storage sections',
+              loadedPaths,
+              actionLabels: {
+                ...(args.treeOptions?.actionLabels ?? {}),
+                duplicate: 'Duplicate',
+                copy: 'Copy to',
+                move: 'Move to',
+                rename: 'Rename',
+                download: 'Download',
+                delete: 'Delete',
+              },
+            }}
+            onCopyFiles={(items, destinationFolder) => {
+              alert(
+                `Copying files: ${items
+                  .map((f) => f.sourceUrl)
+                  .join(', ')} to ${destinationFolder}`,
+              );
+            }}
+            onMoveToFiles={(items, sourceFolder, destinationFolder) => {
+              alert(
+                `Moving files from ${sourceFolder} to ${destinationFolder}: ${items
+                  .map((f) => f.sourceUrl)
+                  .join(', ')}`,
+              );
+            }}
+            onDeleteFiles={(items, sourceFolder) => {
+              alert(
+                `Deleting ${items.length} file(s) from ${sourceFolder}: ${items.map((f) => f.sourceUrl).join(', ')}`,
+              );
+            }}
+            onDownloadFiles={(items) => {
+              alert(
+                `Downloading ${items.length} file(s): ${items.map((f) => f.name).join(', ')}`,
+              );
+            }}
+            onRenameValidate={handleRenameValidation}
+            onUploadFiles={handleUploadFiles}
+            onUploadArchive={(file, destinationFolder) => {
+              alert(`Uploaded archive ${file.name} to ${destinationFolder}`);
+            }}
+            onCreateFolder={handleCreateFolder}
+            onCreateFolderValidate={handleCreateFolderValidate}
+            folderCreationValidationMessages={{
+              emptyName: 'Please enter a folder name',
+              duplicateName:
+                'A folder with this name already exists in this location',
+            }}
+            maxFileSize={10 * 1024 * 1024} // 10MB
+            rootItem={rootFolder}
+          />
+        </div>
       </Popup>
     </div>
   );

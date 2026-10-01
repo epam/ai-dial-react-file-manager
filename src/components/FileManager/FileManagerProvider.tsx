@@ -148,6 +148,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   customDownloadItemsAction,
   customBreakpointRef,
   gridClassName,
+  contentClassName,
   nonClickableTableColumns,
   hideSearchPathItemName,
   showHiddenFileSwitcherInDestinationPopup,
@@ -1055,6 +1056,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     emptyStateDescription,
     searchEmptyStateTitle,
     gridClassName,
+    contentClassName,
 
     sharedWithMeIds,
 
