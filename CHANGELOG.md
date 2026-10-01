@@ -10,10 +10,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Initial standalone AI DIAL React File Manager package.
-- **Layout class hooks** — `DialFileManager.contentClassName` replaces the
-  central content-column classes, and `gridOptions.containerClassName`
-  replaces the grid-panel container classes. These complement the existing
-  root, layout, tree-panel, and underlying-grid class hooks.
+- **Layout class hooks** — `DialFileManager.contentClassName` and
+  `gridOptions.containerClassName` add classes to the central content column
+  and the grid-panel container. They are merged with the defaults, so a class
+  such as `pb-0` or `shadow-none` overrides the matching default. These
+  complement the existing root, layout, tree-panel, and underlying-grid class
+  hooks.
 - **`DialFileManagerSearchBar`** — the search field as a component of its own,
   full width at the head of the grid card. It takes the search props the
   navigation panel used to carry, plus `placeholder`, which the panel omitted,
@@ -39,10 +41,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - **The grid panel has rounded corners and a small shadow by default** — the
-  grid no longer draws a wrapper border, including while files are dragged over
-  it, and `gridOptions.wrapperBorder` is no longer exposed (breaking for
-  consumers that configured it). Set `gridOptions.containerClassName` to
-  replace these classes.
+  grid no longer draws a wrapper border, and `gridOptions.wrapperBorder` is no
+  longer exposed or honoured (breaking for consumers that configured it). The
+  drag-over dashed outline now sits on the rounded grid panel instead of the
+  inner grid, so it follows the corner radius. Use
+  `gridOptions.containerClassName` to adjust the panel classes.
 - **UI Kit moved to `0.15.0-dev.11`** — it brings `FilterChips`, the row the
   folders panel needs, the 2.0 `Breadcrumbs` the content header now heads with,
   and the public `DIAL_KIT_CLASS` names for the 2.0 components. The peer range

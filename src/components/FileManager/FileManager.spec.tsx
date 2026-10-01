@@ -579,12 +579,12 @@ describe('Dial UI Kit :: FileManager', () => {
       ).toHaveClass('rounded-xl', 'shadow-sm');
     });
 
-    test('replaces the grid container classes', async () => {
+    test('merges custom grid container classes with the defaults', async () => {
       renderWithinSizedShell(
         <DialFileManager
           items={itemsMock}
           path="/All files"
-          gridOptions={{ containerClassName: 'rounded-xl shadow-sm' }}
+          gridOptions={{ containerClassName: 'custom-grid-container' }}
         />,
       );
 
@@ -592,25 +592,75 @@ describe('Dial UI Kit :: FileManager', () => {
 
       expect(
         screen.getByRole('region', { name: 'File Manager Grid View' }),
-      ).toHaveClass('rounded-xl', 'shadow-sm');
+      ).toHaveClass('custom-grid-container', 'rounded-xl', 'shadow-sm');
     });
 
-    test('replaces the central content classes', async () => {
+    test('lets custom grid container classes override matching defaults', async () => {
       renderWithinSizedShell(
         <DialFileManager
           items={itemsMock}
           path="/All files"
-          contentClassName="flex min-h-0"
+          gridOptions={{ containerClassName: 'shadow-none' }}
         />,
       );
 
       await waitForGridTable();
 
-      const gridRegion = screen.getByRole('region', {
+      const region = screen.getByRole('region', {
         name: 'File Manager Grid View',
       });
-      expect(gridRegion.parentElement).toHaveClass('flex', 'min-h-0');
-      expect(gridRegion.parentElement).not.toHaveClass('pb-4');
+      expect(region).toHaveClass('shadow-none');
+      expect(region).not.toHaveClass('shadow-sm');
+    });
+
+    test('merges custom content classes with the defaults', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          contentClassName="pb-0 custom-content"
+        />,
+      );
+
+      await waitForGridTable();
+
+      const content = screen.getByRole('region', {
+        name: 'File Manager Grid View',
+      }).parentElement?.parentElement;
+      expect(content).toHaveClass('custom-content', 'pb-0', 'flex', 'min-h-0');
+      expect(content).not.toHaveClass('pb-4');
+    });
+
+    test('shows the drag-over outline on the rounded grid container', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="All files/Design/Icons/SVG/24px"
+          onUploadFiles={vi.fn()}
+          uploadEnabled
+        />,
+      );
+
+      await waitForGridTable();
+
+      const region = screen.getByRole('region', {
+        name: 'File Manager Grid View',
+      });
+      expect(region).not.toHaveClass('outline-dashed');
+
+      const dragEnter = new Event('dragenter', { bubbles: true });
+      Object.defineProperty(dragEnter, 'dataTransfer', {
+        value: { types: ['Files'] },
+      });
+      act(() => {
+        window.dispatchEvent(dragEnter);
+      });
+
+      await waitFor(() => {
+        expect(region).toHaveClass('outline-dashed', 'outline-primary');
+      });
+      expect(region).toHaveClass('rounded-xl');
+      expect(screen.getByRole('grid')).not.toHaveClass('border-dashed');
     });
 
     test('falls back to a landmark label when the panel has no heading', async () => {

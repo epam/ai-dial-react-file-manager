@@ -38,6 +38,13 @@ export const gridPanelClassName =
 export const gridBaseClassName =
   'flex-1 w-full text-secondary overflow-auto min-h-0 min-w-0 rounded-xl shadow-sm';
 
+/* Drag-over outlines sit on the rounded grid region so they follow its radius. */
+export const gridDragOverClassName =
+  'outline outline-1 -outline-offset-1 outline-dashed outline-info';
+
+export const gridDragWindowClassName =
+  'outline outline-1 -outline-offset-1 outline-dashed outline-primary';
+
 /*
  * The bulk actions bar floats over the bottom of the card, centered, so it
  * never covers the header and never pushes a row out of view.
