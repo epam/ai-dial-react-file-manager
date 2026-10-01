@@ -38,10 +38,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- **The grid panel is a card by default (breaking)** — it now uses the raised
-  background, rounded corners, and a small shadow, while the underlying UI Kit
-  grid renders without its wrapper border. `gridOptions.wrapperBorder` is no
-  longer exposed; consumers that configured it should remove that option.
+- **The grid panel has rounded corners and a small shadow by default** — the
+  grid no longer draws a wrapper border, including while files are dragged over
+  it, and `gridOptions.wrapperBorder` is no longer exposed (breaking for
+  consumers that configured it). Set `gridOptions.containerClassName` to
+  replace these classes.
 - **UI Kit moved to `0.15.0-dev.11`** — it brings `FilterChips`, the row the
   folders panel needs, the 2.0 `Breadcrumbs` the content header now heads with,
   and the public `DIAL_KIT_CLASS` names for the 2.0 components. The peer range

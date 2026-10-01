@@ -886,7 +886,6 @@ export const DialFileManagerView: FC = () => {
     visibleColumns = DEFAULT_VISIBLE_COLUMN,
     allowDisabledContextMenu = false,
     containerClassName: gridContainerClassName = gridBaseClassName,
-    className: gridContentClassName,
     ...forwardedGridOptions
   } = gridOptions ?? {};
 
@@ -1647,14 +1646,14 @@ export const DialFileManagerView: FC = () => {
           getContextMenuItems={getGridContextMenuItems}
           withoutHeaderBorders={isCompactView}
           onGridApiChange={handleGridApiChange}
-          className={mergeClasses(dialGridClassName, gridContentClassName)}
+          className={dialGridClassName}
+          wrapperBorder={false}
           {...forwardedGridOptions}
           selectionMode={selectionMode}
           wrapCustomCellRenderers={wrapCustomCellRenderers}
           additionalGridOptions={gridAdditionalOptions}
           selectedRowIds={selectedGridRowsIds}
           onSelectionChange={handleSelectionChange}
-          wrapperBorder={false}
           disabledRowIds={disabledGridRowIds}
           allowDisabledContextMenu={allowDisabledContextMenu}
         />
@@ -1671,7 +1670,6 @@ export const DialFileManagerView: FC = () => {
       isCompactView,
       handleGridApiChange,
       dialGridClassName,
-      gridContentClassName,
       forwardedGridOptions,
       selectionMode,
       wrapCustomCellRenderers,
