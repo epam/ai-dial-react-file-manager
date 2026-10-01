@@ -14,8 +14,12 @@ export const contentGridClassName =
 export const contentHeaderClassName =
   'flex w-full shrink-0 items-center justify-between gap-4 h-[64px]';
 
+/*
+ * The panel width is fixed: without `shrink-0` and an explicit width the flex
+ * row sizes it to its content, so expanding a folder with a long name widens it.
+ */
 export const sidebarPanelClassName =
-  'min-h-0 min-w-[360px] h-full bg-layer-raised shadow-sm';
+  'min-h-0 w-[360px] shrink-0 h-full bg-layer-raised shadow-sm';
 
 export const sidebarContentClassName = 'flex h-full min-h-0 flex-col gap-3';
 
