@@ -288,8 +288,10 @@ export type SortOptions = Omit<
 
 export interface GridOptions extends Omit<
   GridProps<GridRow>,
-  'rowData' | 'columnDefs'
+  'rowData' | 'columnDefs' | 'wrapperBorder'
 > {
+  /** Classes for the region wrapping the grid. Replaces the default container classes. */
+  containerClassName?: string;
   columnDefs?: (
     | ColDef<GridRow>
     | ((
@@ -365,6 +367,8 @@ export interface DialFileManagerProps {
   defaultPath?: string;
   className?: string;
   gridClassName?: string;
+  /** Classes for the central content column. Replaces the default content classes. */
+  contentClassName?: string;
 
   allowedFileTypes?: DialFileAcceptType[];
   items?: DialFile[];
@@ -567,6 +571,7 @@ export interface DialFileManagerProps {
  * @param [defaultPath] - Initial path used in uncontrolled mode (applied only on first render)
  * @param [className] - Additional classes for the root container
  * @param [gridClassName] - Additional classes for the grid container
+ * @param [contentClassName] - Classes for the central content column. Replaces the default content classes.
  * @param [items] - Full hierarchical list of files and folders used by both tree and grid
  * @param [rootItem] - Optional root folder item to represent the top-level container in the tree
  * @param [filesLoading=false] - When true, shows skeleton loading state in the grid
@@ -777,6 +782,7 @@ export const DialFileManagerView: FC = () => {
     fileTooLargeTooltip,
     unsupportedFileTypeTooltip,
     gridClassName,
+    contentClassName = contentGridClassName,
     nonClickableTableColumns,
     hideSearchPathItemName,
     showHiddenFileSwitcherInDestinationPopup,
@@ -879,6 +885,8 @@ export const DialFileManagerView: FC = () => {
     wrapCustomCellRenderers,
     visibleColumns = DEFAULT_VISIBLE_COLUMN,
     allowDisabledContextMenu = false,
+    containerClassName: gridContainerClassName = gridBaseClassName,
+    className: gridContentClassName,
     ...forwardedGridOptions
   } = gridOptions ?? {};
 
@@ -1639,14 +1647,14 @@ export const DialFileManagerView: FC = () => {
           getContextMenuItems={getGridContextMenuItems}
           withoutHeaderBorders={isCompactView}
           onGridApiChange={handleGridApiChange}
-          className={dialGridClassName}
+          className={mergeClasses(dialGridClassName, gridContentClassName)}
           {...forwardedGridOptions}
           selectionMode={selectionMode}
           wrapCustomCellRenderers={wrapCustomCellRenderers}
           additionalGridOptions={gridAdditionalOptions}
           selectedRowIds={selectedGridRowsIds}
           onSelectionChange={handleSelectionChange}
-          wrapperBorder={!isDragging && !isDraggingOverWindow}
+          wrapperBorder={false}
           disabledRowIds={disabledGridRowIds}
           allowDisabledContextMenu={allowDisabledContextMenu}
         />
@@ -1663,14 +1671,13 @@ export const DialFileManagerView: FC = () => {
       isCompactView,
       handleGridApiChange,
       dialGridClassName,
+      gridContentClassName,
       forwardedGridOptions,
       selectionMode,
       wrapCustomCellRenderers,
       gridAdditionalOptions,
       selectedGridRowsIds,
       handleSelectionChange,
-      isDragging,
-      isDraggingOverWindow,
       disabledGridRowIds,
       allowDisabledContextMenu,
     ],
@@ -1690,7 +1697,7 @@ export const DialFileManagerView: FC = () => {
         <div className={mergeClasses(mainGridClassName, gridClassName)}>
           {renderFoldersTree()}
           <div
-            className={mergeClasses(contentGridClassName, {
+            className={mergeClasses(contentClassName, {
               'gap-3': isCompactView,
             })}
           >
@@ -1756,7 +1763,7 @@ export const DialFileManagerView: FC = () => {
               <section
                 role="region"
                 aria-label="File Manager Grid View"
-                className={gridBaseClassName}
+                className={gridContainerClassName}
               >
                 {memoizedGridContent}
               </section>

@@ -36,7 +36,7 @@ export const gridPanelClassName =
   'flex flex-1 flex-col w-full min-h-0 min-w-0 gap-5';
 
 export const gridBaseClassName =
-  'flex-1 w-full text-secondary overflow-auto min-h-0 min-w-0';
+  'flex-1 w-full text-secondary overflow-auto min-h-0 min-w-0 rounded-xl shadow-sm';
 
 /*
  * The bulk actions bar floats over the bottom of the card, centered, so it

@@ -59,6 +59,7 @@ interface MockGridProps<Row extends GridRowLike> {
   disabledRowIds?: Set<string>;
   selectedRowIds?: Set<string>;
   onSelectionChange?: (ids: Set<string>, rows: Row[]) => void;
+  wrapperBorder?: boolean;
 }
 
 const widthBreakpoint = vi.hoisted(() => ({ isBelowBreakpoint: false }));
@@ -86,6 +87,7 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
       disabledRowIds,
       selectedRowIds,
       onSelectionChange,
+      wrapperBorder,
     } = props;
 
     const rowsArray: Row[] = rowData ?? [];
@@ -159,6 +161,7 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
         className={className}
         role={'grid'}
         aria-label="File Manager Grid View"
+        data-wrapper-border={String(wrapperBorder)}
       >
         <table role="table">
           {!filtersDisabled && (
@@ -565,6 +568,50 @@ describe('Dial UI Kit :: FileManager', () => {
       await waitForGridTable();
 
       expect(getFoldersPanel()).toBeInTheDocument();
+    });
+
+    test('uses a raised shadowed grid without a wrapper border by default', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          gridOptions={{
+            className: 'rounded-xl shadow-sm',
+          }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      const grid = screen.getByRole('grid');
+      expect(
+        screen.getByRole('region', { name: 'File Manager Grid View' }),
+      ).toHaveClass('rounded-xl', 'bg-layer-raised', 'shadow-sm');
+      expect(grid).toHaveClass(
+        'min-h-[248px]',
+        'overflow-auto',
+        'rounded-xl',
+        'shadow-sm',
+      );
+      expect(grid).toHaveAttribute('data-wrapper-border', 'false');
+    });
+
+    test('replaces the central content classes', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          contentClassName="flex min-h-0"
+        />,
+      );
+
+      await waitForGridTable();
+
+      const gridRegion = screen.getByRole('region', {
+        name: 'File Manager Grid View',
+      });
+      expect(gridRegion.parentElement).toHaveClass('flex', 'min-h-0');
+      expect(gridRegion.parentElement).not.toHaveClass('pb-4');
     });
 
     test('falls back to a landmark label when the panel has no heading', async () => {

@@ -53,6 +53,7 @@ export interface FileManagerGridRow {
 export interface FileManagerContextValue {
   className?: string;
   gridClassName?: string;
+  contentClassName?: string;
   items: DialFile[];
   rootItem?: DialRootFolder;
   allowedFileTypes?: DialFileAcceptType[];
