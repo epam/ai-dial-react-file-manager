@@ -663,6 +663,26 @@ describe('Dial UI Kit :: FileManager', () => {
       expect(screen.getByRole('grid')).not.toHaveClass('border-dashed');
     });
 
+    /*
+     * jsdom does no layout, so this pins the classes that keep a long folder
+     * name from widening the panel when its parent folder is expanded.
+     */
+    test('keeps the folders panel at a fixed, non-shrinking width', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          treeOptions={{ header: 'File storage' }}
+        />,
+      );
+
+      await waitForGridTable();
+
+      const panel = getFoldersPanel();
+      expect(panel).toHaveClass('w-[360px]', 'shrink-0');
+      expect(panel).not.toHaveClass('min-w-[360px]');
+    });
+
     test('falls back to a landmark label when the panel has no heading', async () => {
       renderWithinSizedShell(
         <DialFileManager
