@@ -371,6 +371,8 @@ export interface DialFileManagerProps {
   gridClassName?: string;
   /** Additional classes for the central content column. Merged with the default content classes. */
   contentClassName?: string;
+  /** Additional classes for the central content header. Merged with the default header classes. */
+  contentHeaderClassName?: string;
 
   allowedFileTypes?: DialFileAcceptType[];
   items?: DialFile[];
@@ -574,6 +576,7 @@ export interface DialFileManagerProps {
  * @param [className] - Additional classes for the root container
  * @param [gridClassName] - Additional classes for the grid container
  * @param [contentClassName] - Additional classes for the central content column. Merged with the default content classes.
+ * @param [contentHeaderClassName] - Additional classes for the central content header. Merged with the default header classes.
  * @param [items] - Full hierarchical list of files and folders used by both tree and grid
  * @param [rootItem] - Optional root folder item to represent the top-level container in the tree
  * @param [filesLoading=false] - When true, shows skeleton loading state in the grid
@@ -785,6 +788,7 @@ export const DialFileManagerView: FC = () => {
     unsupportedFileTypeTooltip,
     gridClassName,
     contentClassName,
+    contentHeaderClassName: customContentHeaderClassName,
     nonClickableTableColumns,
     hideSearchPathItemName,
     showHiddenFileSwitcherInDestinationPopup,
@@ -1703,7 +1707,12 @@ export const DialFileManagerView: FC = () => {
             })}
           >
             {renderCompactTabs()}
-            <div className={contentHeaderClassName}>
+            <div
+              className={mergeClasses(
+                contentHeaderClassName,
+                customContentHeaderClassName,
+              )}
+            >
               {showNavigationPanel && (
                 <DialFileManagerNavigationPanel
                   {...breadcrumbPanelOptions}

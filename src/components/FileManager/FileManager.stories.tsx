@@ -527,8 +527,9 @@ const PopupComponent = (args: DialFileManagerProps) => {
           <DialFileManager
             {...args}
             className="min-h-0 w-full grow bg-layer-sunken"
-            gridClassName="size-full px-5 py-4"
-            contentClassName="pb-0"
+            gridClassName="size-full gap-6 px-6 py-4"
+            contentClassName="px-0 pb-0"
+            contentHeaderClassName="h-10"
             allowedFileTypes={['.ico', '.svg', 'text/plain', 'application/pdf']}
             onPathChange={(path) => {
               if (path) {

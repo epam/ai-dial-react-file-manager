@@ -54,6 +54,7 @@ export interface FileManagerContextValue {
   className?: string;
   gridClassName?: string;
   contentClassName?: string;
+  contentHeaderClassName?: string;
   items: DialFile[];
   rootItem?: DialRootFolder;
   allowedFileTypes?: DialFileAcceptType[];
