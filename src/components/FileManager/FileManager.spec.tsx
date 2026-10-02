@@ -631,6 +631,27 @@ describe('Dial UI Kit :: FileManager', () => {
       expect(content).not.toHaveClass('pb-4');
     });
 
+    test('merges custom content header classes with the defaults', async () => {
+      renderWithinSizedShell(
+        <DialFileManager
+          items={itemsMock}
+          path="/All files"
+          contentHeaderClassName="h-10 custom-content-header"
+        />,
+      );
+
+      await waitForGridTable();
+
+      const header = screen.getByLabelText('navigation-panel').parentElement;
+      expect(header).toHaveClass(
+        'custom-content-header',
+        'h-10',
+        'flex',
+        'shrink-0',
+      );
+      expect(header).not.toHaveClass('h-[64px]');
+    });
+
     test('shows the drag-over outline on the rounded grid container', async () => {
       renderWithinSizedShell(
         <DialFileManager

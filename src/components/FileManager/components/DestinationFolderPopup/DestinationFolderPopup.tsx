@@ -297,7 +297,8 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
           <DialFileManager
             {...restProps}
             items={visibleItems}
-            gridClassName="size-full"
+            gridClassName="size-full gap-6 px-6 py-4"
+            contentClassName="px-0 pb-0"
             className={mergeClasses(
               restProps.className,
               'bg-layer-sunken h-full flex pt-0',
@@ -310,7 +311,10 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
               ...restProps.treeOptions,
               collapsed: collapsedFileTree,
               expandedPaths: new Set<string>([restProps.rootItem?.path || '/']),
-              header: restProps.treeOptions?.header,
+              header: null,
+              containerClassName:
+                restProps.treeOptions?.containerClassName ??
+                'min-h-0 w-[360px] shrink-0 h-full rounded-xl bg-layer-raised shadow-sm pt-4',
             }}
             gridOptions={{ ...restProps.gridOptions, selectionMode: undefined }}
             navigationPanelOptions={{

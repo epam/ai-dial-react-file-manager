@@ -9,6 +9,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`DialFileManager.contentHeaderClassName`** — additional classes for the
+  central content header, merged with the default header classes. Complements
+  the existing `contentClassName`/`gridClassName` layout hooks.
 - Initial standalone AI DIAL React File Manager package.
 - **Layout class hooks** — `DialFileManager.contentClassName` and
   `gridOptions.containerClassName` add classes to the central content column
@@ -225,6 +228,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The Copy/Move destination popup's layout didn't match Figma** — its grid
+  sat flush against the popup edges with no spacing, and its tree panel drew
+  no card background, shadow, or rounded corners, unlike the rest of the
+  component. The grid now gets `gap-6 px-6 py-4`, and the tree panel gets the
+  same `rounded-xl bg-layer-raised shadow-sm` treatment (and fixed
+  `w-[360px] shrink-0` width) as the main folders panel from #56. The popup's
+  tree header is now always hidden (it previously repeated whatever header the
+  host's main tree happened to have, which is not configurable for the popup
+  specifically) and the panel keeps top padding to compensate for the removed
+  heading row.
 - **Bulk-action icons were pinned to `text-secondary`**, so every icon in the
   selection toolbar stayed grey while the `NeutralButton` around it drew its
   label in `text-accent` — an icon and its own label in two different colours.

@@ -461,6 +461,47 @@ describe('Dial UI Kit :: DialDestinationFolderPopup', () => {
     expect(screen.getByText('Documents')).toBeInTheDocument();
   });
 
+  test('gives the tree panel a rounded card style by default', () => {
+    render(
+      <DialDestinationFolderPopup
+        open={true}
+        onClose={vi.fn()}
+        items={mockFiles}
+        rootItem={{
+          id: 'root',
+          name: 'Root',
+          path: '/',
+          folderId: 'root-folder',
+          nodeType: DialFileNodeType.FOLDER,
+          label: 'Root',
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('complementary').className).toContain('rounded-xl');
+  });
+
+  test('lets a host override the tree panel container class', () => {
+    render(
+      <DialDestinationFolderPopup
+        open={true}
+        onClose={vi.fn()}
+        items={mockFiles}
+        treeOptions={{ containerClassName: 'shadow-none' }}
+        rootItem={{
+          id: 'root',
+          name: 'Root',
+          path: '/',
+          folderId: 'root-folder',
+          nodeType: DialFileNodeType.FOLDER,
+          label: 'Root',
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('complementary').className).toBe('shadow-none');
+  });
+
   test('clicking Add folder inserts a new placeholder folder entry', async () => {
     render(
       <DialDestinationFolderPopup
