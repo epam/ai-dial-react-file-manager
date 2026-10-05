@@ -228,6 +228,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The compact view showed only the first of several roots** — with no folders
+  tree, a host that passes more than one root (an "All" tab combining My files,
+  Shared and Organization) showed the first root's contents, so the combined
+  tab looked like a copy of it. The compact view now opens on a list of the
+  roots; selecting one browses it, and a leading breadcrumb named after the
+  active tab returns to the list. The wide view is unchanged.
+  `DialFileManagerNavigationPanel` gains `topLevelLabel`, `isTopLevel` and
+  `onTopLevelClick` for that leading segment.
 - **The Copy/Move destination popup's layout didn't match Figma** — its grid
   sat flush against the popup edges with no spacing, and its tree panel drew
   no card background, shadow, or rounded corners, unlike the rest of the
