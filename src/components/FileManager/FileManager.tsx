@@ -233,9 +233,13 @@ export interface FileTreeOptions extends Omit<
 
 export interface DeleteConfirmationOptions {
   cancelLabel?: string;
-  titleRenderer?: (fileNames: string[]) => ReactNode;
+  /** Receives the names and the items, so a host can title a folder and a file differently by `nodeType`. */
+  titleRenderer?: (fileNames: string[], items: DialFile[]) => ReactNode;
   confirmLabel?: string;
-  contentRenderer?: (fileNames: string[]) => ReactNode;
+  /** Accessible name of the header close control. Defaults to `"Close dialog"`. */
+  closeLabel?: string;
+  /** Receives the names and the items, like `titleRenderer`. */
+  contentRenderer?: (fileNames: string[], items: DialFile[]) => ReactNode;
 }
 
 /**
