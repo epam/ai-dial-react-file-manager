@@ -22,6 +22,12 @@ export interface DialFileManagerNavigationPanelProps extends Omit<
   rootItemPath?: string;
   rootItemLabel?: string;
   breadcrumbsHiddenPathPart?: string;
+  /** Names a level above the folder roots; when set, it heads the trail. */
+  topLevelLabel?: string;
+  /** Whether that top level is the current view, so the trail is its one segment. */
+  isTopLevel?: boolean;
+  /** Fired when the top-level segment is activated from inside a root. */
+  onTopLevelClick?: () => void;
 }
 
 /**
@@ -56,6 +62,9 @@ export interface DialFileManagerNavigationPanelProps extends Omit<
  * @param [className] - Additional classes for the panel container
  * @param [breadcrumbClassName] - ClassName forwarded to inner `Breadcrumbs`
  * @param [breadcrumbsHiddenPathPart] - A slash-separated path fragment whose segments will be omitted from the rendered breadcrumb trail.
+ * @param [topLevelLabel] - Label of a level above the folder roots, drawn as the first segment
+ * @param [isTopLevel=false] - Whether that top level is the current view, so the trail is just its segment
+ * @param [onTopLevelClick] - Callback fired when the top-level segment is activated
  */
 export const DialFileManagerNavigationPanel: FC<
   DialFileManagerNavigationPanelProps
@@ -72,11 +81,14 @@ export const DialFileManagerNavigationPanel: FC<
   rootItemPath,
   rootItemLabel,
   breadcrumbsHiddenPathPart,
+  topLevelLabel,
+  isTopLevel = false,
+  onTopLevelClick,
 
   className,
   breadcrumbClassName,
 }) => {
-  const breadcrumbItems: BreadcrumbsItem[] = useMemo(() => {
+  const pathItems: BreadcrumbsItem[] = useMemo(() => {
     /*
      * The root of the tree has no segment to name it, so it is drawn as a
      * single "/" rather than an empty trail — `Breadcrumbs` renders nothing
@@ -167,6 +179,23 @@ export const DialFileManagerNavigationPanel: FC<
     makeHref,
     onItemClick,
   ]);
+
+  const breadcrumbItems: BreadcrumbsItem[] = useMemo(() => {
+    if (!topLevelLabel) return pathItems;
+    if (isTopLevel) return [{ label: topLevelLabel }];
+    return [
+      {
+        label: topLevelLabel,
+        onClick: onTopLevelClick
+          ? (e: MouseEvent<HTMLElement>) => {
+              e.preventDefault();
+              onTopLevelClick();
+            }
+          : undefined,
+      },
+      ...pathItems,
+    ];
+  }, [pathItems, topLevelLabel, isTopLevel, onTopLevelClick]);
 
   return (
     <div

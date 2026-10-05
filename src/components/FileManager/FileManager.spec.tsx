@@ -825,6 +825,105 @@ describe('Dial UI Kit :: FileManager', () => {
           screen.getByRole('group', { name: 'File storage sections' }),
         ).toBeInTheDocument();
       });
+
+      describe('with several roots', () => {
+        const makeRoot = (name: string, childName: string): DialFile => ({
+          name,
+          path: `/${name}`,
+          folderId: name,
+          nodeType: DialFileNodeType.FOLDER,
+          items: [
+            {
+              name: childName,
+              path: `/${name}/${childName}`,
+              folderId: name,
+              nodeType: DialFileNodeType.ITEM,
+            },
+          ],
+        });
+        const rootsMock = [
+          makeRoot('My files', 'mine.txt'),
+          makeRoot('Shared', 'theirs.txt'),
+        ];
+        const allTabsMock = [
+          { value: DialFileManagerTabs.All, label: 'All' },
+          ...tabsMock,
+        ];
+
+        const ControlledRoots = ({
+          initialPath = '/My files',
+          activeTab = DialFileManagerTabs.All,
+        }: {
+          initialPath?: string;
+          activeTab?: DialFileManagerTabs;
+        }): ReactElement => {
+          const [path, setPath] = React.useState<string | undefined>(
+            initialPath,
+          );
+          return (
+            <DialFileManager
+              items={rootsMock}
+              path={path}
+              onPathChange={setPath}
+              treeOptions={{
+                header: 'File storage',
+                tabs: allTabsMock,
+                activeTab,
+                onTabChange: vi.fn(),
+              }}
+            />
+          );
+        };
+
+        const getBreadcrumbs = () =>
+          screen.getByRole('navigation', { name: 'Breadcrumb' });
+
+        test('opens on the list of roots rather than the first root', async () => {
+          renderWithinSizedShell(<ControlledRoots />);
+
+          const grid = await waitForGridTable();
+
+          expect(within(grid).getByText('My files')).toBeInTheDocument();
+          expect(within(grid).getByText('Shared')).toBeInTheDocument();
+          expect(within(grid).queryByText('mine.txt')).not.toBeInTheDocument();
+          expect(within(getBreadcrumbs()).getByText('All')).toBeInTheDocument();
+          expect(
+            within(getBreadcrumbs()).queryByText('My files'),
+          ).not.toBeInTheDocument();
+        });
+
+        test('enters a root on click and returns through the top breadcrumb', async () => {
+          renderWithinSizedShell(<ControlledRoots />);
+
+          const grid = await waitForGridTable();
+          await userEvent.click(within(grid).getByText('Shared'));
+
+          expect(
+            await within(grid).findByText('theirs.txt'),
+          ).toBeInTheDocument();
+          expect(within(grid).queryByText('My files')).not.toBeInTheDocument();
+
+          await userEvent.click(
+            within(getBreadcrumbs()).getByRole('button', { name: 'All' }),
+          );
+
+          expect(await within(grid).findByText('My files')).toBeInTheDocument();
+          expect(within(grid).getByText('Shared')).toBeInTheDocument();
+          expect(
+            within(grid).queryByText('theirs.txt'),
+          ).not.toBeInTheDocument();
+        });
+
+        test('keeps the wide view on the current root', async () => {
+          widthBreakpoint.isBelowBreakpoint = false;
+          renderWithinSizedShell(<ControlledRoots />);
+
+          const grid = await waitForGridTable();
+
+          expect(within(grid).getByText('mine.txt')).toBeInTheDocument();
+          expect(within(grid).queryByText('Shared')).not.toBeInTheDocument();
+        });
+      });
     });
 
     test('renders no filter row when treeOptions carries no tabs', async () => {
