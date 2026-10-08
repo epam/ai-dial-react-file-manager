@@ -19,6 +19,8 @@ jobs:
     with:
       docker-build-enabled: false
       node-version: "24"
+      trivy-severity: "CRITICAL,HIGH,MEDIUM,LOW"
+      trivy-severity-for-sarif: "CRITICAL,HIGH,MEDIUM,LOW"
 
   package_check:
     name: package
