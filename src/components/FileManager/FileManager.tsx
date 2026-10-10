@@ -172,6 +172,7 @@ export type DialFileManagerDestinationFolderPopupOptions = Pick<
   | 'emptyStateTitle'
   | 'emptyStateDescription'
   | 'excludedPaths'
+  | 'filesLoading'
 > & {
   getCopyHeader?: (itemsCount: number, itemName?: string) => string;
   getMoveHeader?: (itemsCount: number, itemName?: string) => string;
@@ -596,6 +597,7 @@ export interface DialFileManagerProps {
  * @param [bulkActionsToolbarOptions] - Options for the bulk actions toolbar shown when items are selected
  * @param [deleteConfirmationOptions] - Options for the delete confirmation popup
  * @param [destinationFolderPopupOptions.excludedPaths] - Paths to hide from the Copy/Move destination popup only (e.g. a root folder that shouldn't be a valid destination); the main tree/grid are unaffected
+ * @param [destinationFolderPopupOptions.filesLoading] - When true, the Copy/Move destination grid shows its loading state (e.g. while the destination folder's contents load); falls back to the main `filesLoading`
  * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view.
  *
  * @param [onPathChange] - Callback fired when user navigates via tree or breadcrumb
@@ -1881,7 +1883,8 @@ export const DialFileManagerView: FC = () => {
             columnDefs: columnDefs.filter(
               (col) => col.colId !== FileManagerColumnKey.Actions,
             ),
-            loading: filesLoading,
+            loading:
+              destinationFolderPopupOptions?.filesLoading ?? filesLoading,
           }}
           onUploadFiles={onUploadFiles}
           onValidateUpload={onValidateUpload}
