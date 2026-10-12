@@ -1399,6 +1399,7 @@ export const WithUnshareAction: Story = {
             unshare: 'Unshare',
           },
         }}
+        unshareConfirmationOptions={{}}
         onUnshareFiles={(files) => {
           alert(`Unsharing file: ${files.map((f) => f.name).join(',')}`);
         }}
