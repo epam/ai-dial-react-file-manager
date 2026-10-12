@@ -772,7 +772,7 @@ describe('Dial UI Kit :: FileManager', () => {
         };
       });
 
-      test('opens the navigation card into the filter row once the folders panel is gone', async () => {
+      test('opens the navigation card into the filter row and keeps it open on a section change', async () => {
         const onTabChange = vi.fn();
 
         renderWithinSizedShell(
@@ -811,6 +811,9 @@ describe('Dial UI Kit :: FileManager', () => {
         );
 
         expect(onTabChange).toHaveBeenCalledWith(DialFileManagerTabs.Shared);
+        expect(
+          screen.getByRole('button', { name: 'All files', expanded: true }),
+        ).toBeInTheDocument();
       });
 
       test('names the compact filter row from tabsAriaLabel when the header is not text', async () => {

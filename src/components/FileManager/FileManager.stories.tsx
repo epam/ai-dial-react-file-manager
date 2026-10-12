@@ -2450,6 +2450,15 @@ export const CreateFolderValidation: Story = {
 const MobileFileStorageComponent = (args: DialFileManagerProps) => {
   const [activeTab, setActiveTab] = useState(DialFileManagerTabs.MyFiles);
   const items = mobileItemsByTab[activeTab] ?? [];
+  const rootPath = items[0]?.path ?? '';
+  const [path, setPath] = useState(rootPath);
+  const expandedPaths = useMemo(() => new Set([rootPath]), [rootPath]);
+
+  const handleTabChange = (tab: DialFileManagerTabs) => {
+    setActiveTab(tab);
+    setPath(mobileItemsByTab[tab]?.[0]?.path ?? '');
+  };
+
   const actionLabels = {
     [DialFileManagerActions.Download]: 'Download',
     [DialFileManagerActions.Move]: 'Move to',
@@ -2466,17 +2475,17 @@ const MobileFileStorageComponent = (args: DialFileManagerProps) => {
       </h1>
       <div className="min-h-0 flex-1">
         <DialFileManager
-          key={activeTab}
           {...args}
           items={items}
-          defaultPath={items.length === 1 ? items[0].path : undefined}
+          path={path}
+          onPathChange={(nextPath) => setPath(nextPath ?? '')}
           className="p-3 pt-2"
           contentClassName="px-0"
           treeOptions={{
             tabs: mobileTabs,
             activeTab,
-            onTabChange: setActiveTab,
-            expandedPaths: new Set([items[0]?.path ?? '']),
+            onTabChange: handleTabChange,
+            expandedPaths,
             actionLabels,
           }}
           navigationPanelOptions={{
