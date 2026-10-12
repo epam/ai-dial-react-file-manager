@@ -917,14 +917,15 @@ export const DialFileManagerView: FC = () => {
   );
 
   const {
-    isCompactNavigationShown,
+    isCompactNavigationOpen,
     setIsCompactNavigationOpen,
     closeCompactNavigation,
   } = useCompactNavigation(isCompactView);
 
   /*
-   * Opening a menu leaves the navigation card as it is; picking an action from
-   * the toolbar, sort or Add menus closes it, since the result lands in the grid.
+   * Picking a sort, typing a search query or dropping files closes the
+   * navigation card, since the result lands in the grid; the toolbar menus do
+   * the same through onMenuItemClick. Opening a menu leaves the card as it is.
    */
   const handleSortMenuChange = useCallback(
     (nextSort: FileManagerSort) => {
@@ -1341,7 +1342,8 @@ export const DialFileManagerView: FC = () => {
         {...sortDropdownProps}
         iconOnly={sortDropdownProps.iconOnly ?? isCompactView}
         className={mergeClasses(
-          isCompactToolbarShown ? 'shrink-0' : 'ml-auto shrink-0',
+          'shrink-0',
+          { 'ml-auto': !isCompactToolbarShown },
           sortDropdownProps.className,
         )}
         sort={sort}
@@ -1368,7 +1370,7 @@ export const DialFileManagerView: FC = () => {
       !bulkActionsToolbarOptions ||
       selectedPaths.size === 0 ||
       isEmptyStateShown ||
-      isCompactNavigationShown
+      isCompactNavigationOpen
     )
       return null;
 
@@ -1386,7 +1388,7 @@ export const DialFileManagerView: FC = () => {
     bulkActionsToolbarOptions,
     selectedPaths,
     isEmptyStateShown,
-    isCompactNavigationShown,
+    isCompactNavigationOpen,
     clearSelection,
     bulkActions,
   ]);
@@ -1556,7 +1558,7 @@ export const DialFileManagerView: FC = () => {
     return (
       <DialFileManagerCompactNavigation
         label={label}
-        isOpen={isCompactNavigationShown}
+        isOpen={isCompactNavigationOpen}
         onOpenChange={setIsCompactNavigationOpen}
       >
         {tabs?.length && activeTab ? (
@@ -1576,7 +1578,7 @@ export const DialFileManagerView: FC = () => {
     rootItem?.path,
     currentFolder?.path,
     currentFolder?.name,
-    isCompactNavigationShown,
+    isCompactNavigationOpen,
     setIsCompactNavigationOpen,
     tabs,
     activeTab,
@@ -1715,13 +1717,13 @@ export const DialFileManagerView: FC = () => {
         isDragging ? gridDragOverClassName : '',
         isDraggingOverWindow && !isDragging ? gridDragWindowClassName : '',
         gridContainerClassName,
-        isCompactNavigationShown && gridRegionCollapsedClassName,
+        isCompactNavigationOpen && gridRegionCollapsedClassName,
       ),
     [
       isDragging,
       isDraggingOverWindow,
       gridContainerClassName,
-      isCompactNavigationShown,
+      isCompactNavigationOpen,
     ],
   );
 
@@ -1887,7 +1889,7 @@ export const DialFileManagerView: FC = () => {
              */}
             <div
               className={mergeClasses(gridPanelClassName, 'relative', {
-                'flex-none': isCompactNavigationShown,
+                'flex-none': isCompactNavigationOpen,
               })}
               onDragEnter={handleDragEnter}
               onDragLeave={handleDragLeave}

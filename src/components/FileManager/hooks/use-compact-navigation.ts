@@ -12,7 +12,7 @@ export const useCompactNavigation = (isCompactView: boolean) => {
   const closeCompactNavigation = useCallback(() => setIsOpen(false), []);
 
   return {
-    isCompactNavigationShown: isCompactView && isOpen,
+    isCompactNavigationOpen: isOpen,
     setIsCompactNavigationOpen: setIsOpen,
     closeCompactNavigation,
   };

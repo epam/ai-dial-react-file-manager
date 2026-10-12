@@ -80,7 +80,7 @@ export interface DialFileManagerToolbarProps {
  * @param [isCompactView] - Whether to render the compact layout; overrides the viewport check when set.
  * @param [additionalButtons] - Controls rendered before the new button.
  * @param [moreActionsLabel='More actions'] - Accessible name of the compact "more" menu trigger.
- * @param [onMenuItemClick] - Callback fired when an item is picked from a menu of the compact layout.
+ * @param [onMenuItemClick] - Callback fired when a top-level item is picked from a menu of the compact layout; submenu items don't fire it.
  *
  * @remarks
  * - The hidden files toggle uses `Switch`.
@@ -106,7 +106,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
   onMenuItemClick,
 }) => {
   const isMobileScreen = useIsMobileScreen();
-  const isMobile = isCompactView ?? isMobileScreen;
+  const isCompactLayout = isCompactView ?? isMobileScreen;
 
   const dropdownItems = useMemo(() => {
     const items: DropdownItem[] = [
@@ -169,7 +169,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
     </>
   );
 
-  const renderMobileActions = () => (
+  const renderCompactActions = () => (
     <>
       {showHiddenFilesToggle && (
         <Dropdown
@@ -227,10 +227,10 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
   return (
     <div
       className={mergeClasses('flex gap-4 shrink-0 items-center', {
-        'gap-3': isMobile,
+        'gap-3': isCompactLayout,
       })}
     >
-      {isMobile ? renderMobileActions() : renderDesktopActions()}
+      {isCompactLayout ? renderCompactActions() : renderDesktopActions()}
     </div>
   );
 };

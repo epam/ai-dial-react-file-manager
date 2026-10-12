@@ -42,7 +42,10 @@ export const gridPanelClassName =
 export const gridBaseClassName =
   'flex-1 w-full text-secondary overflow-auto min-h-0 min-w-0 rounded-xl shadow-sm';
 
-/* Out of flow but still full width, so the grid keeps its size and scroll while the compact navigation card covers it. */
+/*
+ * Out of flow but still full width while the compact navigation card covers
+ * it, so the grid keeps its columns and scroll position.
+ */
 export const gridRegionCollapsedClassName =
   'invisible absolute inset-x-0 bottom-0 h-0 overflow-hidden';
 

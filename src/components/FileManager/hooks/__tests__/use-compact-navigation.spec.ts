@@ -5,7 +5,7 @@ import { useCompactNavigation } from '@/components/FileManager/hooks/use-compact
 describe('Dial UI Kit :: FileManager :: useCompactNavigation', () => {
   it('starts closed', () => {
     const { result } = renderHook(() => useCompactNavigation(true));
-    expect(result.current.isCompactNavigationShown).toBe(false);
+    expect(result.current.isCompactNavigationOpen).toBe(false);
   });
 
   it('opens and closes the card in the compact view', () => {
@@ -14,12 +14,12 @@ describe('Dial UI Kit :: FileManager :: useCompactNavigation', () => {
     act(() => {
       result.current.setIsCompactNavigationOpen(true);
     });
-    expect(result.current.isCompactNavigationShown).toBe(true);
+    expect(result.current.isCompactNavigationOpen).toBe(true);
 
     act(() => {
       result.current.closeCompactNavigation();
     });
-    expect(result.current.isCompactNavigationShown).toBe(false);
+    expect(result.current.isCompactNavigationOpen).toBe(false);
   });
 
   it('closes the card when the compact view is left', () => {
@@ -32,9 +32,9 @@ describe('Dial UI Kit :: FileManager :: useCompactNavigation', () => {
       result.current.setIsCompactNavigationOpen(true);
     });
     rerender({ isCompactView: false });
-    expect(result.current.isCompactNavigationShown).toBe(false);
+    expect(result.current.isCompactNavigationOpen).toBe(false);
 
     rerender({ isCompactView: true });
-    expect(result.current.isCompactNavigationShown).toBe(false);
+    expect(result.current.isCompactNavigationOpen).toBe(false);
   });
 });
