@@ -8,6 +8,7 @@ import {
   ElementSize,
   GhostIconButton,
   IconButton,
+  mergeClasses,
   Switch,
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
@@ -36,9 +37,10 @@ export interface DialFileManagerToolbarProps {
   showHiddenFilesToggle?: boolean;
   onToggleHiddenFiles?: (value: boolean) => void;
   disabledNewButtonTooltip?: string;
-  isCompact?: boolean;
-  compactSlot?: ReactNode;
+  isCompactView?: boolean;
+  additionalButtons?: ReactNode;
   moreActionsLabel?: string;
+  onMenuItemClick?: () => void;
 }
 
 /**
@@ -75,9 +77,10 @@ export interface DialFileManagerToolbarProps {
  * @param [newButtonDropdownItems=[]] - Dropdown items available under the new button. If empty, a single new button is shown instead.
  * @param [newButtonLabel='New'] - Label text for the new button.
  * @param [disabledNewButtonTooltip] - Tooltip text to show when the new button is disabled.
- * @param [isCompact] - Forces the compact layout; when omitted it follows the viewport width.
- * @param [compactSlot] - Rendered between the "more" menu and the round Add button in the compact layout.
+ * @param [isCompactView] - Whether to render the compact layout; overrides the viewport check when set.
+ * @param [additionalButtons] - Controls rendered before the new button.
  * @param [moreActionsLabel='More actions'] - Accessible name of the compact "more" menu trigger.
+ * @param [onMenuItemClick] - Callback fired when an item is picked from a menu of the compact layout.
  *
  * @remarks
  * - The hidden files toggle uses `Switch`.
@@ -97,12 +100,13 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
   hideHiddenFilesLabel = 'Hide hidden files',
   showHiddenFilesToggle = true,
   disabledNewButtonTooltip,
-  isCompact,
-  compactSlot,
+  isCompactView,
+  additionalButtons,
   moreActionsLabel = 'More actions',
+  onMenuItemClick,
 }) => {
   const isMobileScreen = useIsMobileScreen();
-  const isMobile = isCompact ?? isMobileScreen;
+  const isMobile = isCompactView ?? isMobileScreen;
 
   const dropdownItems = useMemo(() => {
     const items: DropdownItem[] = [
@@ -143,6 +147,8 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
         />
       )}
 
+      {additionalButtons}
+
       {isNewButtonVisible && (
         <Tooltip
           tooltip={
@@ -166,7 +172,11 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
   const renderMobileActions = () => (
     <>
       {showHiddenFilesToggle && (
-        <Dropdown items={dropdownItems} className="group/more-actions">
+        <Dropdown
+          items={dropdownItems}
+          onItemClick={onMenuItemClick}
+          className="group/more-actions"
+        >
           <GhostIconButton
             size={ElementSize.Standard}
             aria-label={moreActionsLabel}
@@ -181,7 +191,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
         </Dropdown>
       )}
 
-      {compactSlot}
+      {additionalButtons}
 
       {isNewButtonVisible ? (
         <Tooltip
@@ -194,6 +204,7 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
           <Dropdown
             items={newButtonDropdownItems}
             {...NEW_BUTTON_DROPDOWN_PROPS}
+            onItemClick={onMenuItemClick}
           >
             <IconButton
               variant={newButtonVariant}
@@ -215,11 +226,9 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
 
   return (
     <div
-      className={
-        isMobile
-          ? 'flex gap-3 shrink-0 items-center'
-          : 'flex gap-4 shrink-0 items-center'
-      }
+      className={mergeClasses('flex gap-4 shrink-0 items-center', {
+        'gap-3': isMobile,
+      })}
     >
       {isMobile ? renderMobileActions() : renderDesktopActions()}
     </div>

@@ -25,11 +25,11 @@ import {
   FileManagerSortField,
 } from '@/types/file-manager';
 
-// The sort menu keeps the design's width rather than following the compact trigger.
 // The kit has no tinted icon-button variant, so the icon-only trigger takes the accent tint from tokens.
 const ICON_ONLY_TRIGGER_CLASS_NAME =
   'border border-accent-alpha bg-control-accent-alpha hover:bg-control-accent-alpha-hover';
 
+// The sort menu keeps the design's width rather than following the compact trigger.
 const SORT_DROPDOWN_PROPS = {
   listClassName: 'min-w-[240px]',
   matchReferenceWidth: false,

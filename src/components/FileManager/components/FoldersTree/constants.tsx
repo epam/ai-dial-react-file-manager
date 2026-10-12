@@ -3,7 +3,7 @@ export const CARET_ICON_PROPS = {
   stroke: 2,
 };
 
-export const CARET_HIT_AREA_CLASS_NAME =
+export const caretHitAreaClassName =
   "relative flex shrink-0 before:absolute before:-inset-y-[7px] before:-inset-x-1 before:content-['']";
 
 export const FOLDER_LEVEL_PADDING = 14;

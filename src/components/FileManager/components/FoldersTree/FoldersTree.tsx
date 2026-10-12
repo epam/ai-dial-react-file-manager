@@ -21,7 +21,7 @@ import {
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import {
-  CARET_HIT_AREA_CLASS_NAME,
+  caretHitAreaClassName,
   CARET_ICON_PROPS,
   FOLDER_LEVEL_PADDING,
   NEW_FOLDER_TEMP_NAME,
@@ -468,7 +468,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                         caretIcon
                       ) : (
                         <span
-                          className={CARET_HIT_AREA_CLASS_NAME}
+                          className={caretHitAreaClassName}
                           onClick={(event) => {
                             event.stopPropagation();
                             togglePath(node.path);

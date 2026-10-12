@@ -165,11 +165,11 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
       <DialFileManagerToolbar
         areHiddenFilesVisible={false}
         onToggleHiddenFiles={vi.fn()}
-        isCompact
+        isCompactView
         isNewButtonVisible
         newButtonLabel="Add"
         newButtonDropdownItems={[{ key: '1', label: 'New File' }]}
-        compactSlot={<button type="button">Sort</button>}
+        additionalButtons={<button type="button">Sort</button>}
       />,
     );
 
@@ -189,7 +189,7 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
       <DialFileManagerToolbar
         areHiddenFilesVisible={false}
         onToggleHiddenFiles={onToggleHiddenFiles}
-        isCompact
+        isCompactView
       />,
     );
 
@@ -204,7 +204,7 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
       <DialFileManagerToolbar
         areHiddenFilesVisible={false}
         onToggleHiddenFiles={vi.fn()}
-        isCompact
+        isCompactView
         showHiddenFilesToggle={false}
         isNewButtonVisible
         newButtonDropdownItems={[{ key: '1', label: 'New File' }]}
@@ -223,7 +223,7 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
         <DialFileManagerToolbar
           areHiddenFilesVisible={false}
           onToggleHiddenFiles={vi.fn()}
-          isCompact
+          isCompactView
           isNewButtonVisible
           newButtonVariant={newButtonVariant}
           newButtonDropdownItems={[{ key: '1', label: 'New File' }]}
@@ -239,12 +239,12 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
     );
   });
 
-  it('keeps the desktop layout when isCompact is false', () => {
+  it('keeps the desktop layout when isCompactView is false', () => {
     render(
       <DialFileManagerToolbar
         areHiddenFilesVisible={false}
         onToggleHiddenFiles={vi.fn()}
-        isCompact={false}
+        isCompactView={false}
       />,
     );
 

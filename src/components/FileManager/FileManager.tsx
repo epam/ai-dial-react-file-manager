@@ -20,6 +20,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type DragEvent,
   type FC,
   type ReactNode,
   type Ref,
@@ -138,6 +139,7 @@ import {
   toolbarBaseClassName,
 } from './constants';
 import { useBulkActions } from './hooks/use-bulk-actions';
+import { useCompactNavigation } from './hooks/use-compact-navigation';
 import {
   useFileManagerColumns,
   type FileManagerGridContext,
@@ -340,7 +342,11 @@ export type NewAction = Pick<DropdownItem, 'label' | 'icon'>;
 
 export type ToolbarOptions = Omit<
   DialFileManagerToolbarProps,
-  'areHiddenFilesVisible' | 'onToggleHiddenFiles' | 'isCompact' | 'compactSlot'
+  | 'areHiddenFilesVisible'
+  | 'onToggleHiddenFiles'
+  | 'isCompactView'
+  | 'additionalButtons'
+  | 'onMenuItemClick'
 > & {
   newActions?: {
     uploadFiles?: NewAction;
@@ -910,38 +916,33 @@ export const DialFileManagerView: FC = () => {
     customBreakpointRef,
   );
 
-  const [isCompactNavigationOpen, setIsCompactNavigationOpen] = useState(false);
-  const isCompactNavigationShown = isCompactView && isCompactNavigationOpen;
+  const {
+    isCompactNavigationShown,
+    setIsCompactNavigationOpen,
+    closeCompactNavigation,
+  } = useCompactNavigation(isCompactView);
 
   /*
    * Opening a menu leaves the navigation card as it is; picking an action from
    * the toolbar, sort or Add menus closes it, since the result lands in the grid.
    */
-  const closeCompactNavigation = useCallback(
-    () => setIsCompactNavigationOpen(false),
-    [],
+  const handleSortMenuChange = useCallback(
+    (nextSort: FileManagerSort) => {
+      closeCompactNavigation();
+      handleSortChange(nextSort);
+    },
+    [closeCompactNavigation, handleSortChange],
   );
 
-  const toolbarNewActions = useMemo<DropdownItem[]>(
-    () =>
-      isCompactView
-        ? newActions.map((action) => ({
-            ...action,
-            onClick: (info) => {
-              closeCompactNavigation();
-              action.onClick?.(info);
-            },
-          }))
-        : newActions,
-    [isCompactView, newActions, closeCompactNavigation],
+  const handleGridPanelDrop = useCallback(
+    (event: DragEvent) => {
+      closeCompactNavigation();
+      handleDrop(event);
+    },
+    [closeCompactNavigation, handleDrop],
   );
 
-  const handleToggleHiddenFiles = useCallback(() => {
-    closeCompactNavigation();
-    toggleHiddenFilesVisibility();
-  }, [closeCompactNavigation, toggleHiddenFilesVisibility]);
-
-  const handleCompactSearchChange = useCallback(
+  const handleSearchBarChange = useCallback(
     (value: string) => {
       if (value) closeCompactNavigation();
       handleSearchChange(value);
@@ -1294,7 +1295,7 @@ export const DialFileManagerView: FC = () => {
   );
 
   const renderToolbar = useCallback(
-    (compactSlot?: ReactNode) => {
+    (additionalButtons?: ReactNode) => {
       if (!toolbarOptions) return null;
 
       return (
@@ -1308,49 +1309,56 @@ export const DialFileManagerView: FC = () => {
           <DialFileManagerToolbar
             {...toolbarOptions}
             areHiddenFilesVisible={areHiddenFilesVisible}
-            onToggleHiddenFiles={handleToggleHiddenFiles}
+            onToggleHiddenFiles={toggleHiddenFilesVisibility}
             isNewButtonVisible={isNewButtonVisible}
             isNewButtonDisabled={isNewButtonDisabled}
-            newButtonDropdownItems={toolbarNewActions}
-            isCompact={isCompactView}
-            compactSlot={compactSlot}
+            newButtonDropdownItems={newActions}
+            isCompactView={isCompactView}
+            additionalButtons={additionalButtons}
+            onMenuItemClick={closeCompactNavigation}
           />
         </div>
       );
     },
     [
       areHiddenFilesVisible,
-      handleToggleHiddenFiles,
+      toggleHiddenFilesVisibility,
       toolbarOptions,
       isNewButtonVisible,
       isNewButtonDisabled,
-      toolbarNewActions,
+      newActions,
       isCompactView,
+      closeCompactNavigation,
     ],
   );
 
   const isCompactToolbarShown = isCompactView && !!toolbarOptions;
 
-  /* The compact view folds the toolbar into the search row as more menu, sort, add. */
-  const renderCompactActions = () => {
-    const compactSort = sortable ? (
+  /* The compact view folds the toolbar into the search row, with sort between its menus. */
+  const renderSearchRowActions = useCallback(() => {
+    const sortDropdown = sortable ? (
       <DialFileManagerSortDropdown
         {...sortDropdownProps}
-        iconOnly
+        iconOnly={isCompactView}
         className={mergeClasses(
           isCompactToolbarShown ? 'shrink-0' : 'ml-auto shrink-0',
           sortDropdownProps.className,
         )}
         sort={sort}
-        onSortChange={(nextSort) => {
-          closeCompactNavigation();
-          handleSortChange(nextSort);
-        }}
+        onSortChange={handleSortMenuChange}
       />
     ) : null;
 
-    return isCompactToolbarShown ? renderToolbar(compactSort) : compactSort;
-  };
+    return isCompactToolbarShown ? renderToolbar(sortDropdown) : sortDropdown;
+  }, [
+    sortable,
+    sortDropdownProps,
+    isCompactView,
+    isCompactToolbarShown,
+    sort,
+    handleSortMenuChange,
+    renderToolbar,
+  ]);
 
   const isEmptyStateShown =
     gridRows.length === 0 && !filesLoading && !searchInProgress;
@@ -1397,9 +1405,9 @@ export const DialFileManagerView: FC = () => {
   const handleFoldersTreeItemClick = useCallback(
     (item: DialFile) => {
       handleTreeItemClick(item);
-      setIsCompactNavigationOpen(false);
+      closeCompactNavigation();
     },
-    [handleTreeItemClick],
+    [handleTreeItemClick, closeCompactNavigation],
   );
 
   const foldersTree = useMemo(
@@ -1563,6 +1571,7 @@ export const DialFileManagerView: FC = () => {
     currentFolder?.path,
     currentFolder?.name,
     isCompactNavigationShown,
+    setIsCompactNavigationOpen,
     tabs,
     activeTab,
     handleTabChange,
@@ -1882,10 +1891,7 @@ export const DialFileManagerView: FC = () => {
               onDragEnter={handleDragEnter}
               onDragLeave={handleDragLeave}
               onDragOver={handleDragOver}
-              onDrop={(event) => {
-                closeCompactNavigation();
-                handleDrop(event);
-              }}
+              onDrop={handleGridPanelDrop}
             >
               {(searchable || sortable || isCompactToolbarShown) && (
                 <div className={searchRowClassName}>
@@ -1901,22 +1907,10 @@ export const DialFileManagerView: FC = () => {
                       searchClassName={searchClassName}
                       searchContainerClassName={searchContainerClassName}
                       value={effectiveSearchValue}
-                      onSearchChange={handleCompactSearchChange}
+                      onSearchChange={handleSearchBarChange}
                     />
                   )}
-                  {isCompactView
-                    ? renderCompactActions()
-                    : sortable && (
-                        <DialFileManagerSortDropdown
-                          {...sortDropdownProps}
-                          className={mergeClasses(
-                            'ml-auto shrink-0',
-                            sortDropdownProps.className,
-                          )}
-                          sort={sort}
-                          onSortChange={handleSortChange}
-                        />
-                      )}
+                  {renderSearchRowActions()}
                 </div>
               )}
 
