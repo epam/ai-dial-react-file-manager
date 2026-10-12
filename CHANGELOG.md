@@ -62,8 +62,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
   `selectOnCaretClick` and `showItemActionsButton` (both default to `true`), and
   `DialFileManagerToolbar` gains `isCompact`, `compactSlot` and
   `moreActionsLabel`; the toolbar now follows the file manager's compact view
-  rather than the viewport width. Rows read "date • size", and folder rows no
-  longer start the date with an empty size slot. The wide view is unchanged.
+  rather than the viewport width. Rows are 68px tall and read "date • size", and
+  folder rows no longer start the date with an empty size slot. The wide view is
+  unchanged.
 - **The delete confirmation follows the DIAL delete design** — Cancel is a
   text (ghost) button, Delete is a danger button led by a trash icon, and the
   header close control is shown. Before, the kit's default footer rendered a

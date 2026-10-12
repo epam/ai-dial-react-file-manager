@@ -14,6 +14,7 @@ import type {
 } from 'ag-grid-community';
 import {
   useCallback,
+  useEffect,
   useId,
   useImperativeHandle,
   useMemo,
@@ -114,6 +115,7 @@ import {
   actionsColumnButtonClassName,
   AG_GRID_SELECTION_COLUMN_ID,
   bulkActionsToolbarWrapperClassName,
+  COMPACT_VIEW_FILE_ROW_HEIGHT,
   COMPACT_VIEW_HEADER_HEIGHT,
   containerBaseClassName,
   contentGridClassName,
@@ -1670,10 +1672,17 @@ export const DialFileManagerView: FC = () => {
     ],
   );
 
+  // AG Grid keeps rendered rows at their old height until told to remeasure.
+  useEffect(() => {
+    gridApiRef.current?.resetRowHeights();
+  }, [isCompactView]);
+
   const gridAdditionalOptions = useMemo<AgGridOptions<GridRow>>(
     () => ({
       headerHeight: COMPACT_VIEW_HEADER_HEIGHT,
-      rowHeight: COMPACT_VIEW_HEADER_HEIGHT,
+      rowHeight: isCompactView
+        ? COMPACT_VIEW_FILE_ROW_HEIGHT
+        : COMPACT_VIEW_HEADER_HEIGHT,
       ...forwardedGridOptions.additionalGridOptions,
       onCellClicked: cellClickHandler,
       rowClass: 'group/grid-row',
@@ -1709,6 +1718,7 @@ export const DialFileManagerView: FC = () => {
       } as FileManagerGridContext,
     }),
     [
+      isCompactView,
       forwardedGridOptions.additionalGridOptions,
       cellClickHandler,
       searchable,
@@ -1797,11 +1807,7 @@ export const DialFileManagerView: FC = () => {
       >
         <div className={mergeClasses(mainGridClassName, gridClassName)}>
           {renderFoldersTree()}
-          <div
-            className={mergeClasses(contentGridClassName, contentClassName, {
-              'gap-3': isCompactView,
-            })}
-          >
+          <div className={mergeClasses(contentGridClassName, contentClassName)}>
             {isCompactView ? (
               renderCompactNavigation()
             ) : (

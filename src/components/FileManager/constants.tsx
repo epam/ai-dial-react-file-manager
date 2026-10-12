@@ -78,7 +78,7 @@ export const AG_GRID_SELECTION_COLUMN_ID = 'ag-Grid-SelectionColumn';
 
 export const COMPACT_VIEW_HEADER_HEIGHT = 44;
 
-export const COMPACT_VIEW_FILE_ROW_HEIGHT = 56;
+export const COMPACT_VIEW_FILE_ROW_HEIGHT = 68;
 
 export const DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT = 800;
 

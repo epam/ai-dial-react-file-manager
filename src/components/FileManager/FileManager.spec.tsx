@@ -48,6 +48,7 @@ interface MockCellClickedEvent<Row extends GridRowLike> {
 
 interface MockAdditionalGridOptions<Row extends GridRowLike> {
   onCellClicked?: (event: MockCellClickedEvent<Row>) => void;
+  rowHeight?: number;
 }
 
 interface MockGridProps<Row extends GridRowLike> {
@@ -160,7 +161,7 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
         role={'grid'}
         aria-label="File Manager Grid View"
       >
-        <table role="table">
+        <table role="table" data-row-height={additionalGridOptions?.rowHeight}>
           {!filtersDisabled && (
             <thead>
               <tr>
@@ -834,6 +835,33 @@ describe('Dial UI Kit :: FileManager', () => {
         expect(
           screen.getByRole('group', { name: 'File storage sections' }),
         ).toBeInTheDocument();
+      });
+
+      test('gives grid rows the taller compact height', async () => {
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        const grid = await waitForGridTable();
+
+        expect(within(grid).getByRole('table')).toHaveAttribute(
+          'data-row-height',
+          '68',
+        );
+      });
+
+      test('keeps the default row height outside the compact view', async () => {
+        widthBreakpoint.isBelowBreakpoint = false;
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        const grid = await waitForGridTable();
+
+        expect(within(grid).getByRole('table')).toHaveAttribute(
+          'data-row-height',
+          '44',
+        );
       });
 
       test('hides the grid while the navigation card is open', async () => {

@@ -179,7 +179,7 @@ const MobileFileStorageComponent = (args: DialFileManagerProps) => {
           items={items}
           defaultPath={items.length === 1 ? items[0].path : undefined}
           className="p-3 pt-2"
-          contentClassName="gap-5 px-0"
+          contentClassName="px-0"
           treeOptions={{
             tabs: mobileTabs,
             activeTab,
