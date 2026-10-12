@@ -154,10 +154,6 @@ export const useItemRenaming = ({
         return messages.consecutiveDotsError;
       }
 
-      if (trimmedName.startsWith('.')) {
-        return messages.hiddenItemWarning;
-      }
-
       const isFile = item.nodeType === DialFileNodeType.ITEM;
       let fullName = trimmedName;
 
@@ -189,6 +185,15 @@ export const useItemRenaming = ({
         if (customError) {
           return customError;
         }
+      }
+
+      /*
+       * The hidden-item notice is a non-blocking warning, so it comes last:
+       * returning it earlier would skip every blocking check above (duplicate
+       * name, the host's `onRenameValidate`) for any name starting with `.`.
+       */
+      if (trimmedName.startsWith('.')) {
+        return messages.hiddenItemWarning;
       }
 
       return null;

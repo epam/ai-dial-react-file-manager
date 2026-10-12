@@ -1,3 +1,4 @@
+import { DEFAULT_WARNINGS } from '@/components/FileManager/errors';
 import { useItemRenaming } from '@/components/FileManager/hooks/use-item-renaming';
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
@@ -557,6 +558,39 @@ describe('useItemRenaming hook', () => {
 
       const error = result.current.renameValidateHandler('DOCUMENT', file);
       expect(error).toBe('An item with this name already exists');
+    });
+
+    it('runs the host validator before the hidden-item warning for a leading-dot name', () => {
+      const onRenameValidate = vi.fn((value: string) =>
+        value === '.dial_folder' ? 'This name is reserved' : null,
+      );
+      const { result } = renderHook(() =>
+        useItemRenaming({ items, onRenameValidate }),
+      );
+
+      const folderA = items[0].items![0]; // /root/A
+      const error = result.current.renameValidateHandler(
+        '.dial_folder',
+        folderA,
+      );
+
+      expect(onRenameValidate).toHaveBeenCalledWith('.dial_folder', folderA);
+      expect(error).toBe('This name is reserved');
+    });
+
+    it('still returns the hidden-item warning when every blocking check passes', () => {
+      const onRenameValidate = vi.fn(() => null);
+      const { result } = renderHook(() =>
+        useItemRenaming({ items, onRenameValidate }),
+      );
+
+      const error = result.current.renameValidateHandler(
+        '.hidden',
+        items[0].items![0],
+      );
+
+      expect(onRenameValidate).toHaveBeenCalled();
+      expect(error).toBe(DEFAULT_WARNINGS.hiddenItemWarning);
     });
 
     it('uses custom validation messages', () => {
