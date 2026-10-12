@@ -53,18 +53,19 @@ and this project follows [Semantic Versioning](https://semver.org/).
   breadcrumb trail and the content header give way to a card naming the current
   folder; it opens into the section chips (one scrolling row) and the folders
   tree, fills the height above the search row while open (the grid is hidden,
-  not unmounted), and closes once a folder is picked or a search query is typed.
-  In the card a folder's caret only expands it, and rows drop the hover "more"
-  button (the right-click menu stays). With several roots the tree lists them
-  all, so the separate list of roots is gone. Search, the "more" menu
-  (horizontal dots), an icon-only Sort and a round Add button share one row.
-  `DialFileManagerSortDropdown` gains `iconOnly`, `DialFoldersTree` gains
-  `selectOnCaretClick` and `showItemActionsButton` (both default to `true`), and
-  `DialFileManagerToolbar` gains `isCompact`, `compactSlot` and
-  `moreActionsLabel`; the toolbar now follows the file manager's compact view
-  rather than the viewport width. Rows are 68px tall and read "date • size", and
-  folder rows no longer start the date with an empty size slot. The wide view is
-  unchanged.
+  not unmounted), and closes once a folder is picked, a search query is typed,
+  an action is picked from the "more", Sort or Add menus, a folder is created or
+  files are dropped (opening a menu keeps it open). In the card a folder's caret
+  only expands it, and rows drop the hover "more" button (the right-click menu
+  stays). With several roots the tree lists them all, so the separate list of
+  roots is gone. Search, the "more" menu (horizontal dots), an icon-only Sort
+  and a round Add button share one row. `DialFileManagerSortDropdown` gains
+  `iconOnly`, `DialFoldersTree` gains `selectOnCaretClick` and
+  `showItemActionsButton` (both default to `true`), and `DialFileManagerToolbar`
+  gains `isCompact`, `compactSlot` and `moreActionsLabel`; the toolbar now
+  follows the file manager's compact view rather than the viewport width. Rows
+  are 68px tall and read "date • size", and folder rows no longer start the date
+  with an empty size slot. The wide view is unchanged.
 - **The delete confirmation follows the DIAL delete design** — Cancel is a
   text (ghost) button, Delete is a danger button led by a trash icon, and the
   header close control is shown. Before, the kit's default footer rendered a
@@ -220,6 +221,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Removed
 
+- **`NavigationPanelOptions.topLevelLabel`, `isTopLevel` and `onTopLevelClick`
+  (breaking)** — the leading breadcrumb segment that returned to the compact
+  list of roots is gone with that list. The file manager always overrode these
+  values, so nothing changes at runtime.
 - **`toolbarOptions.hiddenFilesSwitcherLabel` (breaking)** — the hidden-files
   toggle carried two labels: a static one naming the control and a pair naming
   the action. It now reads only the pair, so the toggle says what the click

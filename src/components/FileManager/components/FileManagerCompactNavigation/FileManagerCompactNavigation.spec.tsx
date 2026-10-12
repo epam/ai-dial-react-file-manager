@@ -16,9 +16,11 @@ describe('Dial UI Kit :: DialFileManagerCompactNavigation', () => {
       </DialFileManagerCompactNavigation>,
     );
 
-    expect(
-      screen.getByRole('button', { name: 'DK Test', expanded: false }),
-    ).toBeInTheDocument();
+    const trigger = screen.getByRole('button', {
+      name: 'DK Test',
+      expanded: false,
+    });
+    expect(trigger).not.toHaveAttribute('aria-controls');
     expect(screen.queryByText('Folders tree')).not.toBeInTheDocument();
   });
 

@@ -65,7 +65,7 @@ export const DialFileManagerCompactNavigation: FC<
         type="button"
         className={compactNavigationTriggerClassName}
         aria-expanded={isOpen}
-        aria-controls={panelId}
+        aria-controls={isOpen ? panelId : undefined}
         onClick={() => onOpenChange(!isOpen)}
       >
         <FolderName

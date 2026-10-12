@@ -908,6 +908,86 @@ describe('Dial UI Kit :: FileManager', () => {
         ).toBeInTheDocument();
       });
 
+      describe('toolbar menus', () => {
+        const writableItems: DialFile[] = [
+          {
+            name: 'My files',
+            path: '/My files',
+            folderId: 'root',
+            nodeType: DialFileNodeType.FOLDER,
+            permissions: [DialFilePermission.READ, DialFilePermission.WRITE],
+            items: [
+              {
+                name: 'notes.txt',
+                path: '/My files/notes.txt',
+                folderId: 'root',
+                nodeType: DialFileNodeType.ITEM,
+              },
+            ],
+          },
+        ];
+
+        const openCard = async () => {
+          renderWithinSizedShell(
+            <DialFileManager
+              items={writableItems}
+              path="/My files"
+              toolbarOptions={{
+                newActions: { newFolder: { label: 'New Folder' } },
+              }}
+              onCreateFolder={vi.fn()}
+            />,
+          );
+          await waitForGridTable();
+          await userEvent.click(
+            screen.getByRole('button', { name: 'My files', expanded: false }),
+          );
+        };
+
+        const expectCardOpen = (isOpen: boolean) =>
+          expect(
+            screen.getByRole('button', { name: 'My files', expanded: isOpen }),
+          ).toBeInTheDocument();
+
+        test('closes the card once Show hidden files is picked, not when the menu opens', async () => {
+          await openCard();
+
+          await userEvent.click(
+            screen.getByRole('button', { name: 'More actions' }),
+          );
+          expectCardOpen(true);
+
+          await userEvent.click(
+            await screen.findByRole('menuitem', { name: 'Show hidden files' }),
+          );
+          expectCardOpen(false);
+        });
+
+        test('closes the card once a sort is picked, not when the menu opens', async () => {
+          await openCard();
+
+          await userEvent.click(screen.getByRole('button', { name: 'Sort' }));
+          expectCardOpen(true);
+
+          await userEvent.click(
+            await screen.findByRole('menuitemradio', { name: 'Size' }),
+          );
+          expectCardOpen(false);
+        });
+
+        test('closes the card once New Folder is picked, not when the menu opens', async () => {
+          await openCard();
+
+          await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+          expectCardOpen(true);
+
+          await userEvent.click(
+            await screen.findByRole('menuitem', { name: 'New Folder' }),
+          );
+          expectCardOpen(false);
+        });
+      });
+
       test('closes the navigation card once a search query is typed', async () => {
         renderWithinSizedShell(
           <DialFileManager

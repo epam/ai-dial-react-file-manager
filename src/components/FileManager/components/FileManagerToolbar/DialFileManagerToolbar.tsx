@@ -165,14 +165,11 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
 
   const renderMobileActions = () => (
     <>
-      <Dropdown
-        items={dropdownItems}
-        allowedPlacements={['bottom', 'bottom-start']}
-      >
+      <Dropdown items={dropdownItems} className="group/more-actions">
         <GhostIconButton
           size={ElementSize.Standard}
           aria-label={moreActionsLabel}
-          className="aria-expanded:bg-control-neutral-active"
+          className="group-aria-expanded/more-actions:bg-control-neutral-active"
           icon={
             <IconDots
               stroke={FILE_MANAGER_ICON_STROKE}
