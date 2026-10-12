@@ -864,7 +864,7 @@ describe('Dial UI Kit :: FileManager', () => {
         );
       });
 
-      test('hides the grid while the navigation card is open', async () => {
+      test('takes the grid out of view while the navigation card is open', async () => {
         renderWithinSizedShell(
           <DialFileManager items={itemsMock} path="/All files" />,
         );
@@ -873,13 +873,13 @@ describe('Dial UI Kit :: FileManager', () => {
         const gridRegion = screen.getByRole('region', {
           name: 'File Manager Grid View',
         });
-        expect(gridRegion).not.toHaveClass('hidden');
+        expect(gridRegion).not.toHaveClass('invisible');
 
         await userEvent.click(
           screen.getByRole('button', { name: 'All files', expanded: false }),
         );
 
-        expect(gridRegion).toHaveClass('hidden');
+        expect(gridRegion).toHaveClass('invisible');
         expect(
           screen.getByRole('search', { name: 'Search' }),
         ).toBeInTheDocument();
@@ -1037,7 +1037,7 @@ describe('Dial UI Kit :: FileManager', () => {
         ).toBeInTheDocument();
         expect(
           screen.getByRole('region', { name: 'File Manager Grid View' }),
-        ).not.toHaveClass('hidden');
+        ).not.toHaveClass('invisible');
       });
 
       test('moves the toolbar into the search row after the search field', async () => {

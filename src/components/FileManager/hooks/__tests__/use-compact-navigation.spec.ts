@@ -22,12 +22,19 @@ describe('Dial UI Kit :: FileManager :: useCompactNavigation', () => {
     expect(result.current.isCompactNavigationShown).toBe(false);
   });
 
-  it('never reports the card shown outside the compact view', () => {
-    const { result } = renderHook(() => useCompactNavigation(false));
+  it('closes the card when the compact view is left', () => {
+    const { result, rerender } = renderHook(
+      ({ isCompactView }) => useCompactNavigation(isCompactView),
+      { initialProps: { isCompactView: true } },
+    );
 
     act(() => {
       result.current.setIsCompactNavigationOpen(true);
     });
+    rerender({ isCompactView: false });
+    expect(result.current.isCompactNavigationShown).toBe(false);
+
+    rerender({ isCompactView: true });
     expect(result.current.isCompactNavigationShown).toBe(false);
   });
 });

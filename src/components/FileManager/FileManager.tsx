@@ -14,7 +14,6 @@ import type {
 } from 'ag-grid-community';
 import {
   useCallback,
-  useEffect,
   useId,
   useImperativeHandle,
   useMemo,
@@ -127,6 +126,7 @@ import {
   gridDragOverClassName,
   gridDragWindowClassName,
   gridPanelClassName,
+  gridRegionCollapsedClassName,
   searchRowClassName,
   mainGridClassName,
   sidebarContentClassName,
@@ -1709,7 +1709,7 @@ export const DialFileManagerView: FC = () => {
         isDragging ? gridDragOverClassName : '',
         isDraggingOverWindow && !isDragging ? gridDragWindowClassName : '',
         gridContainerClassName,
-        { hidden: isCompactNavigationShown },
+        isCompactNavigationShown && gridRegionCollapsedClassName,
       ),
     [
       isDragging,
@@ -1718,11 +1718,6 @@ export const DialFileManagerView: FC = () => {
       isCompactNavigationShown,
     ],
   );
-
-  // AG Grid keeps rendered rows at their old height until told to remeasure.
-  useEffect(() => {
-    gridApiRef.current?.resetRowHeights();
-  }, [isCompactView]);
 
   const gridAdditionalOptions = useMemo<AgGridOptions<GridRow>>(
     () => ({
