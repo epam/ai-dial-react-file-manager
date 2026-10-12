@@ -340,7 +340,7 @@ export type NewAction = Pick<DropdownItem, 'label' | 'icon'>;
 
 export type ToolbarOptions = Omit<
   DialFileManagerToolbarProps,
-  'areHiddenFilesVisible' | 'onToggleHiddenFiles'
+  'areHiddenFilesVisible' | 'onToggleHiddenFiles' | 'isCompact' | 'compactSlot'
 > & {
   newActions?: {
     uploadFiles?: NewAction;
@@ -1414,8 +1414,12 @@ export const DialFileManagerView: FC = () => {
         forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
         forbiddenSymbolsTooltip={forbiddenSymbolsTooltip}
         onItemClick={handleFoldersTreeItemClick}
-        selectOnCaretClick={!isCompactView}
-        showItemActionsButton={!isCompactView}
+        selectOnCaretClick={
+          forwardedTreeProps.selectOnCaretClick ?? !isCompactView
+        }
+        showItemActionsButton={
+          forwardedTreeProps.showItemActionsButton ?? !isCompactView
+        }
         areHiddenFilesVisible={areHiddenFilesVisible}
         getContextMenuItems={getTreeContextMenuItems}
         renamedPath={

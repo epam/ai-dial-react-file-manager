@@ -885,6 +885,30 @@ describe('Dial UI Kit :: FileManager', () => {
         ).toBeInTheDocument();
       });
 
+      test('lets treeOptions.selectOnCaretClick override the compact default', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            treeOptions={{ selectOnCaretClick: true }}
+          />,
+        );
+
+        await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+
+        const rootRow = within(screen.getByRole('tree')).getByRole('treeitem', {
+          name: 'All files',
+        });
+        await userEvent.click(rootRow.querySelector('svg')!);
+
+        expect(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        ).toBeInTheDocument();
+      });
+
       test('keeps the navigation card open while a folder is expanded from its caret', async () => {
         renderWithinSizedShell(
           <DialFileManager items={itemsMock} path="/All files" />,

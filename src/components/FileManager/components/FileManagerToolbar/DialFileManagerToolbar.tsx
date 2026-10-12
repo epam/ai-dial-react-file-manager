@@ -7,7 +7,7 @@ import {
   Dropdown,
   ElementSize,
   GhostIconButton,
-  PrimaryIconButton,
+  IconButton,
   Switch,
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
@@ -165,19 +165,21 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
 
   const renderMobileActions = () => (
     <>
-      <Dropdown items={dropdownItems} className="group/more-actions">
-        <GhostIconButton
-          size={ElementSize.Standard}
-          aria-label={moreActionsLabel}
-          className="group-aria-expanded/more-actions:bg-control-neutral-active"
-          icon={
-            <IconDots
-              stroke={FILE_MANAGER_ICON_STROKE}
-              size={DIAL_ICON_SIZE.LG}
-            />
-          }
-        />
-      </Dropdown>
+      {showHiddenFilesToggle && (
+        <Dropdown items={dropdownItems} className="group/more-actions">
+          <GhostIconButton
+            size={ElementSize.Standard}
+            aria-label={moreActionsLabel}
+            className="group-aria-expanded/more-actions:bg-control-neutral-active"
+            icon={
+              <IconDots
+                stroke={FILE_MANAGER_ICON_STROKE}
+                size={DIAL_ICON_SIZE.LG}
+              />
+            }
+          />
+        </Dropdown>
+      )}
 
       {compactSlot}
 
@@ -193,7 +195,8 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
             items={newButtonDropdownItems}
             {...NEW_BUTTON_DROPDOWN_PROPS}
           >
-            <PrimaryIconButton
+            <IconButton
+              variant={newButtonVariant}
               size={ElementSize.Standard}
               aria-label={newButtonLabel}
               disabled={isNewButtonDisabled}
