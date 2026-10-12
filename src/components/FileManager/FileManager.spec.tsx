@@ -826,6 +826,64 @@ describe('Dial UI Kit :: FileManager', () => {
         ).toBeInTheDocument();
       });
 
+      test('moves the toolbar into the search row after the search field', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            navigationPanelOptions={{ searchable: true }}
+            toolbarOptions={{}}
+          />,
+        );
+
+        await waitForGridTable();
+
+        const toolbar = screen.getByRole('toolbar', {
+          name: 'File Manager Toolbar',
+        });
+        const searchInput = within(
+          screen.getByRole('search', { name: 'Search' }),
+        ).getByRole('textbox');
+
+        expect(
+          within(toolbar)
+            .getAllByRole('button')
+            .map((button) => button.getAttribute('aria-label')),
+        ).toEqual(['More actions', 'Sort']);
+        expect(within(toolbar).queryByRole('switch')).not.toBeInTheDocument();
+        expect(
+          searchInput.compareDocumentPosition(toolbar) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
+      });
+
+      test('keeps the labelled sort beside the toolbar outside the compact view', async () => {
+        widthBreakpoint.isBelowBreakpoint = false;
+
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            navigationPanelOptions={{ searchable: true }}
+            toolbarOptions={{}}
+          />,
+        );
+
+        await waitForGridTable();
+
+        const toolbar = screen.getByRole('toolbar', {
+          name: 'File Manager Toolbar',
+        });
+
+        expect(within(toolbar).getByRole('switch')).toBeInTheDocument();
+        expect(
+          within(toolbar).queryByRole('button', { name: 'Sort' }),
+        ).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /sort/i })).toHaveTextContent(
+          'Sort',
+        );
+      });
+
       describe('with several roots', () => {
         const makeRoot = (name: string, childName: string): DialFile => ({
           name,

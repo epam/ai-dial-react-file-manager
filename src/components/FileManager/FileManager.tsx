@@ -1283,33 +1283,65 @@ export const DialFileManagerView: FC = () => {
     [onTabChange, cancelFolderCreation],
   );
 
-  const renderToolbar = useCallback(() => {
-    if (!toolbarOptions) return null;
+  const renderToolbar = useCallback(
+    (compactSlot?: ReactNode) => {
+      if (!toolbarOptions) return null;
 
-    return (
-      <div
-        className={toolbarBaseClassName}
-        role="toolbar"
-        aria-label="File Manager Toolbar"
-      >
-        <DialFileManagerToolbar
-          {...toolbarOptions}
-          areHiddenFilesVisible={areHiddenFilesVisible}
-          onToggleHiddenFiles={toggleHiddenFilesVisibility}
-          isNewButtonVisible={isNewButtonVisible}
-          isNewButtonDisabled={isNewButtonDisabled}
-          newButtonDropdownItems={newActions}
-        />
-      </div>
-    );
-  }, [
-    areHiddenFilesVisible,
-    toggleHiddenFilesVisibility,
-    toolbarOptions,
-    isNewButtonVisible,
-    isNewButtonDisabled,
-    newActions,
-  ]);
+      return (
+        <div
+          className={mergeClasses(toolbarBaseClassName, {
+            'ml-auto': isCompactView,
+          })}
+          role="toolbar"
+          aria-label="File Manager Toolbar"
+        >
+          <DialFileManagerToolbar
+            {...toolbarOptions}
+            areHiddenFilesVisible={areHiddenFilesVisible}
+            onToggleHiddenFiles={toggleHiddenFilesVisibility}
+            isNewButtonVisible={isNewButtonVisible}
+            isNewButtonDisabled={isNewButtonDisabled}
+            newButtonDropdownItems={newActions}
+            isCompact={isCompactView}
+            compactSlot={compactSlot}
+          />
+        </div>
+      );
+    },
+    [
+      areHiddenFilesVisible,
+      toggleHiddenFilesVisibility,
+      toolbarOptions,
+      isNewButtonVisible,
+      isNewButtonDisabled,
+      newActions,
+      isCompactView,
+    ],
+  );
+
+  const isCompactToolbarShown =
+    isCompactView && !!toolbarOptions && !isRootListShown;
+
+  /*
+   * The compact view folds the toolbar into the search row as more menu,
+   * sort, add. The root list only picks a section, so it keeps the sort alone.
+   */
+  const renderCompactActions = () => {
+    const compactSort = sortable ? (
+      <DialFileManagerSortDropdown
+        {...sortDropdownProps}
+        iconOnly
+        className={mergeClasses(
+          isCompactToolbarShown ? 'shrink-0' : 'ml-auto shrink-0',
+          sortDropdownProps.className,
+        )}
+        sort={sort}
+        onSortChange={handleSortChange}
+      />
+    ) : null;
+
+    return isCompactToolbarShown ? renderToolbar(compactSort) : compactSort;
+  };
 
   const isEmptyStateShown =
     !isRootListShown &&
@@ -1787,7 +1819,7 @@ export const DialFileManagerView: FC = () => {
               )}
 
               {/* The root list only picks a section; acting on one happens inside it. */}
-              {!isRootListShown && renderToolbar()}
+              {!isCompactView && !isRootListShown && renderToolbar()}
             </div>
 
             {/*
@@ -1802,7 +1834,7 @@ export const DialFileManagerView: FC = () => {
               onDragOver={handleDragOver}
               onDrop={handleDrop}
             >
-              {(searchable || sortable) && (
+              {(searchable || sortable || isCompactToolbarShown) && (
                 <div className={searchRowClassName}>
                   {searchable && (
                     <DialFileManagerSearchBar
@@ -1819,17 +1851,19 @@ export const DialFileManagerView: FC = () => {
                       onSearchChange={handleSearchChange}
                     />
                   )}
-                  {sortable && (
-                    <DialFileManagerSortDropdown
-                      {...sortDropdownProps}
-                      className={mergeClasses(
-                        'ml-auto shrink-0',
-                        sortDropdownProps.className,
+                  {isCompactView
+                    ? renderCompactActions()
+                    : sortable && (
+                        <DialFileManagerSortDropdown
+                          {...sortDropdownProps}
+                          className={mergeClasses(
+                            'ml-auto shrink-0',
+                            sortDropdownProps.className,
+                          )}
+                          sort={sort}
+                          onSortChange={handleSortChange}
+                        />
                       )}
-                      sort={sort}
-                      onSortChange={handleSortChange}
-                    />
-                  )}
                 </div>
               )}
 

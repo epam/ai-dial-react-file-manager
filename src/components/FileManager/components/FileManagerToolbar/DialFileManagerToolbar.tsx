@@ -7,6 +7,7 @@ import {
   Dropdown,
   ElementSize,
   GhostIconButton,
+  PrimaryIconButton,
   Switch,
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
@@ -14,8 +15,8 @@ import {
   FILE_MANAGER_ICON_PROPS,
   FILE_MANAGER_ICON_STROKE,
 } from '@/constants/icon';
-import { IconDotsVertical, IconEye, IconEyeOff } from '@tabler/icons-react';
-import { type FC, useMemo } from 'react';
+import { IconDots, IconEye, IconEyeOff, IconPlus } from '@tabler/icons-react';
+import { type FC, type ReactNode, useMemo } from 'react';
 
 // The Add menu keeps the design's own width rather than shrinking to a short button label.
 const NEW_BUTTON_DROPDOWN_PROPS = {
@@ -35,6 +36,9 @@ export interface DialFileManagerToolbarProps {
   showHiddenFilesToggle?: boolean;
   onToggleHiddenFiles?: (value: boolean) => void;
   disabledNewButtonTooltip?: string;
+  isCompact?: boolean;
+  compactSlot?: ReactNode;
+  moreActionsLabel?: string;
 }
 
 /**
@@ -71,6 +75,9 @@ export interface DialFileManagerToolbarProps {
  * @param [newButtonDropdownItems=[]] - Dropdown items available under the new button. If empty, a single new button is shown instead.
  * @param [newButtonLabel='New'] - Label text for the new button.
  * @param [disabledNewButtonTooltip] - Tooltip text to show when the new button is disabled.
+ * @param [isCompact] - Forces the compact layout; when omitted it follows the viewport width.
+ * @param [compactSlot] - Rendered between the "more" menu and the round Add button in the compact layout.
+ * @param [moreActionsLabel='More actions'] - Accessible name of the compact "more" menu trigger.
  *
  * @remarks
  * - The hidden files toggle uses `Switch`.
@@ -90,8 +97,12 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
   hideHiddenFilesLabel = 'Hide hidden files',
   showHiddenFilesToggle = true,
   disabledNewButtonTooltip,
+  isCompact,
+  compactSlot,
+  moreActionsLabel = 'More actions',
 }) => {
-  const isMobile = useIsMobileScreen();
+  const isMobileScreen = useIsMobileScreen();
+  const isMobile = isCompact ?? isMobileScreen;
 
   const dropdownItems = useMemo(() => {
     const items: DropdownItem[] = [
@@ -159,15 +170,19 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
         allowedPlacements={['bottom', 'bottom-start']}
       >
         <GhostIconButton
-          size={ElementSize.Small}
+          size={ElementSize.Standard}
+          aria-label={moreActionsLabel}
+          className="aria-expanded:bg-control-neutral-active"
           icon={
-            <IconDotsVertical
+            <IconDots
               stroke={FILE_MANAGER_ICON_STROKE}
-              size={DIAL_ICON_SIZE.SM}
+              size={DIAL_ICON_SIZE.LG}
             />
           }
         />
       </Dropdown>
+
+      {compactSlot}
 
       {isNewButtonVisible ? (
         <Tooltip
@@ -177,20 +192,35 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
               : undefined
           }
         >
-          <ButtonDropdown
-            label={newButtonLabel}
-            variant={newButtonVariant}
+          <Dropdown
             items={newButtonDropdownItems}
-            dropdownProps={NEW_BUTTON_DROPDOWN_PROPS}
-            disabled={isNewButtonDisabled}
-          />
+            {...NEW_BUTTON_DROPDOWN_PROPS}
+          >
+            <PrimaryIconButton
+              size={ElementSize.Standard}
+              aria-label={newButtonLabel}
+              disabled={isNewButtonDisabled}
+              icon={
+                <IconPlus
+                  stroke={FILE_MANAGER_ICON_STROKE}
+                  size={DIAL_ICON_SIZE.LG}
+                />
+              }
+            />
+          </Dropdown>
         </Tooltip>
       ) : null}
     </>
   );
 
   return (
-    <div className="flex gap-4 shrink-0 items-center">
+    <div
+      className={
+        isMobile
+          ? 'flex gap-3 shrink-0 items-center'
+          : 'flex gap-4 shrink-0 items-center'
+      }
+    >
       {isMobile ? renderMobileActions() : renderDesktopActions()}
     </div>
   );
