@@ -13,6 +13,7 @@ export type {
   NewAction,
   SortOptions,
   ToolbarOptions,
+  UnshareConfirmationOptions,
 } from './components/FileManager/FileManager';
 export { DialDestinationFolderPopup } from './components/FileManager/components/DestinationFolderPopup/DestinationFolderPopup';
 export type { DestinationFolderPopupProps } from './components/FileManager/components/DestinationFolderPopup/DestinationFolderPopup';
