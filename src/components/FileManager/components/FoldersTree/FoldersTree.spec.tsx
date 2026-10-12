@@ -54,6 +54,47 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
     );
   });
 
+  test('only expands a folder from its caret when selectOnCaretClick is false', () => {
+    const onItemClick = vi.fn();
+    render(
+      <DialFoldersTree
+        items={mockItems}
+        onItemClick={onItemClick}
+        selectOnCaretClick={false}
+      />,
+    );
+
+    // The caret is a decorative icon with no role of its own.
+    const caret = screen
+      .getByRole('treeitem', { name: 'Root' })
+      .querySelector('svg');
+    fireEvent.click(caret!);
+
+    expect(screen.getByText('Subfolder')).toBeInTheDocument();
+    expect(onItemClick).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByText('Root'));
+    expect(onItemClick).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Root' }),
+    );
+  });
+
+  test('hides the hover actions button but keeps the menu items when showItemActionsButton is false', () => {
+    const { rerender } = render(
+      <DialFoldersTree items={mockItems} getContextMenuItems={getMenu} />,
+    );
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+
+    rerender(
+      <DialFoldersTree
+        items={mockItems}
+        getContextMenuItems={getMenu}
+        showItemActionsButton={false}
+      />,
+    );
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
   test('shows subfolders when expanded', () => {
     render(
       <DialFoldersTree

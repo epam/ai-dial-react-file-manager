@@ -771,7 +771,7 @@ describe('Dial UI Kit :: FileManager', () => {
         };
       });
 
-      test('keeps the filter row in the content column once the folders panel is gone', async () => {
+      test('opens the navigation card into the filter row once the folders panel is gone', async () => {
         const onTabChange = vi.fn();
 
         renderWithinSizedShell(
@@ -792,6 +792,13 @@ describe('Dial UI Kit :: FileManager', () => {
         expect(
           screen.queryByRole('complementary', { name: 'File storage' }),
         ).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole('group', { name: 'File storage' }),
+        ).not.toBeInTheDocument();
+
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
 
         const chipRow = screen.getByRole('group', { name: 'File storage' });
         expect(
@@ -820,10 +827,85 @@ describe('Dial UI Kit :: FileManager', () => {
         );
 
         await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
 
         expect(
           screen.getByRole('group', { name: 'File storage sections' }),
         ).toBeInTheDocument();
+      });
+
+      test('hides the grid while the navigation card is open', async () => {
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        await waitForGridTable();
+        const gridRegion = screen.getByRole('region', {
+          name: 'File Manager Grid View',
+        });
+        expect(gridRegion).not.toHaveClass('hidden');
+
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+
+        expect(gridRegion).toHaveClass('hidden');
+        expect(
+          screen.getByRole('search', { name: 'Search' }),
+        ).toBeInTheDocument();
+      });
+
+      test('keeps the navigation card open while a folder is expanded from its caret', async () => {
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+
+        const rootRow = within(screen.getByRole('tree')).getByRole('treeitem', {
+          name: 'All files',
+        });
+        const wasExpanded = rootRow.getAttribute('aria-expanded');
+        // The caret is a decorative icon with no role of its own.
+        await userEvent.click(rootRow.querySelector('svg')!);
+
+        expect(rootRow.getAttribute('aria-expanded')).not.toBe(wasExpanded);
+        expect(
+          screen.getByRole('button', { name: 'All files', expanded: true }),
+        ).toBeInTheDocument();
+      });
+
+      test('closes the navigation card once a search query is typed', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            navigationPanelOptions={{ searchable: true }}
+          />,
+        );
+
+        await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+        await userEvent.type(
+          within(screen.getByRole('search', { name: 'Search' })).getByRole(
+            'textbox',
+          ),
+          'svg',
+        );
+
+        expect(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole('region', { name: 'File Manager Grid View' }),
+        ).not.toHaveClass('hidden');
       });
 
       test('moves the toolbar into the search row after the search field', async () => {
@@ -933,43 +1015,38 @@ describe('Dial UI Kit :: FileManager', () => {
           );
         };
 
-        const getBreadcrumbs = () =>
-          screen.getByRole('navigation', { name: 'Breadcrumb' });
-
-        test('opens on the list of roots rather than the first root', async () => {
+        test('opens on the current root and names it on the navigation card', async () => {
           renderWithinSizedShell(<ControlledRoots />);
 
           const grid = await waitForGridTable();
 
-          expect(within(grid).getByText('My files')).toBeInTheDocument();
-          expect(within(grid).getByText('Shared')).toBeInTheDocument();
-          expect(within(grid).queryByText('mine.txt')).not.toBeInTheDocument();
-          expect(within(getBreadcrumbs()).getByText('All')).toBeInTheDocument();
+          expect(within(grid).getByText('mine.txt')).toBeInTheDocument();
           expect(
-            within(getBreadcrumbs()).queryByText('My files'),
+            screen.getByRole('button', { name: 'My files', expanded: false }),
+          ).toBeInTheDocument();
+          expect(
+            screen.queryByRole('navigation', { name: 'Breadcrumb' }),
           ).not.toBeInTheDocument();
         });
 
-        test('enters a root on click and returns through the top breadcrumb', async () => {
+        test('picks another root from the card tree and closes the card', async () => {
           renderWithinSizedShell(<ControlledRoots />);
 
           const grid = await waitForGridTable();
-          await userEvent.click(within(grid).getByText('Shared'));
+          await userEvent.click(
+            screen.getByRole('button', { name: 'My files', expanded: false }),
+          );
+          await userEvent.click(
+            within(screen.getByRole('tree')).getByText('Shared'),
+          );
 
           expect(
             await within(grid).findByText('theirs.txt'),
           ).toBeInTheDocument();
-          expect(within(grid).queryByText('My files')).not.toBeInTheDocument();
-
-          await userEvent.click(
-            within(getBreadcrumbs()).getByRole('button', { name: 'All' }),
-          );
-
-          expect(await within(grid).findByText('My files')).toBeInTheDocument();
-          expect(within(grid).getByText('Shared')).toBeInTheDocument();
+          expect(screen.queryByRole('tree')).not.toBeInTheDocument();
           expect(
-            within(grid).queryByText('theirs.txt'),
-          ).not.toBeInTheDocument();
+            screen.getByRole('button', { name: 'Shared', expanded: false }),
+          ).toBeInTheDocument();
         });
 
         test('keeps the wide view on the current root', async () => {
