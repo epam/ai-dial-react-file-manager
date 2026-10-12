@@ -9,6 +9,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`unshareConfirmationOptions`** — opt-in confirmation before unsharing
+  shared-with-me items from the tree, grid row, or bulk toolbar. Takes the
+  same options as `deleteConfirmationOptions`; without it `onUnshareFiles`
+  still fires straight from the action, so existing hosts are unaffected.
 - **`deleteConfirmationOptions.closeLabel`** — accessible name of the delete
   confirmation's header close control, defaulting to `"Close dialog"`.
 - **`deleteConfirmationOptions.titleRenderer` / `contentRenderer` — `items`** —
