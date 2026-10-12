@@ -25,6 +25,7 @@ const meta = {
   argTypes: {
     label: { control: { type: 'text' } },
     disabled: { control: { type: 'boolean' } },
+    iconOnly: { control: { type: 'boolean' } },
     onSortChange: { action: 'onSortChange' },
   },
   args: {
@@ -67,6 +68,21 @@ export const CustomLabels: Story = {
     directionLabels: {
       [FileManagerSortDirection.Asc]: 'A → Z',
       [FileManagerSortDirection.Desc]: 'Z → A',
+    },
+  },
+};
+
+export const IconOnly: Story = {
+  render: ControlledComponent,
+  args: {
+    iconOnly: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The round icon-only trigger of the compact view, named by `label`. The file manager turns it on in compact view unless `sortOptions.iconOnly` is set.',
+      },
     },
   },
 };
