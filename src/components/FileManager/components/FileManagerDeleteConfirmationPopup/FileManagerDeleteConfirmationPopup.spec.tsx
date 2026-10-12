@@ -247,11 +247,10 @@ describe('Dial UI Kit :: FileManagerDeleteConfirmationPopup', () => {
       />,
     );
 
-    expect(titleRenderer).toHaveBeenCalledWith([
-      'file1.txt',
-      'file2.pdf',
-      'file3.docx',
-    ]);
+    expect(titleRenderer).toHaveBeenCalledWith(
+      ['file1.txt', 'file2.pdf', 'file3.docx'],
+      multipleFiles,
+    );
   });
 
   it('passes file names to contentRenderer', () => {
@@ -267,11 +266,72 @@ describe('Dial UI Kit :: FileManagerDeleteConfirmationPopup', () => {
       />,
     );
 
-    expect(contentRenderer).toHaveBeenCalledWith([
-      'file1.txt',
-      'file2.pdf',
-      'file3.docx',
-    ]);
+    expect(contentRenderer).toHaveBeenCalledWith(
+      ['file1.txt', 'file2.pdf', 'file3.docx'],
+      multipleFiles,
+    );
+  });
+
+  it('lets titleRenderer tell a folder from a file by nodeType', () => {
+    const folder: DialFile = {
+      ...singleFile,
+      id: 'f',
+      name: 'reports',
+      path: '/folder/reports/',
+      nodeType: DialFileNodeType.FOLDER,
+    };
+
+    render(
+      <FileManagerDeleteConfirmationPopup
+        open={true}
+        itemsToDelete={[folder]}
+        onClose={mockOnClose}
+        onConfirm={mockOnConfirm}
+        titleRenderer={(_, items) =>
+          items[0]?.nodeType === DialFileNodeType.FOLDER
+            ? 'Delete folder'
+            : 'Delete file'
+        }
+      />,
+    );
+
+    expect(
+      screen.getByRole('dialog', { name: 'Delete folder' }),
+    ).toBeInTheDocument();
+  });
+
+  it('shows the header close control and closes through it', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <FileManagerDeleteConfirmationPopup
+        open={true}
+        itemsToDelete={[singleFile]}
+        onClose={mockOnClose}
+        onConfirm={mockOnConfirm}
+        closeLabel="Close"
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('leads the Delete button with a decorative trash icon', () => {
+    render(
+      <FileManagerDeleteConfirmationPopup
+        open={true}
+        itemsToDelete={[singleFile]}
+        onClose={mockOnClose}
+        onConfirm={mockOnConfirm}
+      />,
+    );
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    expect(
+      deleteButton.querySelector('svg[aria-hidden="true"]'),
+    ).toBeInTheDocument();
   });
 
   it('handles empty itemsToDelete array', () => {

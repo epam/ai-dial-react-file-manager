@@ -9,6 +9,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`deleteConfirmationOptions.closeLabel`** — accessible name of the delete
+  confirmation's header close control, defaulting to `"Close dialog"`.
+- **`deleteConfirmationOptions.titleRenderer` / `contentRenderer` — `items`** —
+  both renderers now receive the items being deleted as a second argument,
+  after the names, so a host can title the dialog "Delete folder" or "Delete
+  file" by `nodeType`. Existing one-argument renderers keep working.
 - **`DialFileManager.contentHeaderClassName`** — additional classes for the
   central content header, merged with the default header classes. Complements
   the existing `contentClassName`/`gridClassName` layout hooks.
@@ -43,6 +49,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The delete confirmation follows the DIAL delete design** — Cancel is a
+  text (ghost) button, Delete is a danger button led by a trash icon, and the
+  header close control is shown. Before, the kit's default footer rendered a
+  solid neutral Cancel, an icon-less Delete, and no close control. A string
+  title from `titleRenderer` now also names the dialog.
 - **The grid panel has rounded corners and a small shadow by default** — the
   grid no longer draws a wrapper border, and `gridOptions.wrapperBorder` is no
   longer exposed or honoured (breaking for consumers that configured it). The
@@ -228,6 +239,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The compact view showed only the first of several roots** — with no folders
+  tree, a host that passes more than one root (an "All" tab combining My files,
+  Shared and Organization) showed the first root's contents, so the combined
+  tab looked like a copy of it. The compact view now opens on a list of the
+  roots; selecting one browses it, and a leading breadcrumb named after the
+  active tab returns to the list. The wide view is unchanged.
+  `DialFileManagerNavigationPanel` gains `topLevelLabel`, `isTopLevel` and
+  `onTopLevelClick` for that leading segment.
 - **The Copy/Move destination popup's layout didn't match Figma** — its grid
   sat flush against the popup edges with no spacing, and its tree panel drew
   no card background, shadow, or rounded corners, unlike the rest of the

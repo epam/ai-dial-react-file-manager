@@ -233,9 +233,13 @@ export interface FileTreeOptions extends Omit<
 
 export interface DeleteConfirmationOptions {
   cancelLabel?: string;
-  titleRenderer?: (fileNames: string[]) => ReactNode;
+  /** Receives the names and the items, so a host can title a folder and a file differently by `nodeType`. */
+  titleRenderer?: (fileNames: string[], items: DialFile[]) => ReactNode;
   confirmLabel?: string;
-  contentRenderer?: (fileNames: string[]) => ReactNode;
+  /** Accessible name of the header close control. Defaults to `"Close dialog"`. */
+  closeLabel?: string;
+  /** Receives the names and the items, like `titleRenderer`. */
+  contentRenderer?: (fileNames: string[], items: DialFile[]) => ReactNode;
 }
 
 /**
@@ -900,6 +904,39 @@ export const DialFileManagerView: FC = () => {
     customBreakpointRef,
   );
 
+  /*
+   * With several roots (the All tab), the folders tree is what lets a wide
+   * view pick one. The compact view has no tree, so it opens on a list of the
+   * roots instead of silently showing the first one; the top breadcrumb
+   * segment, named after the active tab, returns to that list.
+   */
+  const [isRootListOpen, setIsRootListOpen] = useState(true);
+  const [rootListTab, setRootListTab] = useState(activeTab);
+  if (rootListTab !== activeTab) {
+    setRootListTab(activeTab);
+    setIsRootListOpen(true);
+  }
+  const hasRootList = isCompactView && items.length > 1;
+  const isRootListShown =
+    hasRootList && isRootListOpen && !isSearchMode && !effectiveSearchValue;
+  const rootListLabel = tabs?.find((tab) => tab.value === activeTab)?.label;
+
+  const rootListRows: FileManagerGridRow[] = useMemo(
+    () =>
+      items.map((node) => ({
+        ...node,
+        id: node.id ?? node.path,
+        name: node.name ?? node.path.split('/').pop() ?? '',
+        size: node.contentLength,
+        isTemporary: false,
+      })),
+    [items],
+  );
+
+  const displayedGridRows = isRootListShown ? rootListRows : sortedGridRows;
+
+  const openRootList = useCallback(() => setIsRootListOpen(true), []);
+
   const effectiveVisibleColumns = useMemo(() => {
     return isSearchMode
       ? [
@@ -1273,13 +1310,17 @@ export const DialFileManagerView: FC = () => {
   ]);
 
   const isEmptyStateShown =
-    gridRows.length === 0 && !filesLoading && !searchInProgress;
+    !isRootListShown &&
+    gridRows.length === 0 &&
+    !filesLoading &&
+    !searchInProgress;
 
   const renderBulkActionsToolbar = useCallback(() => {
     if (
       !bulkActionsToolbarOptions ||
       selectedPaths.size === 0 ||
-      isEmptyStateShown
+      isEmptyStateShown ||
+      isRootListShown
     )
       return null;
 
@@ -1297,6 +1338,7 @@ export const DialFileManagerView: FC = () => {
     bulkActionsToolbarOptions,
     selectedPaths,
     isEmptyStateShown,
+    isRootListShown,
     clearSelection,
     bulkActions,
   ]);
@@ -1304,7 +1346,11 @@ export const DialFileManagerView: FC = () => {
   useImperativeHandle(
     actionsRef,
     () => ({
-      createFolder: startFolderCreation,
+      // The new-folder row lands in the current folder, which the root list hides.
+      createFolder: () => {
+        setIsRootListOpen(false);
+        startFolderCreation();
+      },
     }),
     [startFolderCreation],
   );
@@ -1475,11 +1521,13 @@ export const DialFileManagerView: FC = () => {
 
   const getGridContextMenuItems = useCallback(
     (row: GridRow) => {
+      // A root stands for a whole section; there is nothing to rename or delete.
+      if (isRootListShown) return [];
       const file = findNodeByPath(items, row.path);
       if (!file) return [];
       return gridContextMenu(file);
     },
-    [items, gridContextMenu],
+    [isRootListShown, items, gridContextMenu],
   );
 
   const isRowContextMenuDisabled = useCallback(
@@ -1531,10 +1579,16 @@ export const DialFileManagerView: FC = () => {
         return;
       }
       if (event.data) {
+        if (isRootListShown) setIsRootListOpen(false);
         handleTableRowClick(event.data);
       }
     },
-    [renamedPath, handleTableRowClick, nonClickableTableColumns],
+    [
+      renamedPath,
+      handleTableRowClick,
+      nonClickableTableColumns,
+      isRootListShown,
+    ],
   );
 
   const emptyStateRenderer = useCallback(
@@ -1647,16 +1701,16 @@ export const DialFileManagerView: FC = () => {
       ) : (
         <Grid<GridRow>
           columnDefs={columnDefs}
-          rowData={sortedGridRows}
+          rowData={displayedGridRows}
           getRowId={gridRowIdGetter}
-          loading={filesLoading || searchInProgress}
+          loading={!isRootListShown && (filesLoading || searchInProgress)}
           getContextMenuItems={getGridContextMenuItems}
           withoutHeaderBorders={isCompactView}
           onGridApiChange={handleGridApiChange}
           className={dialGridClassName}
           {...forwardedGridOptions}
           wrapperBorder={false}
-          selectionMode={selectionMode}
+          selectionMode={isRootListShown ? undefined : selectionMode}
           wrapCustomCellRenderers={wrapCustomCellRenderers}
           additionalGridOptions={gridAdditionalOptions}
           selectedRowIds={selectedGridRowsIds}
@@ -1667,7 +1721,8 @@ export const DialFileManagerView: FC = () => {
       ),
     [
       isEmptyStateShown,
-      sortedGridRows,
+      displayedGridRows,
+      isRootListShown,
       filesLoading,
       emptyStateRenderer,
       columnDefs,
@@ -1721,10 +1776,16 @@ export const DialFileManagerView: FC = () => {
                   onItemClick={handleBreadcrumbItemClick}
                   rootItemPath={rootItem?.path}
                   rootItemLabel={rootItem?.label}
+                  topLevelLabel={
+                    hasRootList ? (rootListLabel ?? '/') : undefined
+                  }
+                  isTopLevel={isRootListShown}
+                  onTopLevelClick={openRootList}
                 />
               )}
 
-              {renderToolbar()}
+              {/* The root list only picks a section; acting on one happens inside it. */}
+              {!isRootListShown && renderToolbar()}
             </div>
 
             {/*
