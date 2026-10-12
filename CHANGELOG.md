@@ -239,6 +239,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A leading-dot rename skipped every blocking check** — any name starting
+  with `.` returned the non-blocking hidden-item warning straight away, so the
+  duplicate-name check and the host's `onRenameValidate` never ran and a
+  reserved name such as `.dial_folder` could be saved. The warning is now
+  returned only after every blocking check passes.
+- **The Copy/Move destination grid ignored its own loading state** — the
+  popup grid's `loading` always followed the main grid's `filesLoading`, so it
+  showed the empty state while the destination folder was still loading.
+  `destinationFolderPopupOptions.filesLoading` now drives it, falling back to
+  the main `filesLoading`.
 - **The compact view showed only the first of several roots** — with no folders
   tree, a host that passes more than one root (an "All" tab combining My files,
   Shared and Organization) showed the first root's contents, so the combined

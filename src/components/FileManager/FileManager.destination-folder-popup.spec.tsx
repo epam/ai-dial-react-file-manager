@@ -63,4 +63,37 @@ describe('Dial UI Kit :: FileManager destination folder popup', () => {
       }),
     );
   });
+
+  test('drives the destination grid loading state from the popup filesLoading option', () => {
+    render(
+      <div style={{ height: 640, width: 1100 }}>
+        <DialFileManager
+          items={[]}
+          showNavigationPanel={false}
+          filesLoading={false}
+          destinationFolderPopupOptions={{ filesLoading: true }}
+        />
+      </div>,
+    );
+
+    expect(destinationPopupRender).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        gridOptions: expect.objectContaining({ loading: true }),
+      }),
+    );
+  });
+
+  test('falls back to the main filesLoading when the popup sets none', () => {
+    render(
+      <div style={{ height: 640, width: 1100 }}>
+        <DialFileManager items={[]} showNavigationPanel={false} filesLoading />
+      </div>,
+    );
+
+    expect(destinationPopupRender).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        gridOptions: expect.objectContaining({ loading: true }),
+      }),
+    );
+  });
 });
