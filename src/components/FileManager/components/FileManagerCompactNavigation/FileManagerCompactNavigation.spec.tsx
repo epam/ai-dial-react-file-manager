@@ -72,4 +72,60 @@ describe('Dial UI Kit :: DialFileManagerCompactNavigation', () => {
     await userEvent.click(screen.getByRole('button', { name: 'My files' }));
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
   });
+
+  it('returns focus left inside the panel to the trigger once it closes', () => {
+    const { rerender } = render(
+      <DialFileManagerCompactNavigation
+        label="My files"
+        isOpen
+        onOpenChange={vi.fn()}
+      >
+        <button type="button">Folder</button>
+      </DialFileManagerCompactNavigation>,
+    );
+
+    screen.getByRole('button', { name: 'Folder' }).focus();
+    rerender(
+      <DialFileManagerCompactNavigation
+        label="My files"
+        isOpen={false}
+        onOpenChange={vi.fn()}
+      >
+        <button type="button">Folder</button>
+      </DialFileManagerCompactNavigation>,
+    );
+
+    expect(screen.getByRole('button', { name: 'My files' })).toHaveFocus();
+  });
+
+  it('leaves focus held outside the panel where it is', () => {
+    const { rerender } = render(
+      <>
+        <input aria-label="Search" />
+        <DialFileManagerCompactNavigation
+          label="My files"
+          isOpen
+          onOpenChange={vi.fn()}
+        >
+          <div>Folders tree</div>
+        </DialFileManagerCompactNavigation>
+      </>,
+    );
+
+    screen.getByRole('textbox', { name: 'Search' }).focus();
+    rerender(
+      <>
+        <input aria-label="Search" />
+        <DialFileManagerCompactNavigation
+          label="My files"
+          isOpen={false}
+          onOpenChange={vi.fn()}
+        >
+          <div>Folders tree</div>
+        </DialFileManagerCompactNavigation>
+      </>,
+    );
+
+    expect(screen.getByRole('textbox', { name: 'Search' })).toHaveFocus();
+  });
 });

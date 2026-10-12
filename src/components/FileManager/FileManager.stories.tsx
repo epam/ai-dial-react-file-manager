@@ -2452,11 +2452,13 @@ const MobileFileStorageComponent = (args: DialFileManagerProps) => {
   const items = mobileItemsByTab[activeTab] ?? [];
   const rootPath = items[0]?.path ?? '';
   const [path, setPath] = useState(rootPath);
-  const expandedPaths = useMemo(() => new Set([rootPath]), [rootPath]);
+  const [expandedPaths, setExpandedPaths] = useState(() => new Set([rootPath]));
 
   const handleTabChange = (tab: DialFileManagerTabs) => {
+    const nextRootPath = mobileItemsByTab[tab]?.[0]?.path ?? '';
     setActiveTab(tab);
-    setPath(mobileItemsByTab[tab]?.[0]?.path ?? '');
+    setPath(nextRootPath);
+    setExpandedPaths(new Set([nextRootPath]));
   };
 
   const actionLabels = {
@@ -2486,6 +2488,7 @@ const MobileFileStorageComponent = (args: DialFileManagerProps) => {
             activeTab,
             onTabChange: handleTabChange,
             expandedPaths,
+            onExpandedPathsChange: setExpandedPaths,
             actionLabels,
           }}
           navigationPanelOptions={{

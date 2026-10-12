@@ -888,6 +888,82 @@ describe('Dial UI Kit :: FileManager', () => {
         ).toBeInTheDocument();
       });
 
+      test('lets sortOptions.iconOnly override the compact default', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            sortOptions={{ iconOnly: false }}
+          />,
+        );
+
+        await waitForGridTable();
+
+        expect(screen.getByRole('button', { name: 'Sort' })).toHaveTextContent(
+          'Sort',
+        );
+      });
+
+      test('names the navigation card after the active section while no folder is loaded', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={[]}
+            treeOptions={{
+              tabs: tabsMock,
+              activeTab: DialFileManagerTabs.Shared,
+              onTabChange: vi.fn(),
+            }}
+          />,
+        );
+
+        expect(
+          await screen.findByRole('button', {
+            name: 'Shared',
+            expanded: false,
+          }),
+        ).toBeInTheDocument();
+      });
+
+      test('closes the navigation card on Escape and returns focus to it', async () => {
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+        within(screen.getByRole('tree'))
+          .getByRole('treeitem', { name: 'All files' })
+          .focus();
+        await userEvent.keyboard('{Escape}');
+
+        const trigger = screen.getByRole('button', {
+          name: 'All files',
+          expanded: false,
+        });
+        expect(trigger).toHaveFocus();
+      });
+
+      test('returns focus to the navigation card once a folder is picked from the keyboard', async () => {
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+        within(screen.getByRole('tree'))
+          .getByRole('treeitem', { name: 'All files' })
+          .focus();
+        await userEvent.keyboard('{Enter}');
+
+        expect(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        ).toHaveFocus();
+      });
+
       test('lets treeOptions.selectOnCaretClick override the compact default', async () => {
         renderWithinSizedShell(
           <DialFileManager

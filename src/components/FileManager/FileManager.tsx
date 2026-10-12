@@ -1339,7 +1339,7 @@ export const DialFileManagerView: FC = () => {
     const sortDropdown = sortable ? (
       <DialFileManagerSortDropdown
         {...sortDropdownProps}
-        iconOnly={isCompactView}
+        iconOnly={sortDropdownProps.iconOnly ?? isCompactView}
         className={mergeClasses(
           isCompactToolbarShown ? 'shrink-0' : 'ml-auto shrink-0',
           sortDropdownProps.className,
@@ -1428,6 +1428,10 @@ export const DialFileManagerView: FC = () => {
         showItemActionsButton={
           forwardedTreeProps.showItemActionsButton ?? !isCompactView
         }
+        onEscape={
+          forwardedTreeProps.onEscape ??
+          (isCompactView ? closeCompactNavigation : undefined)
+        }
         areHiddenFilesVisible={areHiddenFilesVisible}
         getContextMenuItems={getTreeContextMenuItems}
         renamedPath={
@@ -1459,6 +1463,7 @@ export const DialFileManagerView: FC = () => {
       forbiddenSymbolsTooltip,
       handleFoldersTreeItemClick,
       isCompactView,
+      closeCompactNavigation,
       areHiddenFilesVisible,
       getTreeContextMenuItems,
       renameTriggerView,
@@ -1542,10 +1547,11 @@ export const DialFileManagerView: FC = () => {
    * plain-text header names the chip row directly.
    */
   const renderCompactNavigation = useCallback(() => {
+    const activeTabLabel = tabs?.find((tab) => tab.value === activeTab)?.label;
     const label =
       rootItem?.label && currentFolder?.path === rootItem.path
         ? rootItem.label
-        : (currentFolder?.name ?? '');
+        : (currentFolder?.name ?? activeTabLabel ?? rootItem?.label ?? '');
 
     return (
       <DialFileManagerCompactNavigation

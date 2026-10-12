@@ -1,4 +1,4 @@
-import { type FC, type ReactNode, useId } from 'react';
+import { type FC, type ReactNode, useEffect, useId, useRef } from 'react';
 
 import { DIAL_ICON_SIZE, FolderName, mergeClasses } from '@epam/ai-dial-ui-kit';
 import { IconChevronDown } from '@tabler/icons-react';
@@ -30,6 +30,7 @@ export interface DialFileManagerCompactNavigationProps {
  * The compact view's stand-in for the folders panel: a card naming the current
  * folder that opens into the section chips and the folders tree. The open
  * state is owned by the parent, which closes the card once a folder is picked.
+ * Focus left inside the panel when it closes returns to the trigger.
  *
  * @example
  * ```tsx
@@ -52,6 +53,20 @@ export const DialFileManagerCompactNavigation: FC<
   DialFileManagerCompactNavigationProps
 > = ({ label, isOpen, onOpenChange, children, className }) => {
   const panelId = useId();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const wasOpenRef = useRef(isOpen);
+
+  useEffect(() => {
+    // The panel unmounts on close, which drops focus held inside it to the body.
+    if (
+      wasOpenRef.current &&
+      !isOpen &&
+      document.activeElement === document.body
+    ) {
+      triggerRef.current?.focus();
+    }
+    wasOpenRef.current = isOpen;
+  }, [isOpen]);
 
   return (
     <div
@@ -62,6 +77,7 @@ export const DialFileManagerCompactNavigation: FC<
       )}
     >
       <button
+        ref={triggerRef}
         type="button"
         className={compactNavigationTriggerClassName}
         aria-expanded={isOpen}
