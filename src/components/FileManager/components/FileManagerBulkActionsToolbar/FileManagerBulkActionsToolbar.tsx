@@ -18,7 +18,9 @@ import {
   ACTIONS_GAP,
   COMPACT_ACTIONS_GAP,
   COMPACT_CONTAINER_PADDING,
+  COMPACT_MORE_BUTTON_WIDTH,
   CONTAINER_PADDING,
+  MORE_BUTTON_WIDTH,
   bulkActionsContainerClassName,
   bulkActionsCountClassName,
   bulkActionsGroupClassName,
@@ -126,7 +128,10 @@ export const DialFileManagerBulkActionsToolbar: FC<
     direction: isCompactLayout
       ? FlexibleActionsDirection.Normal
       : FlexibleActionsDirection.Reverse,
-    dependencies: [isCompactLayout],
+    dependencies: [isCompactLayout, selectedCount],
+    moreButtonWidth: isCompactLayout
+      ? COMPACT_MORE_BUTTON_WIDTH
+      : MORE_BUTTON_WIDTH,
     actionsGap: isCompactLayout ? COMPACT_ACTIONS_GAP : ACTIONS_GAP,
     containerPadding: isCompactLayout
       ? COMPACT_CONTAINER_PADDING
@@ -187,6 +192,7 @@ export const DialFileManagerBulkActionsToolbar: FC<
           </div>
 
           <div className={compactBulkActionsGroupClassName}>
+            {/* The mobile design draws Delete like the other icons, without the danger colour. */}
             {visibleActions.map(
               ({ key, icon, tooltip, title, onClick, disabled }) => (
                 <GhostIconButton
@@ -209,6 +215,7 @@ export const DialFileManagerBulkActionsToolbar: FC<
                 <GhostIconButton
                   size={ElementSize.Standard}
                   aria-label={moreActionsLabel}
+                  tooltipProps={{ tooltip: moreActionsLabel }}
                   icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
                 />
               </Dropdown>

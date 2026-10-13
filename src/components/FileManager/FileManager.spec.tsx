@@ -1348,6 +1348,7 @@ describe('Dial UI Kit :: FileManager', () => {
               path="All files"
               selectedPaths={selectedPaths}
               onSelectedPathsChange={setSelectedPaths}
+              gridOptions={{ className: 'host-grid' }}
               bulkActionsToolbarOptions={{
                 getSelectionLabel: (count) =>
                   `item${count === 1 ? '' : 's'} selected`,
@@ -1368,6 +1369,7 @@ describe('Dial UI Kit :: FileManager', () => {
           container.querySelector('section')?.lastElementChild,
         ).toContainElement(toolbar);
         expect(screen.getByRole('grid')).toHaveClass(
+          'host-grid',
           '[&_.ag-body-viewport]:pb-16',
         );
         expect(

@@ -1,4 +1,5 @@
 import { FileManagerColumnKey } from '@/types/file-manager.ts';
+import { DIAL_ICON_SIZE } from '@epam/ai-dial-ui-kit';
 
 export const containerBaseClassName =
   'w-full h-full grid grid-rows-[minmax(0,1fr)] overflow-hidden min-w-0';
@@ -98,7 +99,7 @@ export const COMPACT_VIEW_HEADER_HEIGHT = 44;
 
 export const COMPACT_VIEW_FILE_ROW_HEIGHT = 68;
 
-export const COMPACT_VIEW_FILE_ICON_SIZE = 24;
+export const COMPACT_VIEW_FILE_ICON_SIZE = DIAL_ICON_SIZE.LG;
 
 export const DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT = 800;
 

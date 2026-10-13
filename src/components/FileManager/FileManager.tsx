@@ -932,6 +932,7 @@ export const DialFileManagerView: FC = () => {
     visibleColumns = DEFAULT_VISIBLE_COLUMN,
     allowDisabledContextMenu = false,
     containerClassName: gridContainerClassName,
+    className: gridOptionsClassName,
     ...forwardedGridOptions
   } = gridOptions ?? {};
 
@@ -1745,6 +1746,7 @@ export const DialFileManagerView: FC = () => {
 
   const dialGridClassName = mergeClasses(
     'min-h-[248px] overflow-auto md:min-h-[266px]',
+    gridOptionsClassName,
     isCompactView &&
       isBulkActionsToolbarShown &&
       compactGridScrollInsetClassName,

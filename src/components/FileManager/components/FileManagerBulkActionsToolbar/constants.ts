@@ -20,6 +20,7 @@ export const bulkActionsCountClassName =
 export const bulkActionsGroupClassName = 'flex gap-3 items-center';
 
 export const COMPACT_ACTIONS_GAP = 4;
+export const COMPACT_MORE_BUTTON_WIDTH = 40;
 export const COMPACT_CONTAINER_PADDING = 12;
 
 /* Docked to the bottom edge in the compact view: full width, icon-only actions spread across it. */

@@ -225,5 +225,24 @@ describe('Dial UI Kit :: DialFileManagerBulkActionsToolbar', () => {
         within(toolbar).queryByRole('button', { name: 'Share' }),
       ).not.toBeInTheDocument();
     });
+
+    it('reserves room for the full-size overflow trigger', () => {
+      render(
+        <DialFileManagerBulkActionsToolbar
+          getSelectionLabel={(count) => `${count} selected`}
+          onClearSelection={vi.fn()}
+          actions={actions}
+          selectedCount={3}
+          isCompactView
+        />,
+      );
+
+      expect(vi.mocked(useFlexibleActions)).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          moreButtonWidth: 40,
+          dependencies: [true, 3],
+        }),
+      );
+    });
   });
 });
