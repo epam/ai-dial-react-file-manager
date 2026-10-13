@@ -116,6 +116,8 @@ import {
   actionsColumnButtonClassName,
   AG_GRID_SELECTION_COLUMN_ID,
   bulkActionsToolbarWrapperClassName,
+  compactBulkActionsToolbarWrapperClassName,
+  compactGridScrollInsetClassName,
   COMPACT_VIEW_FILE_ROW_HEIGHT,
   COMPACT_VIEW_HEADER_HEIGHT,
   containerBaseClassName,
@@ -179,6 +181,10 @@ export type DialFileManagerDestinationFolderPopupOptions = Pick<
   | 'emptyStateDescription'
   | 'excludedPaths'
   | 'filesLoading'
+  | 'getSourceItemsLabel'
+  | 'destinationLabel'
+  | 'searchFoldersPlaceholder'
+  | 'searchEmptyStateTitle'
 > & {
   getCopyHeader?: (itemsCount: number, itemName?: string) => string;
   getMoveHeader?: (itemsCount: number, itemName?: string) => string;
@@ -366,7 +372,7 @@ export type ToolbarOptions = Omit<
 
 export type BulkActionsToolbarOptions = Omit<
   DialFileManagerBulkActionsToolbarProps,
-  'onClearSelection' | 'actions' | 'selectedCount'
+  'onClearSelection' | 'actions' | 'selectedCount' | 'isCompactView'
 > & {
   actionLabels?: {
     [DialFileManagerActions.Duplicate]?: string;
@@ -615,8 +621,12 @@ export interface DialFileManagerProps {
  * @param [deleteConfirmationOptions] - Options for the delete confirmation popup
  * @param [unshareConfirmationOptions] - Options for the unshare confirmation popup; when omitted, unshare runs without a confirmation
  * @param [destinationFolderPopupOptions.excludedPaths] - Paths to hide from the Copy/Move destination popup only (e.g. a root folder that shouldn't be a valid destination); the main tree/grid are unaffected
+ * @param [destinationFolderPopupOptions.getSourceItemsLabel] - Text naming several items being copied or moved in the phone sheet; defaults to "N items"
+ * @param [destinationFolderPopupOptions.destinationLabel] - Heading above the folders tree in the phone sheet; defaults to "Copy to folder" or "Move to folder"
+ * @param [destinationFolderPopupOptions.searchFoldersPlaceholder] - Placeholder of the phone sheet's folder search; defaults to "Search folders"
+ * @param [destinationFolderPopupOptions.searchEmptyStateTitle] - Title shown when a search in the Copy/Move picker finds nothing; defaults to "No data"
  * @param [destinationFolderPopupOptions.filesLoading] - When true, the Copy/Move destination grid shows its loading state (e.g. while the destination folder's contents load); falls back to the main `filesLoading`
- * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view.
+ * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view. The Copy/Move picker follows the viewport instead and turns into a bottom sheet below 640px.
  *
  * @param [onPathChange] - Callback fired when user navigates via tree or breadcrumb
  * @param [onSelectedPathsChange] - Callback fired when the selected paths change
@@ -922,6 +932,7 @@ export const DialFileManagerView: FC = () => {
     visibleColumns = DEFAULT_VISIBLE_COLUMN,
     allowDisabledContextMenu = false,
     containerClassName: gridContainerClassName,
+    className: gridOptionsClassName,
     ...forwardedGridOptions
   } = gridOptions ?? {};
 
@@ -1379,30 +1390,41 @@ export const DialFileManagerView: FC = () => {
   const isEmptyStateShown =
     gridRows.length === 0 && !filesLoading && !searchInProgress;
 
+  const isBulkActionsToolbarShown =
+    !!bulkActionsToolbarOptions &&
+    selectedPaths.size > 0 &&
+    !isEmptyStateShown &&
+    !isCompactNavigationOpen;
+
   const renderBulkActionsToolbar = useCallback(() => {
-    if (
-      !bulkActionsToolbarOptions ||
-      selectedPaths.size === 0 ||
-      isEmptyStateShown ||
-      isCompactNavigationOpen
-    )
-      return null;
+    if (!bulkActionsToolbarOptions || !isBulkActionsToolbarShown) return null;
+
+    const toolbar = (
+      <DialFileManagerBulkActionsToolbar
+        {...bulkActionsToolbarOptions}
+        isCompactView={isCompactView}
+        selectedCount={selectedPaths.size}
+        onClearSelection={clearSelection}
+        actions={bulkActions}
+      />
+    );
 
     return (
-      <div className={bulkActionsToolbarWrapperClassName}>
-        <DialFileManagerBulkActionsToolbar
-          {...bulkActionsToolbarOptions}
-          selectedCount={selectedPaths.size}
-          onClearSelection={clearSelection}
-          actions={bulkActions}
-        />
+      <div
+        className={
+          isCompactView
+            ? compactBulkActionsToolbarWrapperClassName
+            : bulkActionsToolbarWrapperClassName
+        }
+      >
+        {toolbar}
       </div>
     );
   }, [
     bulkActionsToolbarOptions,
+    isBulkActionsToolbarShown,
     selectedPaths,
-    isEmptyStateShown,
-    isCompactNavigationOpen,
+    isCompactView,
     clearSelection,
     bulkActions,
   ]);
@@ -1722,7 +1744,13 @@ export const DialFileManagerView: FC = () => {
     return (row: GridRow) => row.path;
   }, []);
 
-  const dialGridClassName = 'min-h-[248px] overflow-auto md:min-h-[266px]';
+  const dialGridClassName = mergeClasses(
+    'min-h-[248px] overflow-auto md:min-h-[266px]',
+    gridOptionsClassName,
+    isCompactView &&
+      isBulkActionsToolbarShown &&
+      compactGridScrollInsetClassName,
+  );
 
   const gridRegionClassName = useMemo(
     () =>
@@ -1859,7 +1887,10 @@ export const DialFileManagerView: FC = () => {
   );
 
   return (
-    <section ref={containerRef} className="size-full">
+    <section
+      ref={containerRef}
+      className={mergeClasses('size-full', { relative: isCompactView })}
+    >
       <div
         className={mergeClasses(
           containerBaseClassName,
@@ -1948,7 +1979,7 @@ export const DialFileManagerView: FC = () => {
                 maxSelectableFileSize={maxSelectableFileSize}
               />
 
-              {renderBulkActionsToolbar()}
+              {!isCompactView && renderBulkActionsToolbar()}
             </div>
           </div>
         </div>
@@ -2052,6 +2083,7 @@ export const DialFileManagerView: FC = () => {
           dateOptions={gridOptions?.dateOptions}
         />
       </div>
+      {isCompactView && renderBulkActionsToolbar()}
     </section>
   );
 };

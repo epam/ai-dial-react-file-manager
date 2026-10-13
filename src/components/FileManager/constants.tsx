@@ -1,4 +1,5 @@
 import { FileManagerColumnKey } from '@/types/file-manager.ts';
+import { DIAL_ICON_SIZE } from '@epam/ai-dial-ui-kit';
 
 export const containerBaseClassName =
   'w-full h-full grid grid-rows-[minmax(0,1fr)] overflow-hidden min-w-0';
@@ -63,6 +64,17 @@ export const gridDragWindowClassName =
 export const bulkActionsToolbarWrapperClassName =
   'absolute bottom-4 left-4 right-4 z-10';
 
+/* The compact bar docks over the bottom edge of the whole file manager, as in the mobile design. */
+export const compactBulkActionsToolbarWrapperClassName =
+  'absolute inset-x-0 bottom-0 z-10';
+
+/*
+ * Lets the last rows scroll clear of the compact bar that docks over them. The
+ * kit `Grid` has no prop for its scroll container yet, so this reaches ag-Grid's
+ * own `.ag-body-viewport`; the padding matches the bar's 64px height.
+ */
+export const compactGridScrollInsetClassName = '[&_.ag-body-viewport]:pb-16';
+
 export const actionsColumnButtonClassName =
   'opacity-0 pointer-events-none group-hover/grid-row:opacity-100 group-hover/grid-row:pointer-events-auto';
 
@@ -86,6 +98,8 @@ export const AG_GRID_SELECTION_COLUMN_ID = 'ag-Grid-SelectionColumn';
 export const COMPACT_VIEW_HEADER_HEIGHT = 44;
 
 export const COMPACT_VIEW_FILE_ROW_HEIGHT = 68;
+
+export const COMPACT_VIEW_FILE_ICON_SIZE = DIAL_ICON_SIZE.LG;
 
 export const DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT = 800;
 

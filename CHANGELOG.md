@@ -61,6 +61,19 @@ and this project follows [Semantic Versioning](https://semver.org/).
   sets it.
 - **`toolbarOptions.moreActionsLabel`** — accessible name of the compact
   "more" menu trigger, defaulting to `"More actions"`.
+- **`destinationFolderPopupOptions.getSourceItemsLabel` / `destinationLabel`**
+  — text for the phone Copy/Move sheet: `getSourceItemsLabel(count)` names
+  several items being copied or moved (default `"N items"`) and
+  `destinationLabel` heads the folders tree (default `"Copy to folder"` /
+  `"Move to folder"`). Both are also props of `DialDestinationFolderPopup`,
+  together with `sourceItems`.
+- **`destinationFolderPopupOptions.searchFoldersPlaceholder` /
+  `searchEmptyStateTitle`** — the placeholder of the phone sheet's folder
+  search (default `"Search folders"`) and the title shown when a search in the
+  Copy/Move picker finds nothing (default `"No data"`).
+- **`bulkActionsToolbarOptions.moreActionsLabel`** — accessible name and
+  tooltip of the compact selection bar's overflow menu trigger, defaulting to
+  `"More actions"`.
 
 ### Changed
 
@@ -82,7 +95,25 @@ and this project follows [Semantic Versioning](https://semver.org/).
   `newButtonVariant`. Rows are 68px tall and read "date • size", and folder rows
   no longer start the date with an empty size slot. Host values for the new
   `treeOptions` and `sortOptions` props below win over the compact defaults.
-  The wide view is unchanged.
+  File and folder icons in the rows are 24px. The wide view is unchanged.
+- **Copy/Move opens a bottom sheet on phones** — below 640px (viewport)
+  `DialDestinationFolderPopup` renders a full-height kit `BottomSheet` instead
+  of the popup: the item being copied or moved (or the count of several), a
+  heading, a folder search, a folders-only tree and full-width confirm and
+  Cancel buttons. The search filters the loaded folders by name, as the
+  popup's search does, keeping the folders that lead to each match open.
+  The tree opens on the picked folder and shows `rootItem.label` for the
+  root. Picking a folder makes it the destination; the source folder keeps
+  the confirm button disabled with its tooltip. The sheet has no Add folder or
+  hidden-files controls, so `showCreateFolderButton` and
+  `showHiddenFileSwitcher` apply to the popup only, and hidden folders stay
+  hidden, in the search too. A non-string `header` falls back to `"Copy to"` /
+  `"Move to"` as the sheet title. Wider screens keep the popup unchanged.
+- **The compact view docks the selection bar** — while items are selected, the
+  bar spans the bottom edge of the file manager over the grid, and the grid's
+  scroll area gains a matching bottom inset so the last rows scroll clear of
+  it. It shows the count, the clear control and the actions as 24px icons with
+  tooltips; actions that don't fit move into a "more" menu at the end.
 - **The delete confirmation follows the DIAL delete design** — Cancel is a
   text (ghost) button, Delete is a danger button led by a trash icon, and the
   header close control is shown. Before, the kit's default footer rendered a
@@ -279,6 +310,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
   along with the `isCompactView` prop it belonged to.
 
 ### Fixed
+
+- **`gridOptions.className` no longer replaces the grid's own classes** — it is
+  merged with them, so the default minimum height and overflow, and the
+  compact view's bottom inset under the selection bar, stay unless the host
+  overrides them.
 
 - **A leading-dot rename skipped every blocking check** — any name starting
   with `.` returned the non-blocking hidden-item warning straight away, so the

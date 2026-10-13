@@ -169,6 +169,31 @@ describe('Dial UI Kit :: FileManager :: useFileClipboard', () => {
     expect(result.current.sourceFolder).toBe('/source');
   });
 
+  it('exposes the files of the open mode as sourceItems', () => {
+    const { result } = renderHook(() =>
+      useFileClipboard({ getDestinationFiles, getSourceFiles }),
+    );
+
+    const copied = [{ id: 'c', path: '/c' } as DialFile];
+    const moved = [{ id: 'm', path: '/m' } as DialFile];
+
+    act(() => {
+      result.current.handleSetCopiedFiles(copied);
+      result.current.handleSetMovedFiles(moved);
+      result.current.handleOpenDestinationFolderPopup(
+        DestinationFolderMode.Move,
+      );
+    });
+    expect(result.current.sourceItems).toBe(moved);
+
+    act(() => {
+      result.current.handleOpenDestinationFolderPopup(
+        DestinationFolderMode.Copy,
+      );
+    });
+    expect(result.current.sourceItems).toBe(copied);
+  });
+
   it('handleCopyTo without conflicts calls onCopyFiles and onCopySuccess', () => {
     const onCopyFiles = vi.fn();
     const onCopySuccess = vi.fn();

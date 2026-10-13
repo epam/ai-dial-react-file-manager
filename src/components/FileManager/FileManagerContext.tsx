@@ -72,6 +72,7 @@ export interface FileManagerContextValue {
   unshareConfirmationOptions?: UnshareConfirmationOptions;
   destinationFolderPopupOptions?: DialFileManagerDestinationFolderPopupOptions & {
     sourceFolder?: string;
+    sourceItems?: DialFile[];
   };
   conflictResolutionPopupOptions?: DialFileManagerConflictResolutionPopupOptions;
   fileMetadataPopupOptions?: FileMetadataPopupOptions;

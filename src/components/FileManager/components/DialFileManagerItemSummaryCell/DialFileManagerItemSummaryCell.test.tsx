@@ -85,4 +85,12 @@ describe('Dial UI Kit :: FileManagerItemSummaryCell', () => {
     expect(details).toHaveTextContent(/^7\/20\/2025$/);
     expect(screen.queryByText('15 KB')).not.toBeInTheDocument();
   });
+
+  test('sizes the icon from iconSize', () => {
+    const { container } = render(
+      <DialFileManagerItemSummaryCell {...baseProps} iconSize={24} />,
+    );
+
+    expect(container.querySelector('svg')).toHaveAttribute('width', '24');
+  });
 });

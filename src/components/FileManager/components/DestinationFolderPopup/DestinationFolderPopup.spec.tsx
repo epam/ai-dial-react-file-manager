@@ -1,9 +1,21 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, expect, test, vi } from 'vitest';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { DialDestinationFolderPopup } from './DestinationFolderPopup';
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
 import { NotificationVariant } from '@epam/ai-dial-ui-kit';
+
+const mobileScreen = vi.hoisted(() => ({ isMobile: false }));
+
+vi.mock('@/hooks/use-is-mobile-screen', () => ({
+  useIsMobileScreen: () => mobileScreen.isMobile,
+}));
 
 const mockFiles: DialFile[] = [
   {
@@ -715,5 +727,245 @@ describe('Dial UI Kit :: DialDestinationFolderPopup', () => {
     );
 
     expect(screen.queryByText('Add folder')).not.toBeInTheDocument();
+  });
+
+  describe('phone sheet', () => {
+    const sourceFile: DialFile = {
+      id: '3',
+      name: 'report.pdf',
+      path: '/Documents/report.pdf',
+      folderId: 'folder-1',
+      nodeType: DialFileNodeType.ITEM,
+      parentPath: '/Documents',
+    };
+
+    beforeEach(() => {
+      mobileScreen.isMobile = true;
+      return () => {
+        mobileScreen.isMobile = false;
+      };
+    });
+
+    test('shows the source item, the heading and a folders tree', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          header="Move file"
+          items={mockFiles}
+          sourceItems={[sourceFile]}
+        />,
+      );
+
+      const sheet = screen.getByRole('dialog', { name: 'Move file' });
+      expect(within(sheet).getByText('report.pdf')).toBeInTheDocument();
+      expect(
+        within(sheet).getByRole('heading', { name: 'Move to folder' }),
+      ).toBeInTheDocument();
+      expect(
+        within(sheet).getByRole('tree', { name: 'Move to folder' }),
+      ).toBeInTheDocument();
+      expect(
+        within(sheet).queryByRole('button', { name: 'Add folder' }),
+      ).not.toBeInTheDocument();
+    });
+
+    test('names several source items from getSourceItemsLabel', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="copy"
+          items={mockFiles}
+          sourceItems={[sourceFile, { ...sourceFile, id: '4', path: '/b' }]}
+          getSourceItemsLabel={(count) => `${count} файла`}
+          destinationLabel="Куда скопировать"
+        />,
+      );
+
+      const sheet = screen.getByRole('dialog', { name: 'Copy to' });
+      expect(within(sheet).getByText('2 файла')).toBeInTheDocument();
+      expect(
+        within(sheet).getByRole('heading', { name: 'Куда скопировать' }),
+      ).toBeInTheDocument();
+    });
+
+    test('picks a folder and confirms', () => {
+      const onConfirm = vi.fn();
+      const setDestinationFolderPath = vi.fn();
+
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          onConfirm={onConfirm}
+          mode="move"
+          items={mockFiles}
+          sourceItems={[sourceFile]}
+          setDestinationFolderPath={setDestinationFolderPath}
+        />,
+      );
+
+      fireEvent.click(screen.getByText('Photos'));
+      expect(setDestinationFolderPath).toHaveBeenCalledWith('/Photos');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Move' }));
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+    });
+
+    test('disables the confirm button on the source folder', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          items={mockFiles}
+          path="/Documents"
+          sourceFolder="/Documents"
+          sourceItems={[sourceFile]}
+        />,
+      );
+
+      expect(screen.getByRole('button', { name: 'Move' })).toBeDisabled();
+    });
+
+    test('closes from Cancel', () => {
+      const onClose = vi.fn();
+
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={onClose}
+          items={mockFiles}
+          sourceItems={[sourceFile]}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    test('filters the folders by name and shows the empty state', async () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          items={mockFiles}
+          sourceItems={[sourceFile]}
+          searchFoldersPlaceholder="Найти папку"
+          searchEmptyStateTitle="Ничего не нашлось"
+        />,
+      );
+
+      const search = screen.getByPlaceholderText('Найти папку');
+
+      fireEvent.change(search, { target: { value: 'pho' } });
+      expect(screen.getByText('Photos')).toBeInTheDocument();
+      expect(screen.queryByText('Documents')).not.toBeInTheDocument();
+
+      fireEvent.change(search, { target: { value: 'zzz' } });
+      expect(await screen.findByText('Ничего не нашлось')).toBeInTheDocument();
+
+      fireEvent.change(search, { target: { value: '' } });
+      expect(screen.getByText('Documents')).toBeInTheDocument();
+    });
+
+    const nestedFiles: DialFile[] = [
+      {
+        id: 'root',
+        name: 'bucket-1',
+        path: '/bucket-1',
+        folderId: 'root',
+        nodeType: DialFileNodeType.FOLDER,
+        items: [
+          {
+            id: 'a',
+            name: 'Alpha',
+            path: '/bucket-1/Alpha',
+            folderId: 'root',
+            nodeType: DialFileNodeType.FOLDER,
+            items: [
+              {
+                id: 'b',
+                name: 'Beta',
+                path: '/bucket-1/Alpha/Beta',
+                folderId: 'a',
+                nodeType: DialFileNodeType.FOLDER,
+              },
+            ],
+          },
+          {
+            id: 'g',
+            name: 'Gamma',
+            path: '/bucket-1/Gamma',
+            folderId: 'root',
+            nodeType: DialFileNodeType.FOLDER,
+          },
+        ],
+      },
+    ];
+
+    test('labels the root and opens on the picked folder', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          items={nestedFiles}
+          rootItem={{
+            id: 'root',
+            name: 'bucket-1',
+            path: '/bucket-1',
+            folderId: 'root',
+            nodeType: DialFileNodeType.FOLDER,
+            label: 'My files',
+          }}
+          path="/bucket-1/Alpha/Beta"
+          sourceItems={[sourceFile]}
+        />,
+      );
+
+      expect(screen.getByText('My files')).toBeInTheDocument();
+      expect(screen.queryByText('bucket-1')).not.toBeInTheDocument();
+      expect(screen.getByText('Beta')).toBeInTheDocument();
+    });
+
+    test('restores the browsing folders when the search is cleared', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          items={nestedFiles}
+          sourceItems={[sourceFile]}
+        />,
+      );
+
+      expect(screen.getByText('Gamma')).toBeInTheDocument();
+      expect(screen.queryByText('Beta')).not.toBeInTheDocument();
+
+      const search = screen.getByPlaceholderText('Search folders');
+      fireEvent.change(search, { target: { value: 'beta' } });
+      expect(screen.getByText('Beta')).toBeInTheDocument();
+      expect(screen.queryByText('Gamma')).not.toBeInTheDocument();
+
+      fireEvent.change(search, { target: { value: '' } });
+      expect(screen.getByText('Gamma')).toBeInTheDocument();
+      expect(screen.queryByText('Beta')).not.toBeInTheDocument();
+    });
+
+    test('shows a folder being moved by its name', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          items={mockFiles}
+          sourceItems={[mockFiles[0]]}
+        />,
+      );
+
+      const sheet = screen.getByRole('dialog', { name: 'Move to' });
+      expect(within(sheet).getAllByText('Documents')).toHaveLength(2);
+    });
   });
 });

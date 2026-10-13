@@ -395,6 +395,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     handleConflictCancel,
     handleConflictDecideForEach,
     sourceFolder,
+    sourceItems,
   } = useFileClipboard({
     getDestinationFiles: (path: string) => {
       const folder = findFolderForPath(items, path);
@@ -931,6 +932,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
       destinationFolderPath,
       setDestinationFolderPath,
       header: destinationFolderTitle,
+      sourceItems,
       onCreateFolder,
       onCreateFolderValidate,
       folderCreationValidationMessages,
