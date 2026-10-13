@@ -7,6 +7,8 @@ import {
   Dropdown,
   ElementSize,
   GhostIconButton,
+  IconButton,
+  mergeClasses,
   Switch,
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
@@ -14,8 +16,8 @@ import {
   FILE_MANAGER_ICON_PROPS,
   FILE_MANAGER_ICON_STROKE,
 } from '@/constants/icon';
-import { IconDotsVertical, IconEye, IconEyeOff } from '@tabler/icons-react';
-import { type FC, useMemo } from 'react';
+import { IconDots, IconEye, IconEyeOff, IconPlus } from '@tabler/icons-react';
+import { type FC, type ReactNode, useMemo } from 'react';
 
 // The Add menu keeps the design's own width rather than shrinking to a short button label.
 const NEW_BUTTON_DROPDOWN_PROPS = {
@@ -35,6 +37,10 @@ export interface DialFileManagerToolbarProps {
   showHiddenFilesToggle?: boolean;
   onToggleHiddenFiles?: (value: boolean) => void;
   disabledNewButtonTooltip?: string;
+  isCompactView?: boolean;
+  additionalButtons?: ReactNode;
+  moreActionsLabel?: string;
+  onMenuItemClick?: () => void;
 }
 
 /**
@@ -71,6 +77,10 @@ export interface DialFileManagerToolbarProps {
  * @param [newButtonDropdownItems=[]] - Dropdown items available under the new button. If empty, a single new button is shown instead.
  * @param [newButtonLabel='New'] - Label text for the new button.
  * @param [disabledNewButtonTooltip] - Tooltip text to show when the new button is disabled.
+ * @param [isCompactView] - Whether to render the compact layout; overrides the viewport check when set.
+ * @param [additionalButtons] - Controls rendered before the new button.
+ * @param [moreActionsLabel='More actions'] - Accessible name of the compact "more" menu trigger.
+ * @param [onMenuItemClick] - Callback fired when a top-level item is picked from a menu of the compact layout; submenu items don't fire it.
  *
  * @remarks
  * - The hidden files toggle uses `Switch`.
@@ -90,8 +100,13 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
   hideHiddenFilesLabel = 'Hide hidden files',
   showHiddenFilesToggle = true,
   disabledNewButtonTooltip,
+  isCompactView,
+  additionalButtons,
+  moreActionsLabel = 'More actions',
+  onMenuItemClick,
 }) => {
-  const isMobile = useIsMobileScreen();
+  const isMobileScreen = useIsMobileScreen();
+  const isCompactLayout = isCompactView ?? isMobileScreen;
 
   const dropdownItems = useMemo(() => {
     const items: DropdownItem[] = [
@@ -132,6 +147,8 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
         />
       )}
 
+      {additionalButtons}
+
       {isNewButtonVisible && (
         <Tooltip
           tooltip={
@@ -152,22 +169,29 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
     </>
   );
 
-  const renderMobileActions = () => (
+  const renderCompactActions = () => (
     <>
-      <Dropdown
-        items={dropdownItems}
-        allowedPlacements={['bottom', 'bottom-start']}
-      >
-        <GhostIconButton
-          size={ElementSize.Small}
-          icon={
-            <IconDotsVertical
-              stroke={FILE_MANAGER_ICON_STROKE}
-              size={DIAL_ICON_SIZE.SM}
-            />
-          }
-        />
-      </Dropdown>
+      {showHiddenFilesToggle && (
+        <Dropdown
+          items={dropdownItems}
+          onItemClick={onMenuItemClick}
+          className="group/more-actions"
+        >
+          <GhostIconButton
+            size={ElementSize.Standard}
+            aria-label={moreActionsLabel}
+            className="group-aria-expanded/more-actions:bg-control-neutral-active"
+            icon={
+              <IconDots
+                stroke={FILE_MANAGER_ICON_STROKE}
+                size={DIAL_ICON_SIZE.LG}
+              />
+            }
+          />
+        </Dropdown>
+      )}
+
+      {additionalButtons}
 
       {isNewButtonVisible ? (
         <Tooltip
@@ -177,21 +201,36 @@ export const DialFileManagerToolbar: FC<DialFileManagerToolbarProps> = ({
               : undefined
           }
         >
-          <ButtonDropdown
-            label={newButtonLabel}
-            variant={newButtonVariant}
+          <Dropdown
             items={newButtonDropdownItems}
-            dropdownProps={NEW_BUTTON_DROPDOWN_PROPS}
-            disabled={isNewButtonDisabled}
-          />
+            {...NEW_BUTTON_DROPDOWN_PROPS}
+            onItemClick={onMenuItemClick}
+          >
+            <IconButton
+              variant={newButtonVariant}
+              size={ElementSize.Standard}
+              aria-label={newButtonLabel}
+              disabled={isNewButtonDisabled}
+              icon={
+                <IconPlus
+                  stroke={FILE_MANAGER_ICON_STROKE}
+                  size={DIAL_ICON_SIZE.LG}
+                />
+              }
+            />
+          </Dropdown>
         </Tooltip>
       ) : null}
     </>
   );
 
   return (
-    <div className="flex gap-4 shrink-0 items-center">
-      {isMobile ? renderMobileActions() : renderDesktopActions()}
+    <div
+      className={mergeClasses('flex gap-4 shrink-0 items-center', {
+        'gap-3': isCompactLayout,
+      })}
+    >
+      {isCompactLayout ? renderCompactActions() : renderDesktopActions()}
     </div>
   );
 };

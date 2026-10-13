@@ -19,6 +19,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type DragEvent,
   type FC,
   type ReactNode,
   type Ref,
@@ -97,6 +98,7 @@ import {
   DialFileManagerSearchBar,
   type DialFileManagerSearchBarProps,
 } from './components/FileManagerSearchBar/FileManagerSearchBar';
+import { DialFileManagerCompactNavigation } from './components/FileManagerCompactNavigation/FileManagerCompactNavigation';
 import {
   DialFileManagerSortDropdown,
   type DialFileManagerSortDropdownProps,
@@ -114,6 +116,7 @@ import {
   actionsColumnButtonClassName,
   AG_GRID_SELECTION_COLUMN_ID,
   bulkActionsToolbarWrapperClassName,
+  COMPACT_VIEW_FILE_ROW_HEIGHT,
   COMPACT_VIEW_HEADER_HEIGHT,
   containerBaseClassName,
   contentGridClassName,
@@ -124,6 +127,7 @@ import {
   gridDragOverClassName,
   gridDragWindowClassName,
   gridPanelClassName,
+  gridRegionCollapsedClassName,
   searchRowClassName,
   mainGridClassName,
   sidebarContentClassName,
@@ -136,6 +140,7 @@ import {
   toolbarBaseClassName,
 } from './constants';
 import { useBulkActions } from './hooks/use-bulk-actions';
+import { useCompactNavigation } from './hooks/use-compact-navigation';
 import {
   useFileManagerColumns,
   type FileManagerGridContext,
@@ -344,7 +349,11 @@ export type NewAction = Pick<DropdownItem, 'label' | 'icon'>;
 
 export type ToolbarOptions = Omit<
   DialFileManagerToolbarProps,
-  'areHiddenFilesVisible' | 'onToggleHiddenFiles'
+  | 'areHiddenFilesVisible'
+  | 'onToggleHiddenFiles'
+  | 'isCompactView'
+  | 'additionalButtons'
+  | 'onMenuItemClick'
 > & {
   newActions?: {
     uploadFiles?: NewAction;
@@ -700,6 +709,7 @@ export const DialFileManagerView: FC = () => {
     setSelectedPaths: selectedPathsChangeHandler,
 
     effectiveSearchValue,
+    currentFolder,
     handleBreadcrumbItemClick,
     handleSearchChange,
     handleTreeItemClick,
@@ -920,38 +930,40 @@ export const DialFileManagerView: FC = () => {
     customBreakpointRef,
   );
 
-  /*
-   * With several roots (the All tab), the folders tree is what lets a wide
-   * view pick one. The compact view has no tree, so it opens on a list of the
-   * roots instead of silently showing the first one; the top breadcrumb
-   * segment, named after the active tab, returns to that list.
-   */
-  const [isRootListOpen, setIsRootListOpen] = useState(true);
-  const [rootListTab, setRootListTab] = useState(activeTab);
-  if (rootListTab !== activeTab) {
-    setRootListTab(activeTab);
-    setIsRootListOpen(true);
-  }
-  const hasRootList = isCompactView && items.length > 1;
-  const isRootListShown =
-    hasRootList && isRootListOpen && !isSearchMode && !effectiveSearchValue;
-  const rootListLabel = tabs?.find((tab) => tab.value === activeTab)?.label;
+  const {
+    isCompactNavigationOpen,
+    setIsCompactNavigationOpen,
+    closeCompactNavigation,
+  } = useCompactNavigation(isCompactView);
 
-  const rootListRows: FileManagerGridRow[] = useMemo(
-    () =>
-      items.map((node) => ({
-        ...node,
-        id: node.id ?? node.path,
-        name: node.name ?? node.path.split('/').pop() ?? '',
-        size: node.contentLength,
-        isTemporary: false,
-      })),
-    [items],
+  /*
+   * Picking a sort, typing a search query or dropping files closes the
+   * navigation card, since the result lands in the grid; the toolbar menus do
+   * the same through onMenuItemClick. Opening a menu leaves the card as it is.
+   */
+  const handleSortMenuChange = useCallback(
+    (nextSort: FileManagerSort) => {
+      closeCompactNavigation();
+      handleSortChange(nextSort);
+    },
+    [closeCompactNavigation, handleSortChange],
   );
 
-  const displayedGridRows = isRootListShown ? rootListRows : sortedGridRows;
+  const handleGridPanelDrop = useCallback(
+    (event: DragEvent) => {
+      closeCompactNavigation();
+      handleDrop(event);
+    },
+    [closeCompactNavigation, handleDrop],
+  );
 
-  const openRootList = useCallback(() => setIsRootListOpen(true), []);
+  const handleSearchBarChange = useCallback(
+    (value: string) => {
+      if (value) closeCompactNavigation();
+      handleSearchChange(value);
+    },
+    [closeCompactNavigation, handleSearchChange],
+  );
 
   const effectiveVisibleColumns = useMemo(() => {
     return isSearchMode
@@ -1297,46 +1309,82 @@ export const DialFileManagerView: FC = () => {
     [onTabChange, cancelFolderCreation],
   );
 
-  const renderToolbar = useCallback(() => {
-    if (!toolbarOptions) return null;
+  const renderToolbar = useCallback(
+    (additionalButtons?: ReactNode) => {
+      if (!toolbarOptions) return null;
 
-    return (
-      <div
-        className={toolbarBaseClassName}
-        role="toolbar"
-        aria-label="File Manager Toolbar"
-      >
-        <DialFileManagerToolbar
-          {...toolbarOptions}
-          areHiddenFilesVisible={areHiddenFilesVisible}
-          onToggleHiddenFiles={toggleHiddenFilesVisibility}
-          isNewButtonVisible={isNewButtonVisible}
-          isNewButtonDisabled={isNewButtonDisabled}
-          newButtonDropdownItems={newActions}
-        />
-      </div>
-    );
+      return (
+        <div
+          className={mergeClasses(toolbarBaseClassName, {
+            'ml-auto': isCompactView,
+          })}
+          role="toolbar"
+          aria-label="File Manager Toolbar"
+        >
+          <DialFileManagerToolbar
+            {...toolbarOptions}
+            areHiddenFilesVisible={areHiddenFilesVisible}
+            onToggleHiddenFiles={toggleHiddenFilesVisibility}
+            isNewButtonVisible={isNewButtonVisible}
+            isNewButtonDisabled={isNewButtonDisabled}
+            newButtonDropdownItems={newActions}
+            isCompactView={isCompactView}
+            additionalButtons={additionalButtons}
+            onMenuItemClick={closeCompactNavigation}
+          />
+        </div>
+      );
+    },
+    [
+      areHiddenFilesVisible,
+      toggleHiddenFilesVisibility,
+      toolbarOptions,
+      isNewButtonVisible,
+      isNewButtonDisabled,
+      newActions,
+      isCompactView,
+      closeCompactNavigation,
+    ],
+  );
+
+  const isCompactToolbarShown = isCompactView && !!toolbarOptions;
+
+  /* The compact view folds the toolbar into the search row, with sort between its menus. */
+  const renderSearchRowActions = useCallback(() => {
+    const sortDropdown = sortable ? (
+      <DialFileManagerSortDropdown
+        {...sortDropdownProps}
+        iconOnly={sortDropdownProps.iconOnly ?? isCompactView}
+        className={mergeClasses(
+          'shrink-0',
+          { 'ml-auto': !isCompactToolbarShown },
+          sortDropdownProps.className,
+        )}
+        sort={sort}
+        onSortChange={handleSortMenuChange}
+      />
+    ) : null;
+
+    return isCompactToolbarShown ? renderToolbar(sortDropdown) : sortDropdown;
   }, [
-    areHiddenFilesVisible,
-    toggleHiddenFilesVisibility,
-    toolbarOptions,
-    isNewButtonVisible,
-    isNewButtonDisabled,
-    newActions,
+    sortable,
+    sortDropdownProps,
+    isCompactView,
+    isCompactToolbarShown,
+    sort,
+    handleSortMenuChange,
+    renderToolbar,
   ]);
 
   const isEmptyStateShown =
-    !isRootListShown &&
-    gridRows.length === 0 &&
-    !filesLoading &&
-    !searchInProgress;
+    gridRows.length === 0 && !filesLoading && !searchInProgress;
 
   const renderBulkActionsToolbar = useCallback(() => {
     if (
       !bulkActionsToolbarOptions ||
       selectedPaths.size === 0 ||
       isEmptyStateShown ||
-      isRootListShown
+      isCompactNavigationOpen
     )
       return null;
 
@@ -1354,7 +1402,7 @@ export const DialFileManagerView: FC = () => {
     bulkActionsToolbarOptions,
     selectedPaths,
     isEmptyStateShown,
-    isRootListShown,
+    isCompactNavigationOpen,
     clearSelection,
     bulkActions,
   ]);
@@ -1362,13 +1410,89 @@ export const DialFileManagerView: FC = () => {
   useImperativeHandle(
     actionsRef,
     () => ({
-      // The new-folder row lands in the current folder, which the root list hides.
       createFolder: () => {
-        setIsRootListOpen(false);
+        closeCompactNavigation();
         startFolderCreation();
       },
     }),
-    [startFolderCreation],
+    [closeCompactNavigation, startFolderCreation],
+  );
+
+  const handleFoldersTreeItemClick = useCallback(
+    (item: DialFile) => {
+      handleTreeItemClick(item);
+      closeCompactNavigation();
+    },
+    [handleTreeItemClick, closeCompactNavigation],
+  );
+
+  const foldersTree = useMemo(
+    () => (
+      <DialFoldersTree
+        {...forwardedTreeProps}
+        items={items}
+        rootItemPath={rootItem?.path}
+        rootItemLabel={rootItem?.label}
+        selectedPath={currentPath}
+        sharedByMePaths={sharedByMePaths}
+        forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
+        forbiddenSymbolsTooltip={forbiddenSymbolsTooltip}
+        onItemClick={handleFoldersTreeItemClick}
+        selectOnCaretClick={
+          forwardedTreeProps.selectOnCaretClick ?? !isCompactView
+        }
+        showContextMenuButton={
+          forwardedTreeProps.showContextMenuButton ?? !isCompactView
+        }
+        onEscape={
+          forwardedTreeProps.onEscape ??
+          (isCompactView ? closeCompactNavigation : undefined)
+        }
+        areHiddenFilesVisible={areHiddenFilesVisible}
+        getContextMenuItems={getTreeContextMenuItems}
+        renamedPath={
+          renameTriggerView === FileManagerRenameTriggerView.Tree
+            ? renamedPath
+            : undefined
+        }
+        onRenameSave={onRenameSave}
+        onRenameCancel={onRenameCancel}
+        onRenameValidate={onRenameValidate}
+        createdFolderPath={
+          createFolderTriggerView === FileManagerCreateFolderTriggerView.Tree
+            ? createdFolderPath
+            : null
+        }
+        onCreateFolderCancel={cancelFolderCreation}
+        onCreateFolderSave={saveFolderCreation}
+        newFolderDefaultName={newFolderDefaultName}
+      />
+    ),
+    [
+      forwardedTreeProps,
+      items,
+      rootItem?.path,
+      rootItem?.label,
+      currentPath,
+      sharedByMePaths,
+      forbiddenSymbolsRegExp,
+      forbiddenSymbolsTooltip,
+      handleFoldersTreeItemClick,
+      isCompactView,
+      closeCompactNavigation,
+      areHiddenFilesVisible,
+      getTreeContextMenuItems,
+      renameTriggerView,
+      createFolderTriggerView,
+      renamedPath,
+      onRenameSave,
+      onRenameCancel,
+      onRenameValidate,
+      createdFolderPath,
+      cancelFolderCreation,
+      saveFolderCreation,
+      newFolderDefaultName,
+    ],
   );
 
   const renderFoldersTree = useCallback(() => {
@@ -1415,38 +1539,7 @@ export const DialFileManagerView: FC = () => {
             </div>
           ) : null}
 
-          <div className={sidebarTreeContainerClassName}>
-            <DialFoldersTree
-              {...forwardedTreeProps}
-              items={items}
-              rootItemPath={rootItem?.path}
-              rootItemLabel={rootItem?.label}
-              selectedPath={currentPath}
-              sharedByMePaths={sharedByMePaths}
-              forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
-              forbiddenSymbolsTooltip={forbiddenSymbolsTooltip}
-              onItemClick={handleTreeItemClick}
-              areHiddenFilesVisible={areHiddenFilesVisible}
-              getContextMenuItems={getTreeContextMenuItems}
-              renamedPath={
-                renameTriggerView === FileManagerRenameTriggerView.Tree
-                  ? renamedPath
-                  : undefined
-              }
-              onRenameSave={onRenameSave}
-              onRenameCancel={onRenameCancel}
-              onRenameValidate={onRenameValidate}
-              createdFolderPath={
-                createFolderTriggerView ===
-                FileManagerCreateFolderTriggerView.Tree
-                  ? createdFolderPath
-                  : null
-              }
-              onCreateFolderCancel={cancelFolderCreation}
-              onCreateFolderSave={saveFolderCreation}
-              newFolderDefaultName={newFolderDefaultName}
-            />
-          </div>
+          <div className={sidebarTreeContainerClassName}>{foldersTree}</div>
         </div>
       </aside>
     );
@@ -1460,48 +1553,54 @@ export const DialFileManagerView: FC = () => {
     activeTab,
     tabsAriaLabel,
     handleTabChange,
-    forwardedTreeProps,
-    items,
-    rootItem?.path,
-    rootItem?.label,
-    currentPath,
-    sharedByMePaths,
-    forbiddenSymbolsRegExp,
-    forbiddenSymbolsTooltip,
-    handleTreeItemClick,
-    areHiddenFilesVisible,
-    getTreeContextMenuItems,
-    renameTriggerView,
-    createFolderTriggerView,
-    renamedPath,
-    onRenameSave,
-    onRenameCancel,
-    onRenameValidate,
-    createdFolderPath,
-    cancelFolderCreation,
-    saveFolderCreation,
-    newFolderDefaultName,
+    foldersTree,
   ]);
 
   /*
-   * The compact view drops the folders panel, and the filter row with it, so
-   * the row moves to the top of the content column — otherwise a narrow host
-   * has no way to switch sections. The panel heading is not rendered here, so
-   * a plain-text header names the row directly.
+   * The compact view drops the folders panel for a card naming the current
+   * folder; it opens into the section chips and the same tree, and closes
+   * once a folder is picked. The panel heading is not rendered here, so a
+   * plain-text header names the chip row directly.
    */
-  const renderCompactTabs = useCallback(() => {
-    if (!isCompactView || !tabs?.length || !activeTab) return null;
+  const renderCompactNavigation = useCallback(() => {
+    const activeTabLabel = tabs?.find((tab) => tab.value === activeTab)?.label;
+    const label =
+      rootItem?.label && currentFolder?.path === rootItem.path
+        ? rootItem.label
+        : (currentFolder?.name ?? activeTabLabel ?? rootItem?.label ?? '');
 
     return (
-      <FilterChips
-        items={tabs}
-        value={activeTab}
-        onChange={handleTabChange}
-        aria-label={typeof header === 'string' ? header : tabsAriaLabel}
-        className="shrink-0 flex-wrap"
-      />
+      <DialFileManagerCompactNavigation
+        label={label}
+        isOpen={isCompactNavigationOpen}
+        onOpenChange={setIsCompactNavigationOpen}
+      >
+        {tabs?.length && activeTab ? (
+          <FilterChips
+            items={tabs}
+            value={activeTab}
+            onChange={handleTabChange}
+            aria-label={typeof header === 'string' ? header : tabsAriaLabel}
+            className="shrink-0 overflow-x-auto"
+          />
+        ) : null}
+        <div className="min-h-0 flex-1 overflow-auto">{foldersTree}</div>
+      </DialFileManagerCompactNavigation>
     );
-  }, [isCompactView, tabs, activeTab, handleTabChange, header, tabsAriaLabel]);
+  }, [
+    rootItem?.label,
+    rootItem?.path,
+    currentFolder?.path,
+    currentFolder?.name,
+    isCompactNavigationOpen,
+    setIsCompactNavigationOpen,
+    tabs,
+    activeTab,
+    handleTabChange,
+    header,
+    tabsAriaLabel,
+    foldersTree,
+  ]);
 
   const gridContextMenu = useGridContextMenu({
     actionLabels: gridOptions?.actionLabels,
@@ -1537,13 +1636,11 @@ export const DialFileManagerView: FC = () => {
 
   const getGridContextMenuItems = useCallback(
     (row: GridRow) => {
-      // A root stands for a whole section; there is nothing to rename or delete.
-      if (isRootListShown) return [];
       const file = findNodeByPath(items, row.path);
       if (!file) return [];
       return gridContextMenu(file);
     },
-    [isRootListShown, items, gridContextMenu],
+    [items, gridContextMenu],
   );
 
   const isRowContextMenuDisabled = useCallback(
@@ -1595,16 +1692,10 @@ export const DialFileManagerView: FC = () => {
         return;
       }
       if (event.data) {
-        if (isRootListShown) setIsRootListOpen(false);
         handleTableRowClick(event.data);
       }
     },
-    [
-      renamedPath,
-      handleTableRowClick,
-      nonClickableTableColumns,
-      isRootListShown,
-    ],
+    [renamedPath, handleTableRowClick, nonClickableTableColumns],
   );
 
   const emptyStateRenderer = useCallback(
@@ -1640,14 +1731,22 @@ export const DialFileManagerView: FC = () => {
         isDragging ? gridDragOverClassName : '',
         isDraggingOverWindow && !isDragging ? gridDragWindowClassName : '',
         gridContainerClassName,
+        isCompactNavigationOpen && gridRegionCollapsedClassName,
       ),
-    [isDragging, isDraggingOverWindow, gridContainerClassName],
+    [
+      isDragging,
+      isDraggingOverWindow,
+      gridContainerClassName,
+      isCompactNavigationOpen,
+    ],
   );
 
   const gridAdditionalOptions = useMemo<AgGridOptions<GridRow>>(
     () => ({
       headerHeight: COMPACT_VIEW_HEADER_HEIGHT,
-      rowHeight: COMPACT_VIEW_HEADER_HEIGHT,
+      rowHeight: isCompactView
+        ? COMPACT_VIEW_FILE_ROW_HEIGHT
+        : COMPACT_VIEW_HEADER_HEIGHT,
       ...forwardedGridOptions.additionalGridOptions,
       onCellClicked: cellClickHandler,
       rowClass: 'group/grid-row',
@@ -1683,6 +1782,7 @@ export const DialFileManagerView: FC = () => {
       } as FileManagerGridContext,
     }),
     [
+      isCompactView,
       forwardedGridOptions.additionalGridOptions,
       cellClickHandler,
       searchable,
@@ -1717,16 +1817,16 @@ export const DialFileManagerView: FC = () => {
       ) : (
         <Grid<GridRow>
           columnDefs={columnDefs}
-          rowData={displayedGridRows}
+          rowData={sortedGridRows}
           getRowId={gridRowIdGetter}
-          loading={!isRootListShown && (filesLoading || searchInProgress)}
+          loading={filesLoading || searchInProgress}
           getContextMenuItems={getGridContextMenuItems}
           withoutHeaderBorders={isCompactView}
           onGridApiChange={handleGridApiChange}
           className={dialGridClassName}
           {...forwardedGridOptions}
           wrapperBorder={false}
-          selectionMode={isRootListShown ? undefined : selectionMode}
+          selectionMode={selectionMode}
           wrapCustomCellRenderers={wrapCustomCellRenderers}
           additionalGridOptions={gridAdditionalOptions}
           selectedRowIds={selectedGridRowsIds}
@@ -1737,8 +1837,7 @@ export const DialFileManagerView: FC = () => {
       ),
     [
       isEmptyStateShown,
-      displayedGridRows,
-      isRootListShown,
+      sortedGridRows,
       filesLoading,
       emptyStateRenderer,
       columnDefs,
@@ -1772,37 +1871,30 @@ export const DialFileManagerView: FC = () => {
       >
         <div className={mergeClasses(mainGridClassName, gridClassName)}>
           {renderFoldersTree()}
-          <div
-            className={mergeClasses(contentGridClassName, contentClassName, {
-              'gap-3': isCompactView,
-            })}
-          >
-            {renderCompactTabs()}
-            <div
-              className={mergeClasses(
-                contentHeaderClassName,
-                customContentHeaderClassName,
-              )}
-            >
-              {showNavigationPanel && (
-                <DialFileManagerNavigationPanel
-                  {...breadcrumbPanelOptions}
-                  makeHref={(segments) => segments.join('/')}
-                  path={currentPath}
-                  onItemClick={handleBreadcrumbItemClick}
-                  rootItemPath={rootItem?.path}
-                  rootItemLabel={rootItem?.label}
-                  topLevelLabel={
-                    hasRootList ? (rootListLabel ?? '/') : undefined
-                  }
-                  isTopLevel={isRootListShown}
-                  onTopLevelClick={openRootList}
-                />
-              )}
+          <div className={mergeClasses(contentGridClassName, contentClassName)}>
+            {isCompactView ? (
+              renderCompactNavigation()
+            ) : (
+              <div
+                className={mergeClasses(
+                  contentHeaderClassName,
+                  customContentHeaderClassName,
+                )}
+              >
+                {showNavigationPanel && (
+                  <DialFileManagerNavigationPanel
+                    {...breadcrumbPanelOptions}
+                    makeHref={(segments) => segments.join('/')}
+                    path={currentPath}
+                    onItemClick={handleBreadcrumbItemClick}
+                    rootItemPath={rootItem?.path}
+                    rootItemLabel={rootItem?.label}
+                  />
+                )}
 
-              {/* The root list only picks a section; acting on one happens inside it. */}
-              {!isRootListShown && renderToolbar()}
-            </div>
+                {renderToolbar()}
+              </div>
+            )}
 
             {/*
              * The card is a plain box: the search row heads it but is not part
@@ -1810,13 +1902,15 @@ export const DialFileManagerView: FC = () => {
              * dropped anywhere on the card, search row included, still uploads.
              */}
             <div
-              className={mergeClasses(gridPanelClassName, 'relative')}
+              className={mergeClasses(gridPanelClassName, 'relative', {
+                'flex-none': isCompactNavigationOpen,
+              })}
               onDragEnter={handleDragEnter}
               onDragLeave={handleDragLeave}
               onDragOver={handleDragOver}
-              onDrop={handleDrop}
+              onDrop={handleGridPanelDrop}
             >
-              {(searchable || sortable) && (
+              {(searchable || sortable || isCompactToolbarShown) && (
                 <div className={searchRowClassName}>
                   {searchable && (
                     <DialFileManagerSearchBar
@@ -1830,20 +1924,10 @@ export const DialFileManagerView: FC = () => {
                       searchClassName={searchClassName}
                       searchContainerClassName={searchContainerClassName}
                       value={effectiveSearchValue}
-                      onSearchChange={handleSearchChange}
+                      onSearchChange={handleSearchBarChange}
                     />
                   )}
-                  {sortable && (
-                    <DialFileManagerSortDropdown
-                      {...sortDropdownProps}
-                      className={mergeClasses(
-                        'ml-auto shrink-0',
-                        sortDropdownProps.className,
-                      )}
-                      sort={sort}
-                      onSortChange={handleSortChange}
-                    />
-                  )}
+                  {renderSearchRowActions()}
                 </div>
               )}
 

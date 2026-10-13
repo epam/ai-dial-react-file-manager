@@ -4,18 +4,30 @@ import {
   ButtonAppearance,
   ButtonDropdown,
   ButtonVariant,
+  DIAL_ICON_SIZE,
+  Dropdown,
   type DropdownItem,
+  ElementSize,
+  IconButton,
   DropdownItemType,
   MenuItemMark,
+  mergeClasses,
 } from '@epam/ai-dial-ui-kit';
 import { IconArrowsSort } from '@tabler/icons-react';
 
-import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
+import {
+  FILE_MANAGER_ICON_PROPS,
+  FILE_MANAGER_ICON_STROKE,
+} from '@/constants/icon';
 import {
   type FileManagerSort,
   FileManagerSortDirection,
   FileManagerSortField,
 } from '@/types/file-manager';
+
+// The kit has no tinted icon-button variant, so the icon-only trigger takes the accent tint from tokens.
+const ICON_ONLY_TRIGGER_CLASS_NAME =
+  'border border-accent-alpha bg-control-accent-alpha hover:bg-control-accent-alpha-hover';
 
 // The sort menu keeps the design's width rather than following the compact trigger.
 const SORT_DROPDOWN_PROPS = {
@@ -38,6 +50,8 @@ export interface DialFileManagerSortDropdownProps {
   disabled?: boolean;
   /** Additional classes for the trigger button. */
   className?: string;
+  /** Renders a round icon-only trigger (the compact view's action row); `label` becomes its accessible name. */
+  iconOnly?: boolean;
 }
 
 const DEFAULT_FIELD_LABELS: Record<FileManagerSortField, string> = {
@@ -77,6 +91,7 @@ const DIRECTIONS = Object.values(FileManagerSortDirection);
  * @param [directionLabels] - Menu labels of the sort directions
  * @param [disabled] - Whether the trigger is disabled
  * @param [className] - Additional classes for the trigger button
+ * @param [iconOnly=false] - Renders a round icon-only trigger; `label` becomes its accessible name
  */
 export const DialFileManagerSortDropdown: FC<
   DialFileManagerSortDropdownProps
@@ -88,6 +103,7 @@ export const DialFileManagerSortDropdown: FC<
   directionLabels,
   disabled,
   className,
+  iconOnly = false,
 }) => {
   const items = useMemo<DropdownItem[]>(
     () => [
@@ -110,6 +126,27 @@ export const DialFileManagerSortDropdown: FC<
     ],
     [sort, onSortChange, fieldLabels, directionLabels],
   );
+
+  if (iconOnly) {
+    return (
+      <Dropdown items={items} {...SORT_DROPDOWN_PROPS}>
+        <IconButton
+          variant={ButtonVariant.Primary}
+          appearance={ButtonAppearance.Ghost}
+          size={ElementSize.Standard}
+          icon={
+            <IconArrowsSort
+              stroke={FILE_MANAGER_ICON_STROKE}
+              size={DIAL_ICON_SIZE.LG}
+            />
+          }
+          aria-label={label}
+          disabled={disabled}
+          className={mergeClasses(ICON_ONLY_TRIGGER_CLASS_NAME, className)}
+        />
+      </Dropdown>
+    );
+  }
 
   return (
     <ButtonDropdown

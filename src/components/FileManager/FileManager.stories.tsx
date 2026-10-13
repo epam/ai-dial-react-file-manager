@@ -44,6 +44,7 @@ import {
 import type { FileManagerGridRow } from './FileManagerContext';
 import { FileManagerProvider } from './FileManagerProvider';
 import { itemsMock } from './__mocks__/files';
+import { mobileItemsByTab, mobileTabs } from './__mocks__/mobile-files';
 import { useDialFileManagerTabs } from './hooks/use-file-manager-tabs';
 
 const meta = {
@@ -2440,4 +2441,94 @@ const CreateFolderValidationDemo = (args: DialFileManagerProps) => {
 
 export const CreateFolderValidation: Story = {
   render: (args) => <CreateFolderValidationDemo {...args} />,
+};
+
+/**
+ * Host page for the mobile "File storage" design: a page header above a file
+ * manager narrow enough for the compact view.
+ * @param args - story args forwarded to `DialFileManager`
+ */
+const MobileFileStorageComponent = (args: DialFileManagerProps) => {
+  const [activeTab, setActiveTab] = useState(DialFileManagerTabs.MyFiles);
+  const items = mobileItemsByTab[activeTab] ?? [];
+  const rootPath = items[0]?.path ?? '';
+  const [path, setPath] = useState(rootPath);
+  const [expandedPaths, setExpandedPaths] = useState(() => new Set([rootPath]));
+
+  const handleTabChange = (tab: DialFileManagerTabs) => {
+    const nextRootPath = mobileItemsByTab[tab]?.[0]?.path ?? '';
+    setActiveTab(tab);
+    setPath(nextRootPath);
+    setExpandedPaths(new Set([nextRootPath]));
+  };
+
+  const actionLabels = {
+    [DialFileManagerActions.Download]: 'Download',
+    [DialFileManagerActions.Move]: 'Move to',
+    [DialFileManagerActions.Copy]: 'Copy to',
+    [DialFileManagerActions.Duplicate]: 'Duplicate',
+    [DialFileManagerActions.Rename]: 'Rename',
+    [DialFileManagerActions.Delete]: 'Delete',
+  };
+
+  return (
+    <div className="flex h-dvh flex-col bg-layer-base">
+      <h1 className="dial-h1-text text-primary flex h-12 shrink-0 items-center px-3">
+        File storage
+      </h1>
+      <div className="min-h-0 flex-1">
+        <DialFileManager
+          {...args}
+          items={items}
+          path={path}
+          onPathChange={(nextPath) => setPath(nextPath ?? '')}
+          className="p-3 pt-2"
+          contentClassName="px-0"
+          treeOptions={{
+            tabs: mobileTabs,
+            activeTab,
+            onTabChange: handleTabChange,
+            expandedPaths,
+            onExpandedPathsChange: setExpandedPaths,
+            actionLabels,
+          }}
+          navigationPanelOptions={{
+            searchable: true,
+            placeholder: 'Search...',
+          }}
+          toolbarOptions={{
+            newActions: {
+              newFolder: { label: 'New folder' },
+              uploadFiles: { label: 'Upload files' },
+            },
+          }}
+          gridOptions={{
+            selectionMode: GridSelectionMode.MULTIPLE,
+            filterable: false,
+            dateLocale: 'en-US',
+            dateOptions: { month: 'short', day: 'numeric', year: 'numeric' },
+            actionLabels,
+          }}
+          bulkActionsToolbarOptions={{
+            getSelectionLabel: (count) =>
+              `item${count === 1 ? '' : 's'} selected`,
+            actionLabels,
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
+export const MobileFileStorage: Story = {
+  render: MobileFileStorageComponent,
+  globals: { viewport: { value: 'mobile1', isRotated: false } },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The compact (mobile) layout at phone width: a card naming the current folder that opens into the section chips and the folders tree, one action row with search, the "more" menu, Sort and Add, and two-line rows with the date and size.',
+      },
+    },
+  },
 };

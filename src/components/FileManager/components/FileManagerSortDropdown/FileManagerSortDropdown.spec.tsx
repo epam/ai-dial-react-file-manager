@@ -110,4 +110,17 @@ describe('Dial UI Kit :: DialFileManagerSortDropdown', () => {
       screen.getByRole('menuitemradio', { name: 'Z → A' }),
     ).toBeInTheDocument();
   });
+
+  test('renders an icon-only trigger named by the label that opens the same menu', async () => {
+    render(
+      <DialFileManagerSortDropdown sort={NAME_ASC} iconOnly label="Sort" />,
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Sort' });
+    expect(trigger).not.toHaveTextContent('Sort');
+
+    await userEvent.click(trigger);
+
+    expect(await screen.findAllByRole('menuitemradio')).toHaveLength(5);
+  });
 });

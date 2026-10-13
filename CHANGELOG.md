@@ -51,8 +51,38 @@ and this project follows [Semantic Versioning](https://semver.org/).
   wrapper's `aria-label="folder"` are gone — both were names on generic
   elements that no assistive technology announced.
 
+- **`DialFoldersTree` — `selectOnCaretClick` / `showContextMenuButton`** —
+  whether clicking a folder's caret also selects it, and whether rows show the
+  hover "more" button that opens the `getContextMenuItems` menu (the
+  right-click menu and `renderItemActions` stay either way). Both default to
+  `true`; the compact view turns them off unless `treeOptions` sets them.
+- **`DialFileManagerSortDropdown` — `iconOnly`** — renders a round icon-only
+  trigger named by `label`. The compact view turns it on unless `sortOptions`
+  sets it.
+- **`toolbarOptions.moreActionsLabel`** — accessible name of the compact
+  "more" menu trigger, defaulting to `"More actions"`.
+
 ### Changed
 
+- **The compact view follows the mobile design** — the folders panel, the
+  breadcrumb trail and the content header give way to a card naming the current
+  folder (or, while none is loaded, the active section). It opens into the
+  section chips (one scrolling row) and the folders tree and fills the height
+  above the search row; the grid stays mounted and keeps its columns and scroll
+  position. Picking a folder, typing a search query, picking an action from the
+  "more", Sort or Add menus, creating a folder, dropping files or pressing
+  Escape in the tree closes it, and focus left inside returns to the card;
+  switching sections or expanding a folder from its caret keeps it open. In the
+  card the caret only expands a folder and rows drop the hover "more" button
+  (the right-click menu stays). With several roots the tree lists them all, so
+  the separate list of roots is gone. Search, the "more" menu (horizontal
+  dots), an icon-only Sort and a round Add button share one row; the toolbar
+  follows the file manager's compact view rather than the viewport width, hides
+  the "more" menu when `showHiddenFilesToggle` is off and styles Add after
+  `newButtonVariant`. Rows are 68px tall and read "date • size", and folder rows
+  no longer start the date with an empty size slot. Host values for the new
+  `treeOptions` and `sortOptions` props below win over the compact defaults.
+  The wide view is unchanged.
 - **The delete confirmation follows the DIAL delete design** — Cancel is a
   text (ghost) button, Delete is a danger button led by a trash icon, and the
   header close control is shown. Before, the kit's default footer rendered a
@@ -208,6 +238,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Removed
 
+- **`NavigationPanelOptions.topLevelLabel`, `isTopLevel` and `onTopLevelClick`
+  (breaking)** — 0.3.0 opened the compact view on a list of the roots when a
+  host passed several (an "All" tab), with a leading breadcrumb segment named
+  after the active tab that returned to the list; these props drove that
+  segment. The compact navigation card now lists every root in its folders
+  tree, so the list and the segment are gone. The file manager always overrode
+  these values, so nothing changes at runtime.
 - **`toolbarOptions.hiddenFilesSwitcherLabel` (breaking)** — the hidden-files
   toggle carried two labels: a static one naming the control and a pair naming
   the action. It now reads only the pair, so the toggle says what the click
@@ -253,14 +290,6 @@ and this project follows [Semantic Versioning](https://semver.org/).
   showed the empty state while the destination folder was still loading.
   `destinationFolderPopupOptions.filesLoading` now drives it, falling back to
   the main `filesLoading`.
-- **The compact view showed only the first of several roots** — with no folders
-  tree, a host that passes more than one root (an "All" tab combining My files,
-  Shared and Organization) showed the first root's contents, so the combined
-  tab looked like a copy of it. The compact view now opens on a list of the
-  roots; selecting one browses it, and a leading breadcrumb named after the
-  active tab returns to the list. The wide view is unchanged.
-  `DialFileManagerNavigationPanel` gains `topLevelLabel`, `isTopLevel` and
-  `onTopLevelClick` for that leading segment.
 - **The Copy/Move destination popup's layout didn't match Figma** — its grid
   sat flush against the popup edges with no spacing, and its tree panel drew
   no card background, shadow, or rounded corners, unlike the rest of the

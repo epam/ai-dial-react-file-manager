@@ -4,7 +4,12 @@ import { DialFileManagerToolbar } from './DialFileManagerToolbar';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import { ButtonVariant } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
+import {
+  FileManagerSortDirection,
+  FileManagerSortField,
+} from '@/types/file-manager';
 import { IconFile, IconFileZip, IconFolder } from '@tabler/icons-react';
+import { DialFileManagerSortDropdown } from '../FileManagerSortDropdown/FileManagerSortDropdown';
 
 const meta: Meta<typeof DialFileManagerToolbar> = {
   title: 'FileManager/components/FileManagerToolbar',
@@ -192,5 +197,46 @@ export const WithoutHiddenFilesToggle: Story = {
     };
 
     return <StoryWrapper />;
+  },
+};
+
+export const CompactLayout: Story = {
+  render: () => {
+    const StoryWrapper = () => {
+      const [areHiddenFilesVisible, setAreHiddenFilesVisible] = useState(false);
+      const [sort, setSort] = useState({
+        field: FileManagerSortField.Name,
+        direction: FileManagerSortDirection.Asc,
+      });
+
+      return (
+        <div className="p-4 border rounded-lg bg-layer-base">
+          <DialFileManagerToolbar
+            areHiddenFilesVisible={areHiddenFilesVisible}
+            onToggleHiddenFiles={setAreHiddenFilesVisible}
+            isNewButtonVisible
+            newButtonDropdownItems={mockCreateItems}
+            isCompactView
+            additionalButtons={
+              <DialFileManagerSortDropdown
+                iconOnly
+                sort={sort}
+                onSortChange={setSort}
+              />
+            }
+          />
+        </div>
+      );
+    };
+
+    return <StoryWrapper />;
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The compact layout the file manager folds into its search row: the "more" menu with the hidden files toggle, the controls passed as `additionalButtons` (here the icon-only Sort) and a round Add button.',
+      },
+    },
   },
 };
