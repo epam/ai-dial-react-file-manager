@@ -1333,6 +1333,63 @@ describe('Dial UI Kit :: FileManager', () => {
       ).not.toBeInTheDocument();
     });
 
+    test('docks the bulk actions toolbar over the bottom of the file manager in the compact view', async () => {
+      widthBreakpoint.isBelowBreakpoint = true;
+
+      try {
+        const SelectionHarness = () => {
+          const [selectedPaths, setSelectedPaths] = React.useState(
+            () => new Set(['All files/Design']),
+          );
+
+          return (
+            <DialFileManager
+              items={itemsMock}
+              path="All files"
+              selectedPaths={selectedPaths}
+              onSelectedPathsChange={setSelectedPaths}
+              gridOptions={{ className: 'host-grid' }}
+              bulkActionsToolbarOptions={{
+                getSelectionLabel: (count) =>
+                  `item${count === 1 ? '' : 's'} selected`,
+                actionLabels: { download: 'Download', delete: 'Delete' },
+              }}
+            />
+          );
+        };
+
+        const { container } = renderWithinSizedShell(<SelectionHarness />);
+
+        await waitForGridTable();
+
+        const toolbar = screen.getByRole('toolbar', {
+          name: 'File bulk actions',
+        });
+        expect(
+          container.querySelector('section')?.lastElementChild,
+        ).toContainElement(toolbar);
+        expect(screen.getByRole('grid')).toHaveClass(
+          'host-grid',
+          '[&_.ag-body-viewport]:pb-16',
+        );
+        expect(
+          within(toolbar).getByRole('button', { name: 'Clear selection' }),
+        ).toBeInTheDocument();
+        expect(within(toolbar).getByText('item selected')).toHaveClass(
+          'sr-only',
+        );
+
+        await userEvent.click(
+          within(toolbar).getByRole('button', { name: 'Clear selection' }),
+        );
+        expect(screen.getByRole('grid')).not.toHaveClass(
+          '[&_.ag-body-viewport]:pb-16',
+        );
+      } finally {
+        widthBreakpoint.isBelowBreakpoint = false;
+      }
+    });
+
     test('keeps the content header while a selection is live', async () => {
       renderWithinSizedShell(
         <DialFileManager

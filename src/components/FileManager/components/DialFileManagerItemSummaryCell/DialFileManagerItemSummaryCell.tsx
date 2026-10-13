@@ -12,6 +12,7 @@ interface DialFileManagerItemSummaryCellProps {
   nodeType: DialFileNodeType;
   size?: number;
   updatedAt?: string;
+  iconSize?: number;
   shared?: boolean;
   dateLocale?: Intl.LocalesArgument;
   dateOptions?: Intl.DateTimeFormatOptions;
@@ -59,6 +60,7 @@ interface DialFileManagerItemSummaryCellProps {
  * @param nodeType - Determines whether the item renders as a **File** or **Folder**.
  * @param size - File size in bytes; formatted with {@link formatBytes}. Omit for folders.
  * @param updatedAt - Date or timestamp passed to `DateCellRenderer`. If invalid or missing, renders `"—"`.
+ * @param [iconSize=BASE_FILE_MANAGER_ICON_SIZE] - Size of the file or folder icon, in px.
  * @param dateLocale - Optional locale override for date formatting (e.g., `"fr-FR"`).
  * @param dateOptions - Optional `Intl.DateTimeFormat` configuration (e.g., `{ timeZone: 'UTC' }`).
  * @params sharedIndicatorClassName - Optional CSS classes for the shared indicator.
@@ -74,6 +76,7 @@ export const DialFileManagerItemSummaryCell: FC<
   nodeType,
   size,
   updatedAt,
+  iconSize = BASE_FILE_MANAGER_ICON_SIZE,
   dateLocale,
   dateOptions,
   shared,
@@ -96,7 +99,7 @@ export const DialFileManagerItemSummaryCell: FC<
           name={name}
           elementId={id}
           shared={shared}
-          iconSize={BASE_FILE_MANAGER_ICON_SIZE}
+          iconSize={iconSize}
           sharedIndicatorClassName={sharedIndicatorClassName}
           hideTooltip={hideTooltip}
           forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
