@@ -870,5 +870,102 @@ describe('Dial UI Kit :: DialDestinationFolderPopup', () => {
       fireEvent.change(search, { target: { value: '' } });
       expect(screen.getByText('Documents')).toBeInTheDocument();
     });
+
+    const nestedFiles: DialFile[] = [
+      {
+        id: 'root',
+        name: 'bucket-1',
+        path: '/bucket-1',
+        folderId: 'root',
+        nodeType: DialFileNodeType.FOLDER,
+        items: [
+          {
+            id: 'a',
+            name: 'Alpha',
+            path: '/bucket-1/Alpha',
+            folderId: 'root',
+            nodeType: DialFileNodeType.FOLDER,
+            items: [
+              {
+                id: 'b',
+                name: 'Beta',
+                path: '/bucket-1/Alpha/Beta',
+                folderId: 'a',
+                nodeType: DialFileNodeType.FOLDER,
+              },
+            ],
+          },
+          {
+            id: 'g',
+            name: 'Gamma',
+            path: '/bucket-1/Gamma',
+            folderId: 'root',
+            nodeType: DialFileNodeType.FOLDER,
+          },
+        ],
+      },
+    ];
+
+    test('labels the root and opens on the picked folder', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          items={nestedFiles}
+          rootItem={{
+            id: 'root',
+            name: 'bucket-1',
+            path: '/bucket-1',
+            folderId: 'root',
+            nodeType: DialFileNodeType.FOLDER,
+            label: 'My files',
+          }}
+          path="/bucket-1/Alpha/Beta"
+          sourceItems={[sourceFile]}
+        />,
+      );
+
+      expect(screen.getByText('My files')).toBeInTheDocument();
+      expect(screen.queryByText('bucket-1')).not.toBeInTheDocument();
+      expect(screen.getByText('Beta')).toBeInTheDocument();
+    });
+
+    test('restores the browsing folders when the search is cleared', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          items={nestedFiles}
+          sourceItems={[sourceFile]}
+        />,
+      );
+
+      expect(screen.getByText('Gamma')).toBeInTheDocument();
+      expect(screen.queryByText('Beta')).not.toBeInTheDocument();
+
+      const search = screen.getByPlaceholderText('Search folders');
+      fireEvent.change(search, { target: { value: 'beta' } });
+      expect(screen.getByText('Beta')).toBeInTheDocument();
+      expect(screen.queryByText('Gamma')).not.toBeInTheDocument();
+
+      fireEvent.change(search, { target: { value: '' } });
+      expect(screen.getByText('Gamma')).toBeInTheDocument();
+      expect(screen.queryByText('Beta')).not.toBeInTheDocument();
+    });
+
+    test('shows a folder being moved by its name', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          items={mockFiles}
+          sourceItems={[mockFiles[0]]}
+        />,
+      );
+
+      const sheet = screen.getByRole('dialog', { name: 'Move to' });
+      expect(within(sheet).getAllByText('Documents')).toHaveLength(2);
+    });
   });
 });

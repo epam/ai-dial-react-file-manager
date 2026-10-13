@@ -93,10 +93,10 @@ export const excludePathsFromTree = (
 /**
  * Finds the folders whose name contains the query, case-insensitively. A
  * matching folder keeps its whole subtree; other folders stay only when they
- * lead to a match. Files are dropped.
+ * lead to a match. Files and hidden dot-folders outside a match are dropped.
  * @param nodes - Hierarchical items to search
  * @param query - Text to look for in folder names
- * @returns The folders-only tree, and the paths of the folders above the matches so the tree can open on them
+ * @returns The filtered tree, and the paths of the folders above the matches so the tree can open on them
  */
 export const searchFoldersByName = (
   nodes: DialFile[],
@@ -107,7 +107,9 @@ export const searchFoldersByName = (
 
   const search = (items: DialFile[]): DialFile[] =>
     items.flatMap((node) => {
-      if (node.nodeType !== DialFileNodeType.FOLDER) return [];
+      if (node.nodeType !== DialFileNodeType.FOLDER || isHiddenDotFile(node)) {
+        return [];
+      }
       if (normalizeToLowerCase(node.name).includes(normalizedQuery)) {
         return [node];
       }
@@ -120,6 +122,23 @@ export const searchFoldersByName = (
     });
 
   return { items: search(nodes), expandedPaths };
+};
+
+/**
+ * Lists the paths of the folders that contain the given path, nearest first.
+ * @param path - Path of a file or folder
+ * @returns Parent paths, e.g. `['/a/b', '/a']` for `'/a/b/c'`
+ */
+export const getAncestorPaths = (path: string): string[] => {
+  const ancestors: string[] = [];
+  let separatorIndex = path.lastIndexOf('/');
+
+  while (separatorIndex > 0) {
+    ancestors.push(path.slice(0, separatorIndex));
+    separatorIndex = path.lastIndexOf('/', separatorIndex - 1);
+  }
+
+  return ancestors;
 };
 
 export const isHiddenDotFile = (node: DialFile) => {

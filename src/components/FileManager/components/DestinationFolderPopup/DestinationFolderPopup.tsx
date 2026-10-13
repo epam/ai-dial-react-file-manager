@@ -7,10 +7,6 @@ import type { DialFileManagerActionsRef } from '@/models/file-manager';
 import { DestinationFolderMode } from '@/types/file-manager';
 import {
   ButtonAppearance,
-  Dropdown,
-  type DropdownItem,
-  ElementSize,
-  GhostIconButton,
   mergeClasses,
   NeutralButton,
   Notification,
@@ -21,7 +17,7 @@ import {
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
-import { IconDotsVertical, IconEye, IconFolderPlus } from '@tabler/icons-react';
+import { IconFolderPlus } from '@tabler/icons-react';
 import {
   type ComponentProps,
   type FC,
@@ -149,7 +145,6 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
   ...restProps
 }: DestinationFolderPopupProps) => {
   const [showHiddenFiles, setShowHiddenFiles] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const fileManagerActionRef = useRef<DialFileManagerActionsRef>(null);
   const isMobile = useIsMobileScreen();
 
@@ -161,48 +156,6 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
   const handleShowHiddenFilesChange = useCallback((value: boolean) => {
     setShowHiddenFiles(value);
   }, []);
-
-  const mobileFooterDropdownItems = useMemo<DropdownItem[]>(() => {
-    const footerDropdownItems = [];
-
-    if (showCreateFolderButton) {
-      footerDropdownItems.push({
-        key: 'add-folder',
-        label: addFolderLabel,
-        icon: (
-          <IconFolderPlus
-            {...FILE_MANAGER_ICON_PROPS}
-            className="text-secondary"
-          />
-        ),
-        onClick: () => {
-          fileManagerActionRef.current?.createFolder();
-          setMobileMenuOpen(false);
-        },
-      });
-    }
-
-    if (showHiddenFileSwitcher) {
-      footerDropdownItems.push({
-        key: 'show-hidden-files',
-        label: hiddenFilesSwitcherLabel,
-        icon: (
-          <IconEye {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
-        ),
-        onClick: () => {
-          setShowHiddenFiles((prev) => !prev);
-          setMobileMenuOpen(false);
-        },
-      });
-    }
-
-    return footerDropdownItems;
-  }, [
-    addFolderLabel,
-    hiddenFilesSwitcherLabel,
-    showHiddenFileSwitcher,
-    showCreateFolderButton,
-  ]);
 
   const handleOnPathChange = useCallback(
     (nextPath?: string) => {
@@ -221,8 +174,11 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
     ],
   );
 
-  const defaultTitle =
-    mode === DestinationFolderMode.Copy ? 'Copy to' : 'Move to';
+  const isCopyMode = mode === DestinationFolderMode.Copy;
+  const defaultTitle = isCopyMode ? 'Copy to' : 'Move to';
+  const defaultDestinationLabel = isCopyMode
+    ? 'Copy to folder'
+    : 'Move to folder';
 
   const isDestinationDisabled = useMemo(() => {
     if (!path || !sourceFolder) {
@@ -232,11 +188,10 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
     return sourceFolder === path;
   }, [path, sourceFolder]);
 
-  const confirmLabel = mode === 'copy' ? copyLabel : moveLabel;
+  const confirmLabel = isCopyMode ? copyLabel : moveLabel;
 
   if (isMobile) {
-    const ConfirmIcon =
-      mode === DestinationFolderMode.Copy ? CopyToIcon : MoveToIcon;
+    const ConfirmIcon = isCopyMode ? CopyToIcon : MoveToIcon;
 
     return (
       <DestinationFolderSheet
@@ -245,12 +200,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
         items={visibleItems}
         sourceItems={sourceItems}
         sourceItemsLabel={getSourceItemsLabel(sourceItems.length)}
-        destinationLabel={
-          destinationLabel ??
-          (mode === DestinationFolderMode.Copy
-            ? 'Copy to folder'
-            : 'Move to folder')
-        }
+        destinationLabel={destinationLabel ?? defaultDestinationLabel}
         confirmLabel={confirmLabel}
         confirmIcon={
           <ConfirmIcon
@@ -261,6 +211,8 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
         isConfirmDisabled={isDestinationDisabled}
         disabledConfirmTooltip={disabledPathTooltip}
         selectedPath={path}
+        rootItemPath={restProps.rootItem?.path}
+        rootItemLabel={restProps.rootItem?.label}
         loadedPaths={restProps.treeOptions?.loadedPaths}
         loadingPaths={restProps.treeOptions?.loadingPaths}
         emptyStateTitle={restProps.emptyStateTitle}
@@ -286,45 +238,29 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
       footer={
         <div className="flex justify-between items-center gap-2 p-4 md:px-6">
           <div className="flex items-center gap-4 min-w-0">
-            {isMobile ? (
-              <Dropdown
-                items={mobileFooterDropdownItems}
-                open={mobileMenuOpen}
-                onOpenChange={setMobileMenuOpen}
-              >
-                <GhostIconButton
-                  size={ElementSize.Large}
-                  aria-label="More options"
-                  icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
-                />
-              </Dropdown>
-            ) : (
+            {showCreateFolderButton && (
+              <PrimaryButton
+                label={addFolderLabel}
+                appearance={ButtonAppearance.Ghost}
+                iconBefore={<IconFolderPlus {...FILE_MANAGER_ICON_PROPS} />}
+                onClick={() => {
+                  fileManagerActionRef.current?.createFolder();
+                }}
+              />
+            )}
+            {showCreateFolderButton && showHiddenFileSwitcher && (
+              <div className="w-px h-[26px] bg-control-disable-primary my-2" />
+            )}
+            {showHiddenFileSwitcher && (
               <>
-                {showCreateFolderButton && (
-                  <PrimaryButton
-                    label={addFolderLabel}
-                    appearance={ButtonAppearance.Ghost}
-                    iconBefore={<IconFolderPlus {...FILE_MANAGER_ICON_PROPS} />}
-                    onClick={() => {
-                      fileManagerActionRef.current?.createFolder();
-                    }}
+                <div className="inline-flex items-center cursor-pointer">
+                  <Switch
+                    labelProps={{ label: hiddenFilesSwitcherLabel }}
+                    isOn={showHiddenFiles}
+                    onChange={handleShowHiddenFilesChange}
+                    id="hidden-files-switch-modal"
                   />
-                )}
-                {showCreateFolderButton && showHiddenFileSwitcher && (
-                  <div className="w-px h-[26px] bg-control-disable-primary my-2" />
-                )}
-                {showHiddenFileSwitcher && (
-                  <>
-                    <div className="inline-flex items-center cursor-pointer">
-                      <Switch
-                        labelProps={{ label: hiddenFilesSwitcherLabel }}
-                        isOn={showHiddenFiles}
-                        onChange={handleShowHiddenFilesChange}
-                        id="hidden-files-switch-modal"
-                      />
-                    </div>
-                  </>
-                )}
+                </div>
               </>
             )}
           </div>

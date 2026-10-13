@@ -17,6 +17,7 @@ import {
   getNextFolderName,
   sortGridRows,
   excludePathsFromTree,
+  getAncestorPaths,
   searchFoldersByName,
 } from './utils';
 
@@ -532,10 +533,34 @@ describe('Dial UI Kit :: searchFoldersByName', () => {
     expect(items).toEqual([folder('/Media')]);
   });
 
+  it('skips hidden dot-folders, as the tree hides them', () => {
+    const { items } = searchFoldersByName(
+      [folder('/.config', [folder('/.config/foo')]), folder('/foo')],
+      'foo',
+    );
+
+    expect(items).toEqual([folder('/foo')]);
+  });
+
   it('returns nothing when no folder matches', () => {
     const { items, expandedPaths } = searchFoldersByName(tree, 'nope');
 
     expect(items).toEqual([]);
     expect(expandedPaths.size).toBe(0);
+  });
+});
+
+describe('Dial UI Kit :: getAncestorPaths', () => {
+  it('lists the parent folders, nearest first', () => {
+    expect(getAncestorPaths('/a/b/c')).toEqual(['/a/b', '/a']);
+    expect(getAncestorPaths('All files/Design/Icons')).toEqual([
+      'All files/Design',
+      'All files',
+    ]);
+  });
+
+  it('returns nothing for a top-level path', () => {
+    expect(getAncestorPaths('/a')).toEqual([]);
+    expect(getAncestorPaths('All files')).toEqual([]);
   });
 });

@@ -13,7 +13,10 @@ import {
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
 import { IconFiles } from '@tabler/icons-react';
-import { searchFoldersByName } from '@/components/FileManager/utils';
+import {
+  getAncestorPaths,
+  searchFoldersByName,
+} from '@/components/FileManager/utils';
 import {
   type ComponentProps,
   type FC,
@@ -43,6 +46,8 @@ export interface DestinationFolderSheetProps {
   isConfirmDisabled: boolean;
   disabledConfirmTooltip: string;
   selectedPath?: string;
+  rootItemPath?: string;
+  rootItemLabel?: string;
   loadedPaths?: Set<string>;
   loadingPaths?: Set<string>;
   emptyStateTitle?: string;
@@ -74,6 +79,8 @@ const DestinationFolderSheetContent: FC<DestinationFolderSheetContentProps> = ({
   isConfirmDisabled,
   disabledConfirmTooltip,
   selectedPath,
+  rootItemPath,
+  rootItemLabel,
   loadedPaths,
   loadingPaths,
   emptyStateTitle,
@@ -86,21 +93,23 @@ const DestinationFolderSheetContent: FC<DestinationFolderSheetContentProps> = ({
   onClose,
 }) => {
   const [query, setQuery] = useState('');
-  const [expandedPaths, setExpandedPaths] = useState(
-    () => new Set(items.map(({ path }) => path)),
+  const [browseExpandedPaths, setBrowseExpandedPaths] = useState(
+    () =>
+      new Set([
+        ...items.map(({ path }) => path),
+        ...(selectedPath ? getAncestorPaths(selectedPath) : []),
+      ]),
   );
+  const [searchExpandedPaths, setSearchExpandedPaths] = useState<Set<string>>();
 
-  const isSearching = query.trim().length > 0;
-  const visibleItems = useMemo(
-    () => (isSearching ? searchFoldersByName(items, query).items : items),
-    [isSearching, items, query],
+  const searchResult = useMemo(
+    () => (query.trim() ? searchFoldersByName(items, query) : undefined),
+    [items, query],
   );
 
   const handleSearchChange = (value: string) => {
     setQuery(value);
-    if (value.trim()) {
-      setExpandedPaths(searchFoldersByName(items, value).expandedPaths);
-    }
+    setSearchExpandedPaths(undefined);
   };
 
   const renderSource = () => {
@@ -161,17 +170,25 @@ const DestinationFolderSheetContent: FC<DestinationFolderSheetContentProps> = ({
           />
 
           <DialFoldersTree
-            items={visibleItems}
-            expandedPaths={expandedPaths}
-            onExpandedPathsChange={setExpandedPaths}
+            items={searchResult?.items ?? items}
+            expandedPaths={
+              searchResult
+                ? (searchExpandedPaths ?? searchResult.expandedPaths)
+                : browseExpandedPaths
+            }
+            onExpandedPathsChange={
+              searchResult ? setSearchExpandedPaths : setBrowseExpandedPaths
+            }
             selectedPath={selectedPath}
+            rootItemPath={rootItemPath}
+            rootItemLabel={rootItemLabel}
             loadedPaths={loadedPaths}
             loadingPaths={loadingPaths}
             emptyStateTitle={
-              isSearching ? searchEmptyStateTitle : emptyStateTitle
+              searchResult ? searchEmptyStateTitle : emptyStateTitle
             }
             emptyStateDescription={
-              isSearching ? undefined : emptyStateDescription
+              searchResult ? undefined : emptyStateDescription
             }
             ariaLabel={destinationLabel}
             showContextMenuButton={false}
@@ -208,7 +225,9 @@ const DestinationFolderSheetContent: FC<DestinationFolderSheetContentProps> = ({
  * @param confirmIcon - Icon of the confirm button
  * @param isConfirmDisabled - Whether the picked folder can't be the destination
  * @param disabledConfirmTooltip - Tooltip of the disabled confirm button
- * @param [selectedPath] - Folder currently picked as the destination
+ * @param [selectedPath] - Folder currently picked as the destination; the folders above it open expanded
+ * @param [rootItemPath] - Path of the root folder shown with `rootItemLabel`
+ * @param [rootItemLabel] - Label shown for the root folder instead of its name
  * @param [loadedPaths] - Folders whose children have loaded
  * @param [loadingPaths] - Folders whose children are loading
  * @param [emptyStateTitle] - Title shown when there are no folders
