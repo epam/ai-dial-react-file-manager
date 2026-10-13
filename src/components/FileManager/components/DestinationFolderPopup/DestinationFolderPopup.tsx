@@ -7,10 +7,6 @@ import type { DialFileManagerActionsRef } from '@/models/file-manager';
 import { DestinationFolderMode } from '@/types/file-manager';
 import {
   ButtonAppearance,
-  Dropdown,
-  type DropdownItem,
-  ElementSize,
-  GhostIconButton,
   mergeClasses,
   NeutralButton,
   Notification,
@@ -21,7 +17,7 @@ import {
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
-import { IconDotsVertical, IconEye, IconFolderPlus } from '@tabler/icons-react';
+import { IconFolderPlus } from '@tabler/icons-react';
 import {
   type ComponentProps,
   type FC,
@@ -32,6 +28,10 @@ import {
   useState,
 } from 'react';
 import { excludePathsFromTree } from '@/components/FileManager/utils';
+import type { DialFile } from '@/models/file';
+import CopyToIcon from '@/assets/icons/copy-to.svg?react';
+import MoveToIcon from '@/assets/icons/move-to.svg?react';
+import { DestinationFolderSheet } from './DestinationFolderSheet';
 
 export interface DestinationFolderPopupProps extends DialFileManagerProps {
   onClose: () => void;
@@ -54,6 +54,10 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
   onFolderPopupPathChange?: (newPath?: string) => void;
   processDestinationFolderPath?: (path: string) => string;
   excludedPaths?: string[];
+  sourceItems?: DialFile[];
+  getSourceItemsLabel?: (count: number) => string;
+  destinationLabel?: string;
+  searchFoldersPlaceholder?: string;
 }
 
 /**
@@ -97,6 +101,15 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
  * @param [collapsedFileTree=false] - Whether the file tree should be initially collapsed
  * @param [processDestinationFolderPath] - Optional function to process the destination folder path before setting it
  * @param [excludedPaths] - Paths to hide from this popup's tree and grid (e.g. a root folder that shouldn't be a valid destination). Matching items and their subtree are excluded.
+ * @param [sourceItems=[]] - Items being copied or moved; the phone sheet shows them above the tree
+ * @param [getSourceItemsLabel] - Text naming several source items in the phone sheet; defaults to "N items"
+ * @param [destinationLabel] - Heading above the tree in the phone sheet; defaults to "Copy to folder" or "Move to folder"
+ * @param [searchFoldersPlaceholder="Search folders"] - Placeholder of the phone sheet's folder search, which filters the loaded folders by name
+ *
+ * @remarks
+ * Below 640px the picker is a bottom sheet with a folders-only tree and no
+ * Add folder or hidden-files controls, so `showCreateFolderButton` and
+ * `showHiddenFileSwitcher` only apply to the popup.
  *
  * @returns A React component for the destination folder selection popup
  */
@@ -125,10 +138,13 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
   processDestinationFolderPath,
   excludedPaths,
   items,
+  sourceItems = [],
+  getSourceItemsLabel = (count) => `${count} items`,
+  destinationLabel,
+  searchFoldersPlaceholder = 'Search folders',
   ...restProps
 }: DestinationFolderPopupProps) => {
   const [showHiddenFiles, setShowHiddenFiles] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const fileManagerActionRef = useRef<DialFileManagerActionsRef>(null);
   const isMobile = useIsMobileScreen();
 
@@ -140,48 +156,6 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
   const handleShowHiddenFilesChange = useCallback((value: boolean) => {
     setShowHiddenFiles(value);
   }, []);
-
-  const mobileFooterDropdownItems = useMemo<DropdownItem[]>(() => {
-    const footerDropdownItems = [];
-
-    if (showCreateFolderButton) {
-      footerDropdownItems.push({
-        key: 'add-folder',
-        label: addFolderLabel,
-        icon: (
-          <IconFolderPlus
-            {...FILE_MANAGER_ICON_PROPS}
-            className="text-secondary"
-          />
-        ),
-        onClick: () => {
-          fileManagerActionRef.current?.createFolder();
-          setMobileMenuOpen(false);
-        },
-      });
-    }
-
-    if (showHiddenFileSwitcher) {
-      footerDropdownItems.push({
-        key: 'show-hidden-files',
-        label: hiddenFilesSwitcherLabel,
-        icon: (
-          <IconEye {...FILE_MANAGER_ICON_PROPS} className="text-secondary" />
-        ),
-        onClick: () => {
-          setShowHiddenFiles((prev) => !prev);
-          setMobileMenuOpen(false);
-        },
-      });
-    }
-
-    return footerDropdownItems;
-  }, [
-    addFolderLabel,
-    hiddenFilesSwitcherLabel,
-    showHiddenFileSwitcher,
-    showCreateFolderButton,
-  ]);
 
   const handleOnPathChange = useCallback(
     (nextPath?: string) => {
@@ -200,8 +174,11 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
     ],
   );
 
-  const defaultTitle =
-    mode === DestinationFolderMode.Copy ? 'Copy to' : 'Move to';
+  const isCopyMode = mode === DestinationFolderMode.Copy;
+  const defaultTitle = isCopyMode ? 'Copy to' : 'Move to';
+  const defaultDestinationLabel = isCopyMode
+    ? 'Copy to folder'
+    : 'Move to folder';
 
   const isDestinationDisabled = useMemo(() => {
     if (!path || !sourceFolder) {
@@ -210,6 +187,45 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
 
     return sourceFolder === path;
   }, [path, sourceFolder]);
+
+  const confirmLabel = isCopyMode ? copyLabel : moveLabel;
+
+  if (isMobile) {
+    const ConfirmIcon = isCopyMode ? CopyToIcon : MoveToIcon;
+
+    return (
+      <DestinationFolderSheet
+        open={open}
+        title={typeof header === 'string' ? header : defaultTitle}
+        items={visibleItems}
+        sourceItems={sourceItems}
+        sourceItemsLabel={getSourceItemsLabel(sourceItems.length)}
+        destinationLabel={destinationLabel ?? defaultDestinationLabel}
+        confirmLabel={confirmLabel}
+        confirmIcon={
+          <ConfirmIcon
+            width={FILE_MANAGER_ICON_PROPS.size}
+            height={FILE_MANAGER_ICON_PROPS.size}
+          />
+        }
+        isConfirmDisabled={isDestinationDisabled}
+        disabledConfirmTooltip={disabledPathTooltip}
+        selectedPath={path}
+        rootItemPath={restProps.rootItem?.path}
+        rootItemLabel={restProps.rootItem?.label}
+        loadedPaths={restProps.treeOptions?.loadedPaths}
+        loadingPaths={restProps.treeOptions?.loadingPaths}
+        emptyStateTitle={restProps.emptyStateTitle}
+        emptyStateDescription={restProps.emptyStateDescription}
+        searchPlaceholder={searchFoldersPlaceholder}
+        searchEmptyStateTitle={restProps.searchEmptyStateTitle ?? 'No data'}
+        alertProps={alertProps}
+        onSelectFolder={handleOnPathChange}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />
+    );
+  }
 
   return (
     <Popup
@@ -222,45 +238,29 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
       footer={
         <div className="flex justify-between items-center gap-2 p-4 md:px-6">
           <div className="flex items-center gap-4 min-w-0">
-            {isMobile ? (
-              <Dropdown
-                items={mobileFooterDropdownItems}
-                open={mobileMenuOpen}
-                onOpenChange={setMobileMenuOpen}
-              >
-                <GhostIconButton
-                  size={ElementSize.Large}
-                  aria-label="More options"
-                  icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
-                />
-              </Dropdown>
-            ) : (
+            {showCreateFolderButton && (
+              <PrimaryButton
+                label={addFolderLabel}
+                appearance={ButtonAppearance.Ghost}
+                iconBefore={<IconFolderPlus {...FILE_MANAGER_ICON_PROPS} />}
+                onClick={() => {
+                  fileManagerActionRef.current?.createFolder();
+                }}
+              />
+            )}
+            {showCreateFolderButton && showHiddenFileSwitcher && (
+              <div className="w-px h-[26px] bg-control-disable-primary my-2" />
+            )}
+            {showHiddenFileSwitcher && (
               <>
-                {showCreateFolderButton && (
-                  <PrimaryButton
-                    label={addFolderLabel}
-                    appearance={ButtonAppearance.Ghost}
-                    iconBefore={<IconFolderPlus {...FILE_MANAGER_ICON_PROPS} />}
-                    onClick={() => {
-                      fileManagerActionRef.current?.createFolder();
-                    }}
+                <div className="inline-flex items-center cursor-pointer">
+                  <Switch
+                    labelProps={{ label: hiddenFilesSwitcherLabel }}
+                    isOn={showHiddenFiles}
+                    onChange={handleShowHiddenFilesChange}
+                    id="hidden-files-switch-modal"
                   />
-                )}
-                {showCreateFolderButton && showHiddenFileSwitcher && (
-                  <div className="w-px h-[26px] bg-control-disable-primary my-2" />
-                )}
-                {showHiddenFileSwitcher && (
-                  <>
-                    <div className="inline-flex items-center cursor-pointer">
-                      <Switch
-                        labelProps={{ label: hiddenFilesSwitcherLabel }}
-                        isOn={showHiddenFiles}
-                        onChange={handleShowHiddenFilesChange}
-                        id="hidden-files-switch-modal"
-                      />
-                    </div>
-                  </>
-                )}
+                </div>
               </>
             )}
           </div>
@@ -270,16 +270,13 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
               <Tooltip tooltip={disabledPathTooltip}>
                 <PrimaryButton
                   onClick={onConfirm}
-                  label={mode === 'copy' ? copyLabel : moveLabel}
+                  label={confirmLabel}
                   disabled={isDestinationDisabled}
                   aria-disabled={isDestinationDisabled}
                 />
               </Tooltip>
             ) : (
-              <PrimaryButton
-                onClick={onConfirm}
-                label={mode === 'copy' ? copyLabel : moveLabel}
-              />
+              <PrimaryButton onClick={onConfirm} label={confirmLabel} />
             )}
           </div>
         </div>

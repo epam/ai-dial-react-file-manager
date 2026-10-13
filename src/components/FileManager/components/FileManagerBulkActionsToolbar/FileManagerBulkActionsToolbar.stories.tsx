@@ -145,3 +145,19 @@ export const ManyActions: Story = {
   },
   render: (args) => <DialFileManagerBulkActionsToolbar {...args} />,
 };
+
+export const CompactLayout: Story = {
+  args: {
+    getSelectionLabel: (selectedCount: number) =>
+      `item${selectedCount === 1 ? '' : 's'} selected`,
+    onClearSelection: () => alert('Selections cleared'),
+    actions: mockActions,
+    selectedCount: 4,
+    isCompactView: true,
+  },
+  render: (args) => (
+    <div className="w-[320px]">
+      <DialFileManagerBulkActionsToolbar {...args} />
+    </div>
+  ),
+};

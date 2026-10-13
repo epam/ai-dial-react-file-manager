@@ -17,6 +17,8 @@ import {
   getNextFolderName,
   sortGridRows,
   excludePathsFromTree,
+  getAncestorPaths,
+  searchFoldersByName,
 } from './utils';
 
 describe('Dial UI Kit :: splitPathAndName', () => {
@@ -483,5 +485,82 @@ describe('Dial UI Kit :: sortGridRows', () => {
 
     expect(sorted[0].name).toBe('New folder');
     expect(input).toEqual(snapshot);
+  });
+});
+
+describe('Dial UI Kit :: searchFoldersByName', () => {
+  const folder = (path: string, items?: DialFile[]): DialFile => ({
+    id: path,
+    folderId: path,
+    name: path.split('/').pop() ?? path,
+    path,
+    nodeType: DialFileNodeType.FOLDER,
+    items,
+  });
+
+  const tree: DialFile[] = [
+    folder('/Design', [
+      folder('/Design/Icons', [
+        folder('/Design/Icons/SVG', [folder('/Design/Icons/SVG/24px')]),
+      ]),
+      {
+        id: 'logo',
+        folderId: '/Design',
+        name: 'svg-logo.svg',
+        path: '/Design/svg-logo.svg',
+        nodeType: DialFileNodeType.ITEM,
+      },
+    ]),
+    folder('/Media'),
+  ];
+
+  it('keeps the matches, their whole subtree and the folders leading to them', () => {
+    const { items, expandedPaths } = searchFoldersByName(tree, '  svg ');
+
+    expect(items).toEqual([
+      folder('/Design', [
+        folder('/Design/Icons', [
+          folder('/Design/Icons/SVG', [folder('/Design/Icons/SVG/24px')]),
+        ]),
+      ]),
+    ]);
+    expect(expandedPaths).toEqual(new Set(['/Design', '/Design/Icons']));
+  });
+
+  it('matches case-insensitively and drops files', () => {
+    const { items } = searchFoldersByName(tree, 'MEDIA');
+
+    expect(items).toEqual([folder('/Media')]);
+  });
+
+  it('skips hidden dot-folders, as the tree hides them', () => {
+    const { items } = searchFoldersByName(
+      [folder('/.config', [folder('/.config/foo')]), folder('/foo')],
+      'foo',
+    );
+
+    expect(items).toEqual([folder('/foo')]);
+  });
+
+  it('returns nothing when no folder matches', () => {
+    const { items, expandedPaths } = searchFoldersByName(tree, 'nope');
+
+    expect(items).toEqual([]);
+    expect(expandedPaths.size).toBe(0);
+  });
+});
+
+describe('Dial UI Kit :: getAncestorPaths', () => {
+  it('lists the parent folders, nearest first', () => {
+    expect(getAncestorPaths('/a/b/c')).toEqual(['/a/b', '/a']);
+    expect(getAncestorPaths('All files/Design/Icons')).toEqual([
+      'All files/Design',
+      'All files',
+    ]);
+  });
+
+  it('returns nothing for a top-level path', () => {
+    expect(getAncestorPaths('/a')).toEqual([]);
+    expect(getAncestorPaths('All files')).toEqual([]);
   });
 });
