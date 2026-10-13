@@ -33,5 +33,11 @@ export const compactBulkActionsCountClassName =
 export const compactBulkActionsDividerClassName =
   'w-px h-[26px] bg-control-disable-primary';
 
+/*
+ * The action icons arrive pre-sized at 18px for the desktop bar; the mobile
+ * design draws them at 24px in the same 40px buttons. Strokes keep their 1.5px
+ * on screen, since the Move/Copy icons are drawn on an 18px grid and would
+ * otherwise thicken as they scale up.
+ */
 export const compactBulkActionsGroupClassName =
-  'flex flex-1 min-w-0 items-center justify-between gap-1';
+  'flex flex-1 min-w-0 items-center justify-between gap-1 [&_svg]:size-6 [&_svg_*]:[vector-effect:non-scaling-stroke]';

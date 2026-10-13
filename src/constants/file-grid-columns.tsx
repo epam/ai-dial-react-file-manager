@@ -18,7 +18,10 @@ import { DialFileManagerItemName } from '@/components/FileManager/components/Fil
 import { DialFileManagerItemSummaryCell } from '@/components/FileManager/components/DialFileManagerItemSummaryCell/DialFileManagerItemSummaryCell';
 
 import type { FileManagerGridRow } from '@/components/FileManager/FileManagerContext';
-import { BASE_FILE_MANAGER_ICON_SIZE } from '@/components/FileManager/constants';
+import {
+  BASE_FILE_MANAGER_ICON_SIZE,
+  COMPACT_VIEW_FILE_ICON_SIZE,
+} from '@/components/FileManager/constants';
 import type { FileManagerGridContext } from '@/components/FileManager/hooks/use-file-manager-columns';
 import {
   formatBytes,
@@ -58,6 +61,9 @@ export const NAME_COLUMN =
         } = params.context;
 
         const isSharedByMe = sharedByMePaths?.has(params.data.path);
+        const nameIconSize = isCompactView
+          ? COMPACT_VIEW_FILE_ICON_SIZE
+          : BASE_FILE_MANAGER_ICON_SIZE;
         const isSelected = selectedPaths?.has(params.data.path);
         const isDisabled = disabledRowIds?.has(params.data.path) ?? false;
 
@@ -77,7 +83,7 @@ export const NAME_COLUMN =
               loading={filesLoading}
               shared={isSharedByMe}
               sharedIndicatorClassName={sharedIndicatorClassName}
-              iconSize={BASE_FILE_MANAGER_ICON_SIZE}
+              iconSize={nameIconSize}
               validate={validateFolderName}
               onSave={saveFolderCreation}
               onCancel={cancelFolderCreation}
@@ -120,7 +126,7 @@ export const NAME_COLUMN =
               editing={true}
               shared={isSharedByMe}
               sharedIndicatorClassName={sharedIndicatorClassName}
-              iconSize={BASE_FILE_MANAGER_ICON_SIZE}
+              iconSize={nameIconSize}
               validate={(value) => onRenameValidate(value, renamedItem)}
               onSave={onRenameSave}
               onCancel={onRenameCancel}
@@ -143,6 +149,7 @@ export const NAME_COLUMN =
               shared={isSharedByMe}
               sharedIndicatorClassName={sharedIndicatorClassName}
               updatedAt={params.data.updatedAt}
+              iconSize={COMPACT_VIEW_FILE_ICON_SIZE}
               dateLocale={dateLocale}
               dateOptions={dateOptions}
               hideTooltip={isDisabled}
