@@ -67,6 +67,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
   `destinationLabel` heads the folders tree (default `"Copy to folder"` /
   `"Move to folder"`). Both are also props of `DialDestinationFolderPopup`,
   together with `sourceItems`.
+- **`destinationFolderPopupOptions.searchFoldersPlaceholder` /
+  `searchEmptyStateTitle`** — the placeholder of the phone sheet's folder
+  search (default `"Search folders"`) and the title shown when a search in the
+  Copy/Move picker finds nothing (default `"No data"`).
 - **`DialFileManagerBulkActionsToolbar` — `isCompactView` /
   `moreActionsLabel`** — `isCompactView` docks the bar full width with the
   count, the clear control and icon-only actions (the selection label stays for
@@ -98,7 +102,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - **Copy/Move opens a bottom sheet on phones** — below 640px (viewport)
   `DialDestinationFolderPopup` renders a full-height kit `BottomSheet` instead
   of the popup: the item being copied or moved (or the count of several), a
-  heading, a folders-only tree and full-width confirm and Cancel buttons.
+  heading, a folder search, a folders-only tree and full-width confirm and
+  Cancel buttons. The search filters the loaded folders by name, as the
+  popup's search does, keeping the folders that lead to each match open.
   Picking a folder makes it the destination; the source folder keeps the
   confirm button disabled with its tooltip. The sheet has no Add folder or
   hidden-files controls, so `showCreateFolderButton` and

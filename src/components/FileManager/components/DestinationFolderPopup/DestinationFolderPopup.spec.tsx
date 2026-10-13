@@ -845,5 +845,30 @@ describe('Dial UI Kit :: DialDestinationFolderPopup', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
       expect(onClose).toHaveBeenCalledTimes(1);
     });
+
+    test('filters the folders by name and shows the empty state', async () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          items={mockFiles}
+          sourceItems={[sourceFile]}
+          searchFoldersPlaceholder="Найти папку"
+          searchEmptyStateTitle="Ничего не нашлось"
+        />,
+      );
+
+      const search = screen.getByPlaceholderText('Найти папку');
+
+      fireEvent.change(search, { target: { value: 'pho' } });
+      expect(screen.getByText('Photos')).toBeInTheDocument();
+      expect(screen.queryByText('Documents')).not.toBeInTheDocument();
+
+      fireEvent.change(search, { target: { value: 'zzz' } });
+      expect(await screen.findByText('Ничего не нашлось')).toBeInTheDocument();
+
+      fireEvent.change(search, { target: { value: '' } });
+      expect(screen.getByText('Documents')).toBeInTheDocument();
+    });
   });
 });

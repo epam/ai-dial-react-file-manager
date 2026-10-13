@@ -90,6 +90,38 @@ export const excludePathsFromTree = (
   return filter(nodes);
 };
 
+/**
+ * Finds the folders whose name contains the query, case-insensitively. A
+ * matching folder keeps its whole subtree; other folders stay only when they
+ * lead to a match. Files are dropped.
+ * @param nodes - Hierarchical items to search
+ * @param query - Text to look for in folder names
+ * @returns The folders-only tree, and the paths of the folders above the matches so the tree can open on them
+ */
+export const searchFoldersByName = (
+  nodes: DialFile[],
+  query: string,
+): { items: DialFile[]; expandedPaths: Set<string> } => {
+  const normalizedQuery = normalizeToLowerCase(query.trim());
+  const expandedPaths = new Set<string>();
+
+  const search = (items: DialFile[]): DialFile[] =>
+    items.flatMap((node) => {
+      if (node.nodeType !== DialFileNodeType.FOLDER) return [];
+      if (normalizeToLowerCase(node.name).includes(normalizedQuery)) {
+        return [node];
+      }
+
+      const children = search(node.items ?? []);
+      if (children.length === 0) return [];
+
+      expandedPaths.add(node.path);
+      return [{ ...node, items: children }];
+    });
+
+  return { items: search(nodes), expandedPaths };
+};
+
 export const isHiddenDotFile = (node: DialFile) => {
   const name = node.name ?? node.path.split('/').pop() ?? '';
   return name.startsWith('.');

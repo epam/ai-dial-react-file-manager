@@ -17,6 +17,7 @@ import {
   getNextFolderName,
   sortGridRows,
   excludePathsFromTree,
+  searchFoldersByName,
 } from './utils';
 
 describe('Dial UI Kit :: splitPathAndName', () => {
@@ -483,5 +484,58 @@ describe('Dial UI Kit :: sortGridRows', () => {
 
     expect(sorted[0].name).toBe('New folder');
     expect(input).toEqual(snapshot);
+  });
+});
+
+describe('Dial UI Kit :: searchFoldersByName', () => {
+  const folder = (path: string, items?: DialFile[]): DialFile => ({
+    id: path,
+    folderId: path,
+    name: path.split('/').pop() ?? path,
+    path,
+    nodeType: DialFileNodeType.FOLDER,
+    items,
+  });
+
+  const tree: DialFile[] = [
+    folder('/Design', [
+      folder('/Design/Icons', [
+        folder('/Design/Icons/SVG', [folder('/Design/Icons/SVG/24px')]),
+      ]),
+      {
+        id: 'logo',
+        folderId: '/Design',
+        name: 'svg-logo.svg',
+        path: '/Design/svg-logo.svg',
+        nodeType: DialFileNodeType.ITEM,
+      },
+    ]),
+    folder('/Media'),
+  ];
+
+  it('keeps the matches, their whole subtree and the folders leading to them', () => {
+    const { items, expandedPaths } = searchFoldersByName(tree, '  svg ');
+
+    expect(items).toEqual([
+      folder('/Design', [
+        folder('/Design/Icons', [
+          folder('/Design/Icons/SVG', [folder('/Design/Icons/SVG/24px')]),
+        ]),
+      ]),
+    ]);
+    expect(expandedPaths).toEqual(new Set(['/Design', '/Design/Icons']));
+  });
+
+  it('matches case-insensitively and drops files', () => {
+    const { items } = searchFoldersByName(tree, 'MEDIA');
+
+    expect(items).toEqual([folder('/Media')]);
+  });
+
+  it('returns nothing when no folder matches', () => {
+    const { items, expandedPaths } = searchFoldersByName(tree, 'nope');
+
+    expect(items).toEqual([]);
+    expect(expandedPaths.size).toBe(0);
   });
 });

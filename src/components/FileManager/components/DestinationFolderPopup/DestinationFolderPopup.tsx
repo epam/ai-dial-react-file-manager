@@ -61,6 +61,7 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
   sourceItems?: DialFile[];
   getSourceItemsLabel?: (count: number) => string;
   destinationLabel?: string;
+  searchFoldersPlaceholder?: string;
 }
 
 /**
@@ -107,6 +108,7 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
  * @param [sourceItems=[]] - Items being copied or moved; the phone sheet shows them above the tree
  * @param [getSourceItemsLabel] - Text naming several source items in the phone sheet; defaults to "N items"
  * @param [destinationLabel] - Heading above the tree in the phone sheet; defaults to "Copy to folder" or "Move to folder"
+ * @param [searchFoldersPlaceholder="Search folders"] - Placeholder of the phone sheet's folder search, which filters the loaded folders by name
  *
  * @remarks
  * Below 640px the picker is a bottom sheet with a folders-only tree and no
@@ -143,6 +145,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
   sourceItems = [],
   getSourceItemsLabel = (count) => `${count} items`,
   destinationLabel,
+  searchFoldersPlaceholder = 'Search folders',
   ...restProps
 }: DestinationFolderPopupProps) => {
   const [showHiddenFiles, setShowHiddenFiles] = useState(false);
@@ -262,6 +265,8 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
         loadingPaths={restProps.treeOptions?.loadingPaths}
         emptyStateTitle={restProps.emptyStateTitle}
         emptyStateDescription={restProps.emptyStateDescription}
+        searchPlaceholder={searchFoldersPlaceholder}
+        searchEmptyStateTitle={restProps.searchEmptyStateTitle ?? 'No data'}
         alertProps={alertProps}
         onSelectFolder={handleOnPathChange}
         onConfirm={onConfirm}

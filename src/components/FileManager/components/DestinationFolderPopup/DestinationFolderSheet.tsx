@@ -1,3 +1,4 @@
+import { DialFileManagerSearchBar } from '@/components/FileManager/components/FileManagerSearchBar/FileManagerSearchBar';
 import { DialFoldersTree } from '@/components/FileManager/components/FoldersTree/FoldersTree';
 import { BASE_FILE_MANAGER_ICON_SIZE } from '@/components/FileManager/constants';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
@@ -12,7 +13,14 @@ import {
   Tooltip,
 } from '@epam/ai-dial-ui-kit';
 import { IconFiles } from '@tabler/icons-react';
-import { type ComponentProps, type FC, type ReactNode, useMemo } from 'react';
+import { searchFoldersByName } from '@/components/FileManager/utils';
+import {
+  type ComponentProps,
+  type FC,
+  type ReactNode,
+  useMemo,
+  useState,
+} from 'react';
 import {
   destinationSheetBodyClassName,
   destinationSheetClassName,
@@ -39,39 +47,24 @@ export interface DestinationFolderSheetProps {
   loadingPaths?: Set<string>;
   emptyStateTitle?: string;
   emptyStateDescription?: string;
+  searchPlaceholder: string;
+  searchEmptyStateTitle: string;
   alertProps?: ComponentProps<typeof Notification>;
   onSelectFolder: (path: string) => void;
   onConfirm?: () => void;
   onClose: () => void;
 }
 
-/**
- * The phone layout of the Copy/Move destination picker: a bottom sheet with
- * the items being copied or moved, a folders-only tree and full-width
- * confirm and cancel buttons.
- * @param open - Whether the sheet is shown
- * @param title - Title of the sheet header
- * @param items - Tree items to pick the destination from; the top-level folders open expanded
- * @param sourceItems - Items being copied or moved
- * @param sourceItemsLabel - Text naming several source items, e.g. "3 items"
- * @param destinationLabel - Heading above the tree
- * @param confirmLabel - Label of the confirm button
- * @param confirmIcon - Icon of the confirm button
- * @param isConfirmDisabled - Whether the picked folder can't be the destination
- * @param disabledConfirmTooltip - Tooltip of the disabled confirm button
- * @param [selectedPath] - Folder currently picked as the destination
- * @param [loadedPaths] - Folders whose children have loaded
- * @param [loadingPaths] - Folders whose children are loading
- * @param [emptyStateTitle] - Title shown when there are no folders
- * @param [emptyStateDescription] - Description shown when there are no folders
- * @param [alertProps] - Notification shown above the source items
- * @param onSelectFolder - Called with the path of the picked folder
- * @param [onConfirm] - Called when the confirm button is pressed
- * @param onClose - Called when the sheet asks to close
+type DestinationFolderSheetContentProps = Omit<
+  DestinationFolderSheetProps,
+  'open' | 'title'
+>;
+
+/*
+ * Rendered inside the sheet, which unmounts it on close, so the search and the
+ * expanded folders start over every time the sheet opens.
  */
-export const DestinationFolderSheet: FC<DestinationFolderSheetProps> = ({
-  open,
-  title,
+const DestinationFolderSheetContent: FC<DestinationFolderSheetContentProps> = ({
   items,
   sourceItems,
   sourceItemsLabel,
@@ -85,15 +78,30 @@ export const DestinationFolderSheet: FC<DestinationFolderSheetProps> = ({
   loadingPaths,
   emptyStateTitle,
   emptyStateDescription,
+  searchPlaceholder,
+  searchEmptyStateTitle,
   alertProps,
   onSelectFolder,
   onConfirm,
   onClose,
 }) => {
-  const initialExpandedPaths = useMemo(
+  const [query, setQuery] = useState('');
+  const [expandedPaths, setExpandedPaths] = useState(
     () => new Set(items.map(({ path }) => path)),
-    [items],
   );
+
+  const isSearching = query.trim().length > 0;
+  const visibleItems = useMemo(
+    () => (isSearching ? searchFoldersByName(items, query).items : items),
+    [isSearching, items, query],
+  );
+
+  const handleSearchChange = (value: string) => {
+    setQuery(value);
+    if (value.trim()) {
+      setExpandedPaths(searchFoldersByName(items, value).expandedPaths);
+    }
+  };
 
   const renderSource = () => {
     if (sourceItems.length !== 1) {
@@ -130,13 +138,7 @@ export const DestinationFolderSheet: FC<DestinationFolderSheetProps> = ({
   );
 
   return (
-    <BottomSheet
-      open={open}
-      title={title}
-      onClose={onClose}
-      className={destinationSheetClassName}
-      bodyClassName={destinationSheetScrollAreaClassName}
-    >
+    <>
       <div className={destinationSheetBodyClassName}>
         {alertProps && <Notification {...alertProps} />}
 
@@ -151,14 +153,26 @@ export const DestinationFolderSheet: FC<DestinationFolderSheetProps> = ({
             {destinationLabel}
           </h3>
 
+          <DialFileManagerSearchBar
+            elementId="file-manager-destination-folder-search"
+            value={query}
+            placeholder={searchPlaceholder}
+            onSearchChange={handleSearchChange}
+          />
+
           <DialFoldersTree
-            items={items}
-            expandedPaths={initialExpandedPaths}
+            items={visibleItems}
+            expandedPaths={expandedPaths}
+            onExpandedPathsChange={setExpandedPaths}
             selectedPath={selectedPath}
             loadedPaths={loadedPaths}
             loadingPaths={loadingPaths}
-            emptyStateTitle={emptyStateTitle}
-            emptyStateDescription={emptyStateDescription}
+            emptyStateTitle={
+              isSearching ? searchEmptyStateTitle : emptyStateTitle
+            }
+            emptyStateDescription={
+              isSearching ? undefined : emptyStateDescription
+            }
             ariaLabel={destinationLabel}
             showContextMenuButton={false}
             onItemClick={(item) => onSelectFolder(item.path)}
@@ -176,6 +190,49 @@ export const DestinationFolderSheet: FC<DestinationFolderSheetProps> = ({
         </div>
         <NeutralButton className="flex-1" label="Cancel" onClick={onClose} />
       </div>
-    </BottomSheet>
+    </>
   );
 };
+
+/**
+ * The phone layout of the Copy/Move destination picker: a bottom sheet with
+ * the items being copied or moved, a folders-only tree and full-width
+ * a folder search and full-width confirm and cancel buttons.
+ * @param open - Whether the sheet is shown
+ * @param title - Title of the sheet header
+ * @param items - Tree items to pick the destination from; the top-level folders open expanded
+ * @param sourceItems - Items being copied or moved
+ * @param sourceItemsLabel - Text naming several source items, e.g. "3 items"
+ * @param destinationLabel - Heading above the tree
+ * @param confirmLabel - Label of the confirm button
+ * @param confirmIcon - Icon of the confirm button
+ * @param isConfirmDisabled - Whether the picked folder can't be the destination
+ * @param disabledConfirmTooltip - Tooltip of the disabled confirm button
+ * @param [selectedPath] - Folder currently picked as the destination
+ * @param [loadedPaths] - Folders whose children have loaded
+ * @param [loadingPaths] - Folders whose children are loading
+ * @param [emptyStateTitle] - Title shown when there are no folders
+ * @param [emptyStateDescription] - Description shown when there are no folders
+ * @param searchPlaceholder - Placeholder of the folder search
+ * @param searchEmptyStateTitle - Title shown when no folder matches the search
+ * @param [alertProps] - Notification shown above the source items
+ * @param onSelectFolder - Called with the path of the picked folder
+ * @param [onConfirm] - Called when the confirm button is pressed
+ * @param onClose - Called when the sheet asks to close
+ */
+export const DestinationFolderSheet: FC<DestinationFolderSheetProps> = ({
+  open,
+  title,
+  onClose,
+  ...contentProps
+}) => (
+  <BottomSheet
+    open={open}
+    title={title}
+    onClose={onClose}
+    className={destinationSheetClassName}
+    bodyClassName={destinationSheetScrollAreaClassName}
+  >
+    <DestinationFolderSheetContent {...contentProps} onClose={onClose} />
+  </BottomSheet>
+);
