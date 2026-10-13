@@ -421,7 +421,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
         <IconCaretRightFilled
           {...CARET_ICON_PROPS}
           className={mergeClasses(
-            'flex-shrink-0 text-secondary',
+            'shrink-0 text-secondary',
             isExpanded && 'rotate-90 transition-all',
             isLoaded && !hasValidItems && 'text-transparent',
           )}
@@ -459,7 +459,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                 style={{ paddingLeft: `${level * FOLDER_LEVEL_PADDING}px` }}
                 className={mergeClasses(
                   'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover rounded-full group/item w-full relative',
-                  'outline-none focus-visible:outline focus-visible:outline-focus focus-visible:-outline-offset-1',
+                  'outline-hidden focus-visible:outline focus-visible:outline-focus focus-visible:-outline-offset-1',
                   selectedClass,
                 )}
               >

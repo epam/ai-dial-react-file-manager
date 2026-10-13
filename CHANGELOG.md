@@ -7,6 +7,22 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- **`styles.css` — built with Tailwind CSS v4 inside the kit's `ui` layer** —
+  the stylesheet used to be entirely unlayered, preflight included. Its
+  preflight now sits in `@layer ui.base` and its utilities in
+  `@layer ui.utilities`, the layers `@epam/ai-dial-ui-kit/styles.css` (0.16)
+  uses. A host's unlayered CSS, and the kit's `dial-*` classes, now win over a
+  file-manager utility that sets the same property; `!`-prefixed classes keep
+  winning. The preflight no longer overrides the kit's utilities, so the
+  stylesheet stops re-emitting them and requires the kit's `styles.css`
+  alongside it, as before. `hover:` applies only on devices that can hover.
+  Theme tokens, class names and props are unchanged; nothing is declared on
+  `:root`. See the kit's
+  [Tailwind v4 migration guide](https://github.com/epam/ai-dial-ui-kit/blob/development/migration-guides/0.16.0/tailwind-v4-stylesheet.md)
+  for the preflight and browser-baseline differences, which apply here too.
+
 ### Added
 
 - **`unshareConfirmationOptions`** — opt-in confirmation before unsharing

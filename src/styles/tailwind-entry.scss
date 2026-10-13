@@ -1,3 +1,64 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+ * Tailwind sits in the `ui` layer, the same one `@epam/ai-dial-ui-kit/styles.css`
+ * uses, so the file manager's utilities and preflight take part in the
+ * cascade exactly like the kit's: unlayered CSS (the host's styles and the
+ * kit's `dial-*` classes) wins over a utility, and this preflight can no
+ * longer override a utility the kit's stylesheet ships. The order is declared
+ * first because a layer's position is fixed where it first appears.
+ */
+@layer ui.theme, ui.base, ui.components, ui.utilities;
+
+/*
+ * `reference inline` writes theme values straight into the utilities instead
+ * of declaring `--font-sans`, `--spacing`, `--radius-*`, `--color-*` on
+ * `:root`. Those names are Tailwind v4's own, so a host on Tailwind v4
+ * declares them too, and these copies — in a layer that comes later — would
+ * replace the host's theme across the whole page.
+ */
+@import 'tailwindcss/theme.css' layer(ui.theme) theme(reference inline);
+/* The file manager's tokens; after Tailwind's defaults, so its keys win. */
+@import './theme.scss';
+@import 'tailwindcss/preflight.css' layer(ui.base);
+@import 'tailwindcss/utilities.css' layer(ui.utilities) source(none);
+
+@source '../**/*.{ts,tsx}';
+/*
+ * Specs never ship, and the ones that check a passed-through `className` use
+ * Tailwind's default palette names, which the theme does not define.
+ */
+@source not '../**/*.spec.{ts,tsx}';
+/*
+ * `shadow-sm` is the side bar / side panel / right panel step, and nothing
+ * scanned above paints that surface — the kit's sidebar deliberately draws no
+ * background of its own, so the host applies the shadow. Without this the
+ * class is scanned out of the shipped stylesheet and a host that writes it
+ * against `@epam/ai-dial-react-file-manager/styles.css` gets nothing.
+ */
+@source inline('shadow-sm');
+
+/*
+ * Tailwind v3 preflight behaviour that v4 dropped, kept because the
+ * stylesheet's preflight reaches every element on the host page, not only the
+ * file manager's. Written after the preflight import so it wins inside
+ * `ui.base`. Matches the kit's stylesheet.
+ */
+@layer ui.base {
+  input::placeholder,
+  textarea::placeholder {
+    opacity: 1;
+    color: #9ca3af;
+  }
+
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+
+  :disabled {
+    cursor: default;
+  }
+
+  dialog {
+    margin: auto;
+  }
+}
