@@ -213,8 +213,8 @@ const DestinationFolderSheetContent: FC<DestinationFolderSheetContentProps> = ({
 
 /**
  * The phone layout of the Copy/Move destination picker: a bottom sheet with
- * the items being copied or moved, a folders-only tree and full-width
- * a folder search and full-width confirm and cancel buttons.
+ * the items being copied or moved, a folder search, a folders-only tree and
+ * full-width confirm and cancel buttons.
  * @param open - Whether the sheet is shown
  * @param title - Title of the sheet header
  * @param items - Tree items to pick the destination from; the top-level folders open expanded

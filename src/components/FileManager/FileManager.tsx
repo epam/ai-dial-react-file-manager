@@ -626,7 +626,7 @@ export interface DialFileManagerProps {
  * @param [destinationFolderPopupOptions.searchFoldersPlaceholder] - Placeholder of the phone sheet's folder search; defaults to "Search folders"
  * @param [destinationFolderPopupOptions.searchEmptyStateTitle] - Title shown when a search in the Copy/Move picker finds nothing; defaults to "No data"
  * @param [destinationFolderPopupOptions.filesLoading] - When true, the Copy/Move destination grid shows its loading state (e.g. while the destination folder's contents load); falls back to the main `filesLoading`
- * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view.
+ * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view. The Copy/Move picker follows the viewport instead and turns into a bottom sheet below 640px.
  *
  * @param [onPathChange] - Callback fired when user navigates via tree or breadcrumb
  * @param [onSelectedPathsChange] - Callback fired when the selected paths change

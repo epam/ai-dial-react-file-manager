@@ -152,7 +152,9 @@ describe('Dial UI Kit :: DialFileManagerBulkActionsToolbar', () => {
     it('renders the count and icon-only actions, keeping the label for screen readers', () => {
       render(
         <DialFileManagerBulkActionsToolbar
-          getSelectionLabel={(count) => `file${count === 1 ? '' : 's'} selected`}
+          getSelectionLabel={(count) =>
+            `file${count === 1 ? '' : 's'} selected`
+          }
           onClearSelection={vi.fn()}
           actions={actions}
           selectedCount={3}

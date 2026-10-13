@@ -236,7 +236,7 @@ export const PhoneSheet: Story = {
     docs: {
       description: {
         story:
-          'Below 640px the picker is a bottom sheet: the item being moved, a folders-only tree and full-width Move and Cancel buttons.',
+          'Below 640px the picker is a bottom sheet: the item being moved, a heading, a folder search, a folders-only tree and full-width Move and Cancel buttons.',
       },
     },
   },
