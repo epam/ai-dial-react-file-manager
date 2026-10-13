@@ -14,7 +14,6 @@ import {
 } from '@tabler/icons-react';
 import CopyToIcon from '@/assets/icons/copy-to.svg?react';
 import MoveToIcon from '@/assets/icons/move-to.svg?react';
-import IconUnshare from '@/assets/icons/unshare.svg?react';
 import AddChild from '@/assets/icons/add-child.svg?react';
 import AddSibling from '@/assets/icons/add-sibling.svg?react';
 import { DropdownItemType } from '@epam/ai-dial-ui-kit';
@@ -326,9 +325,8 @@ export const useGridContextMenu = ({
           key: DialFileManagerActions.Unshare,
           label: actionLabels[DialFileManagerActions.Unshare],
           icon: (
-            <IconUnshare
-              width={FILE_MANAGER_ICON_PROPS.size}
-              height={FILE_MANAGER_ICON_PROPS.size}
+            <IconTrashX
+              {...FILE_MANAGER_ICON_PROPS}
               className="text-secondary"
             />
           ),
