@@ -61,6 +61,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
   sets it.
 - **`toolbarOptions.moreActionsLabel`** — accessible name of the compact
   "more" menu trigger, defaulting to `"More actions"`.
+- **`DialFileManagerBulkActionsToolbar` — `isCompactView` /
+  `moreActionsLabel`** — `isCompactView` docks the bar full width with the
+  count, the clear control and icon-only actions (the selection label stays for
+  screen readers); it overrides the viewport check, so used on its own the bar
+  turns compact below 640px. `moreActionsLabel` (also on
+  `bulkActionsToolbarOptions`) names the overflow menu trigger, defaulting to
+  `"More actions"`.
 
 ### Changed
 
@@ -82,6 +89,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
   `newButtonVariant`. Rows are 68px tall and read "date • size", and folder rows
   no longer start the date with an empty size slot. Host values for the new
   `treeOptions` and `sortOptions` props below win over the compact defaults.
+- **The compact view docks the selection bar** — while items are selected, the
+  bar spans the bottom edge of the file manager over the grid, and the grid's
+  scroll area gains a matching bottom inset so the last rows scroll clear of
+  it. It shows the count, the clear control and the actions as icons with
+  tooltips; actions that don't fit move into a "more" menu at the end.
   The wide view is unchanged.
 - **The delete confirmation follows the DIAL delete design** — Cancel is a
   text (ghost) button, Delete is a danger button led by a trash icon, and the

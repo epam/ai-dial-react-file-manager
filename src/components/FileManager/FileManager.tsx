@@ -116,6 +116,8 @@ import {
   actionsColumnButtonClassName,
   AG_GRID_SELECTION_COLUMN_ID,
   bulkActionsToolbarWrapperClassName,
+  compactBulkActionsToolbarWrapperClassName,
+  compactGridScrollInsetClassName,
   COMPACT_VIEW_FILE_ROW_HEIGHT,
   COMPACT_VIEW_HEADER_HEIGHT,
   containerBaseClassName,
@@ -366,7 +368,7 @@ export type ToolbarOptions = Omit<
 
 export type BulkActionsToolbarOptions = Omit<
   DialFileManagerBulkActionsToolbarProps,
-  'onClearSelection' | 'actions' | 'selectedCount'
+  'onClearSelection' | 'actions' | 'selectedCount' | 'isCompactView'
 > & {
   actionLabels?: {
     [DialFileManagerActions.Duplicate]?: string;
@@ -1379,30 +1381,41 @@ export const DialFileManagerView: FC = () => {
   const isEmptyStateShown =
     gridRows.length === 0 && !filesLoading && !searchInProgress;
 
+  const isBulkActionsToolbarShown =
+    !!bulkActionsToolbarOptions &&
+    selectedPaths.size > 0 &&
+    !isEmptyStateShown &&
+    !isCompactNavigationOpen;
+
   const renderBulkActionsToolbar = useCallback(() => {
-    if (
-      !bulkActionsToolbarOptions ||
-      selectedPaths.size === 0 ||
-      isEmptyStateShown ||
-      isCompactNavigationOpen
-    )
-      return null;
+    if (!bulkActionsToolbarOptions || !isBulkActionsToolbarShown) return null;
+
+    const toolbar = (
+      <DialFileManagerBulkActionsToolbar
+        {...bulkActionsToolbarOptions}
+        isCompactView={isCompactView}
+        selectedCount={selectedPaths.size}
+        onClearSelection={clearSelection}
+        actions={bulkActions}
+      />
+    );
 
     return (
-      <div className={bulkActionsToolbarWrapperClassName}>
-        <DialFileManagerBulkActionsToolbar
-          {...bulkActionsToolbarOptions}
-          selectedCount={selectedPaths.size}
-          onClearSelection={clearSelection}
-          actions={bulkActions}
-        />
+      <div
+        className={
+          isCompactView
+            ? compactBulkActionsToolbarWrapperClassName
+            : bulkActionsToolbarWrapperClassName
+        }
+      >
+        {toolbar}
       </div>
     );
   }, [
     bulkActionsToolbarOptions,
+    isBulkActionsToolbarShown,
     selectedPaths,
-    isEmptyStateShown,
-    isCompactNavigationOpen,
+    isCompactView,
     clearSelection,
     bulkActions,
   ]);
@@ -1722,7 +1735,12 @@ export const DialFileManagerView: FC = () => {
     return (row: GridRow) => row.path;
   }, []);
 
-  const dialGridClassName = 'min-h-[248px] overflow-auto md:min-h-[266px]';
+  const dialGridClassName = mergeClasses(
+    'min-h-[248px] overflow-auto md:min-h-[266px]',
+    isCompactView &&
+      isBulkActionsToolbarShown &&
+      compactGridScrollInsetClassName,
+  );
 
   const gridRegionClassName = useMemo(
     () =>
@@ -1859,7 +1877,10 @@ export const DialFileManagerView: FC = () => {
   );
 
   return (
-    <section ref={containerRef} className="size-full">
+    <section
+      ref={containerRef}
+      className={mergeClasses('size-full', { relative: isCompactView })}
+    >
       <div
         className={mergeClasses(
           containerBaseClassName,
@@ -1948,7 +1969,7 @@ export const DialFileManagerView: FC = () => {
                 maxSelectableFileSize={maxSelectableFileSize}
               />
 
-              {renderBulkActionsToolbar()}
+              {!isCompactView && renderBulkActionsToolbar()}
             </div>
           </div>
         </div>
@@ -2052,6 +2073,7 @@ export const DialFileManagerView: FC = () => {
           dateOptions={gridOptions?.dateOptions}
         />
       </div>
+      {isCompactView && renderBulkActionsToolbar()}
     </section>
   );
 };

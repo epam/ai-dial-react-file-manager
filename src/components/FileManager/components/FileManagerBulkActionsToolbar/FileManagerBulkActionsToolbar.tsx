@@ -3,6 +3,7 @@ import { useIsMobileScreen } from '@/hooks/use-is-mobile-screen';
 import {
   ButtonAppearance,
   DangerButton,
+  DIAL_ICON_SIZE,
   Dropdown,
   ElementSize,
   FlexibleActionsDirection,
@@ -15,12 +16,18 @@ import { IconDotsVertical, IconX } from '@tabler/icons-react';
 import type { FC, ReactNode } from 'react';
 import {
   ACTIONS_GAP,
+  COMPACT_ACTIONS_GAP,
+  COMPACT_CONTAINER_PADDING,
   CONTAINER_PADDING,
   bulkActionsContainerClassName,
   bulkActionsCountClassName,
   bulkActionsGroupClassName,
   bulkActionsLabelClassName,
   bulkActionsStripClassName,
+  compactBulkActionsContainerClassName,
+  compactBulkActionsCountClassName,
+  compactBulkActionsDividerClassName,
+  compactBulkActionsGroupClassName,
 } from './constants';
 
 export interface DialActionDropdownItem extends DropdownItem {
@@ -40,6 +47,10 @@ export interface DialFileManagerBulkActionsToolbarProps {
   selectedCount: number;
   /** Accessible name of the control that drops the selection. */
   clearSelectionLabel?: string;
+  /** Docks the bar to the bottom edge with icon-only actions; overrides the viewport check when set. */
+  isCompactView?: boolean;
+  /** Accessible name of the compact overflow menu trigger. */
+  moreActionsLabel?: string;
 }
 
 /**
@@ -87,6 +98,8 @@ export interface DialFileManagerBulkActionsToolbarProps {
  *   Each action defines a title, icon, key, and optional click handler.
  * @param {number} [props.selectedCount] - Count of currently selected items.
  * @param {string} [props.clearSelectionLabel='Clear selection'] - Accessible name of the control that drops the selection.
+ * @param {boolean} [props.isCompactView] - Docks the bar full width with the count, the clear control and icon-only actions. The selection label is kept for screen readers only. Overrides the viewport check when set.
+ * @param {string} [props.moreActionsLabel='More actions'] - Accessible name of the compact overflow menu trigger.
  *
  * @returns {JSX.Element} A responsive toolbar that adjusts visible actions based on available width.
  */
@@ -98,8 +111,11 @@ export const DialFileManagerBulkActionsToolbar: FC<
   actions,
   selectedCount,
   clearSelectionLabel = 'Clear selection',
+  isCompactView,
+  moreActionsLabel = 'More actions',
 }) => {
   const isMobile = useIsMobileScreen();
+  const isCompactLayout = isCompactView ?? isMobile;
 
   const {
     refs: { containerRef, leftSectionRef, measureRef },
@@ -107,13 +123,101 @@ export const DialFileManagerBulkActionsToolbar: FC<
     hiddenActions,
   } = useFlexibleActions({
     actions,
-    direction: FlexibleActionsDirection.Reverse,
-    dependencies: [isMobile],
-    actionsGap: ACTIONS_GAP,
-    containerPadding: CONTAINER_PADDING,
+    direction: isCompactLayout
+      ? FlexibleActionsDirection.Normal
+      : FlexibleActionsDirection.Reverse,
+    dependencies: [isCompactLayout],
+    actionsGap: isCompactLayout ? COMPACT_ACTIONS_GAP : ACTIONS_GAP,
+    containerPadding: isCompactLayout
+      ? COMPACT_CONTAINER_PADDING
+      : CONTAINER_PADDING,
   });
 
   const selectionLabel = getSelectionLabel(selectedCount);
+
+  const clearSelectionButton = (
+    <GhostIconButton
+      size={isCompactLayout ? ElementSize.Standard : ElementSize.Small}
+      aria-label={clearSelectionLabel}
+      tooltipProps={{ tooltip: clearSelectionLabel }}
+      icon={
+        <IconX
+          {...FILE_MANAGER_ICON_PROPS}
+          size={
+            isCompactLayout ? DIAL_ICON_SIZE.SM : FILE_MANAGER_ICON_PROPS.size
+          }
+        />
+      }
+      onClick={onClearSelection}
+    />
+  );
+
+  if (isCompactLayout) {
+    return (
+      <>
+        <div
+          ref={measureRef}
+          className="absolute top-0 left-0 invisible pointer-events-none overflow-hidden flex"
+        >
+          {actions.map(({ key, icon }) => (
+            <GhostIconButton
+              key={key}
+              size={ElementSize.Standard}
+              icon={icon}
+            />
+          ))}
+        </div>
+
+        <div
+          ref={containerRef}
+          className={compactBulkActionsContainerClassName}
+          role="toolbar"
+          aria-label="File bulk actions"
+        >
+          <div
+            ref={leftSectionRef}
+            className="flex shrink-0 items-center gap-2"
+          >
+            <span className={compactBulkActionsCountClassName}>
+              {selectedCount}
+              <span className="sr-only"> {selectionLabel}</span>
+            </span>
+            {clearSelectionButton}
+            <div className={compactBulkActionsDividerClassName} />
+          </div>
+
+          <div className={compactBulkActionsGroupClassName}>
+            {visibleActions.map(
+              ({ key, icon, tooltip, title, onClick, disabled }) => (
+                <GhostIconButton
+                  key={key}
+                  size={ElementSize.Standard}
+                  aria-label={title}
+                  tooltipProps={{ tooltip: tooltip ?? title }}
+                  icon={icon}
+                  disabled={disabled}
+                  onClick={(domEvent) => onClick?.({ key, domEvent })}
+                />
+              ),
+            )}
+
+            {hiddenActions.length > 0 && (
+              <Dropdown
+                items={hiddenActions}
+                allowedPlacements={['top', 'top-end']}
+              >
+                <GhostIconButton
+                  size={ElementSize.Standard}
+                  aria-label={moreActionsLabel}
+                  icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
+                />
+              </Dropdown>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -144,13 +248,7 @@ export const DialFileManagerBulkActionsToolbar: FC<
           <div ref={leftSectionRef} className={bulkActionsLabelClassName}>
             <span className={bulkActionsCountClassName}>{selectedCount}</span>
             <span className="whitespace-nowrap">{selectionLabel}</span>
-            <GhostIconButton
-              size={ElementSize.Small}
-              aria-label={clearSelectionLabel}
-              tooltipProps={{ tooltip: clearSelectionLabel }}
-              icon={<IconX {...FILE_MANAGER_ICON_PROPS} />}
-              onClick={onClearSelection}
-            />
+            {clearSelectionButton}
           </div>
 
           <div className={bulkActionsGroupClassName}>

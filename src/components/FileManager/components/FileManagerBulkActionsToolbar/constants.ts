@@ -18,3 +18,20 @@ export const bulkActionsCountClassName =
   'rounded bg-control-neutral-active w-[22px] flex items-center justify-center h-[22px] dial-small-text font-semibold text-primary rounded-full';
 
 export const bulkActionsGroupClassName = 'flex gap-3 items-center';
+
+export const COMPACT_ACTIONS_GAP = 4;
+export const COMPACT_CONTAINER_PADDING = 12;
+
+/* Docked to the bottom edge in the compact view: full width, icon-only actions spread across it. */
+export const compactBulkActionsContainerClassName =
+  'w-full h-16 bg-layer-base border-t border-tertiary px-3 flex items-center gap-2';
+
+/* A 24px circle that widens into a pill for longer counts. */
+export const compactBulkActionsCountClassName =
+  'h-6 min-w-6 px-1.5 flex shrink-0 items-center justify-center rounded-full bg-control-neutral-active dial-small-semi-text text-primary';
+
+export const compactBulkActionsDividerClassName =
+  'w-px h-[26px] bg-control-disable-primary';
+
+export const compactBulkActionsGroupClassName =
+  'flex flex-1 min-w-0 items-center justify-between gap-1';
