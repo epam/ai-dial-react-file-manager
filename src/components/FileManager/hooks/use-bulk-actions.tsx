@@ -11,7 +11,6 @@ import {
 import CopyToIcon from '@/assets/icons/copy-to.svg?react';
 import MoveToIcon from '@/assets/icons/move-to.svg?react';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
-import IconUnshare from '@/assets/icons/unshare.svg?react';
 
 import { cleanForbiddenSymbolsRegExp } from '@/components/FileManager/utils';
 
@@ -140,12 +139,7 @@ export const useBulkActions = ({
         tooltip: disabled
           ? 'Selected items contain item which can not be unshared'
           : undefined,
-        icon: (
-          <IconUnshare
-            width={FILE_MANAGER_ICON_PROPS.size}
-            height={FILE_MANAGER_ICON_PROPS.size}
-          />
-        ),
+        icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
         onClick: () => {
           onUnshare(selectedFilesArray);
           onClearSelection();

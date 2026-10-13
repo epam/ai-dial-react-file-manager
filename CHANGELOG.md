@@ -77,6 +77,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The Unshare action uses the trash-x icon** — in the tree context menu,
+  the grid row menu, and the bulk toolbar, matching the "Remove from My List"
+  action hosts show for other shared-with-me entities. The bundled
+  `unshare.svg` asset is removed.
 - **The compact view follows the mobile design** — the folders panel, the
   breadcrumb trail and the content header give way to a card naming the current
   folder (or, while none is loaded, the active section). It opens into the

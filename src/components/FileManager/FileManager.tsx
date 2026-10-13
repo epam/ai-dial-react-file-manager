@@ -30,7 +30,6 @@ import AddChild from '@/assets/icons/add-child.svg?react';
 import AddSibling from '@/assets/icons/add-sibling.svg?react';
 import CopyToIcon from '@/assets/icons/copy-to.svg?react';
 import MoveToIcon from '@/assets/icons/move-to.svg?react';
-import IconUnshare from '@/assets/icons/unshare.svg?react';
 import {
   baseColumnComparator,
   Grid,
@@ -1198,9 +1197,8 @@ export const DialFileManagerView: FC = () => {
             key: 'unshare',
             label: treeOptions.actionLabels[DialFileManagerActions.Unshare],
             icon: (
-              <IconUnshare
-                width={FILE_MANAGER_ICON_PROPS.size}
-                height={FILE_MANAGER_ICON_PROPS.size}
+              <IconTrashX
+                {...FILE_MANAGER_ICON_PROPS}
                 className="text-secondary"
               />
             ),
