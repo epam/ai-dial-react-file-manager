@@ -1,9 +1,21 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, expect, test, vi } from 'vitest';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { DialDestinationFolderPopup } from './DestinationFolderPopup';
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
 import { NotificationVariant } from '@epam/ai-dial-ui-kit';
+
+const mobileScreen = vi.hoisted(() => ({ isMobile: false }));
+
+vi.mock('@/hooks/use-is-mobile-screen', () => ({
+  useIsMobileScreen: () => mobileScreen.isMobile,
+}));
 
 const mockFiles: DialFile[] = [
   {
@@ -715,5 +727,123 @@ describe('Dial UI Kit :: DialDestinationFolderPopup', () => {
     );
 
     expect(screen.queryByText('Add folder')).not.toBeInTheDocument();
+  });
+
+  describe('phone sheet', () => {
+    const sourceFile: DialFile = {
+      id: '3',
+      name: 'report.pdf',
+      path: '/Documents/report.pdf',
+      folderId: 'folder-1',
+      nodeType: DialFileNodeType.ITEM,
+      parentPath: '/Documents',
+    };
+
+    beforeEach(() => {
+      mobileScreen.isMobile = true;
+      return () => {
+        mobileScreen.isMobile = false;
+      };
+    });
+
+    test('shows the source item, the heading and a folders tree', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          header="Move file"
+          items={mockFiles}
+          sourceItems={[sourceFile]}
+        />,
+      );
+
+      const sheet = screen.getByRole('dialog', { name: 'Move file' });
+      expect(within(sheet).getByText('report.pdf')).toBeInTheDocument();
+      expect(
+        within(sheet).getByRole('heading', { name: 'Move to folder' }),
+      ).toBeInTheDocument();
+      expect(
+        within(sheet).getByRole('tree', { name: 'Move to folder' }),
+      ).toBeInTheDocument();
+      expect(
+        within(sheet).queryByRole('button', { name: 'Add folder' }),
+      ).not.toBeInTheDocument();
+    });
+
+    test('names several source items from getSourceItemsLabel', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="copy"
+          items={mockFiles}
+          sourceItems={[sourceFile, { ...sourceFile, id: '4', path: '/b' }]}
+          getSourceItemsLabel={(count) => `${count} файла`}
+          destinationLabel="Куда скопировать"
+        />,
+      );
+
+      const sheet = screen.getByRole('dialog', { name: 'Copy to' });
+      expect(within(sheet).getByText('2 файла')).toBeInTheDocument();
+      expect(
+        within(sheet).getByRole('heading', { name: 'Куда скопировать' }),
+      ).toBeInTheDocument();
+    });
+
+    test('picks a folder and confirms', () => {
+      const onConfirm = vi.fn();
+      const setDestinationFolderPath = vi.fn();
+
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          onConfirm={onConfirm}
+          mode="move"
+          items={mockFiles}
+          sourceItems={[sourceFile]}
+          setDestinationFolderPath={setDestinationFolderPath}
+        />,
+      );
+
+      fireEvent.click(screen.getByText('Photos'));
+      expect(setDestinationFolderPath).toHaveBeenCalledWith('/Photos');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Move' }));
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+    });
+
+    test('disables the confirm button on the source folder', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          items={mockFiles}
+          path="/Documents"
+          sourceFolder="/Documents"
+          sourceItems={[sourceFile]}
+        />,
+      );
+
+      expect(screen.getByRole('button', { name: 'Move' })).toBeDisabled();
+    });
+
+    test('closes from Cancel', () => {
+      const onClose = vi.fn();
+
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={onClose}
+          items={mockFiles}
+          sourceItems={[sourceFile]}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 });

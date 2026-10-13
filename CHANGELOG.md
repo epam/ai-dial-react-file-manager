@@ -61,6 +61,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
   sets it.
 - **`toolbarOptions.moreActionsLabel`** — accessible name of the compact
   "more" menu trigger, defaulting to `"More actions"`.
+- **`destinationFolderPopupOptions.getSourceItemsLabel` / `destinationLabel`**
+  — text for the phone Copy/Move sheet: `getSourceItemsLabel(count)` names
+  several items being copied or moved (default `"N items"`) and
+  `destinationLabel` heads the folders tree (default `"Copy to folder"` /
+  `"Move to folder"`). Both are also props of `DialDestinationFolderPopup`,
+  together with `sourceItems`.
 - **`DialFileManagerBulkActionsToolbar` — `isCompactView` /
   `moreActionsLabel`** — `isCompactView` docks the bar full width with the
   count, the clear control and icon-only actions (the selection label stays for
@@ -89,6 +95,17 @@ and this project follows [Semantic Versioning](https://semver.org/).
   `newButtonVariant`. Rows are 68px tall and read "date • size", and folder rows
   no longer start the date with an empty size slot. Host values for the new
   `treeOptions` and `sortOptions` props below win over the compact defaults.
+- **Copy/Move opens a bottom sheet on phones** — below 640px (viewport)
+  `DialDestinationFolderPopup` renders a full-height kit `BottomSheet` instead
+  of the popup: the item being copied or moved (or the count of several), a
+  heading, a folders-only tree and full-width confirm and Cancel buttons.
+  Picking a folder makes it the destination; the source folder keeps the
+  confirm button disabled with its tooltip. The sheet has no Add folder or
+  hidden-files controls, so `showCreateFolderButton` and
+  `showHiddenFileSwitcher` apply to the popup only, and hidden folders stay
+  hidden. A non-string `header` falls
+  back to `"Copy to"` / `"Move to"` as the sheet title. Wider screens keep the
+  popup unchanged.
 - **The compact view docks the selection bar** — while items are selected, the
   bar spans the bottom edge of the file manager over the grid, and the grid's
   scroll area gains a matching bottom inset so the last rows scroll clear of

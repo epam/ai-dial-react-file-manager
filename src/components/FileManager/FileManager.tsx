@@ -181,6 +181,8 @@ export type DialFileManagerDestinationFolderPopupOptions = Pick<
   | 'emptyStateDescription'
   | 'excludedPaths'
   | 'filesLoading'
+  | 'getSourceItemsLabel'
+  | 'destinationLabel'
 > & {
   getCopyHeader?: (itemsCount: number, itemName?: string) => string;
   getMoveHeader?: (itemsCount: number, itemName?: string) => string;
@@ -617,6 +619,8 @@ export interface DialFileManagerProps {
  * @param [deleteConfirmationOptions] - Options for the delete confirmation popup
  * @param [unshareConfirmationOptions] - Options for the unshare confirmation popup; when omitted, unshare runs without a confirmation
  * @param [destinationFolderPopupOptions.excludedPaths] - Paths to hide from the Copy/Move destination popup only (e.g. a root folder that shouldn't be a valid destination); the main tree/grid are unaffected
+ * @param [destinationFolderPopupOptions.getSourceItemsLabel] - Text naming several items being copied or moved in the phone sheet; defaults to "N items"
+ * @param [destinationFolderPopupOptions.destinationLabel] - Heading above the folders tree in the phone sheet; defaults to "Copy to folder" or "Move to folder"
  * @param [destinationFolderPopupOptions.filesLoading] - When true, the Copy/Move destination grid shows its loading state (e.g. while the destination folder's contents load); falls back to the main `filesLoading`
  * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view.
  *

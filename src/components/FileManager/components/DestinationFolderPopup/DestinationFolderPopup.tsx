@@ -32,6 +32,10 @@ import {
   useState,
 } from 'react';
 import { excludePathsFromTree } from '@/components/FileManager/utils';
+import type { DialFile } from '@/models/file';
+import CopyToIcon from '@/assets/icons/copy-to.svg?react';
+import MoveToIcon from '@/assets/icons/move-to.svg?react';
+import { DestinationFolderSheet } from './DestinationFolderSheet';
 
 export interface DestinationFolderPopupProps extends DialFileManagerProps {
   onClose: () => void;
@@ -54,6 +58,9 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
   onFolderPopupPathChange?: (newPath?: string) => void;
   processDestinationFolderPath?: (path: string) => string;
   excludedPaths?: string[];
+  sourceItems?: DialFile[];
+  getSourceItemsLabel?: (count: number) => string;
+  destinationLabel?: string;
 }
 
 /**
@@ -97,6 +104,14 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
  * @param [collapsedFileTree=false] - Whether the file tree should be initially collapsed
  * @param [processDestinationFolderPath] - Optional function to process the destination folder path before setting it
  * @param [excludedPaths] - Paths to hide from this popup's tree and grid (e.g. a root folder that shouldn't be a valid destination). Matching items and their subtree are excluded.
+ * @param [sourceItems=[]] - Items being copied or moved; the phone sheet shows them above the tree
+ * @param [getSourceItemsLabel] - Text naming several source items in the phone sheet; defaults to "N items"
+ * @param [destinationLabel] - Heading above the tree in the phone sheet; defaults to "Copy to folder" or "Move to folder"
+ *
+ * @remarks
+ * Below 640px the picker is a bottom sheet with a folders-only tree and no
+ * Add folder or hidden-files controls, so `showCreateFolderButton` and
+ * `showHiddenFileSwitcher` only apply to the popup.
  *
  * @returns A React component for the destination folder selection popup
  */
@@ -125,6 +140,9 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
   processDestinationFolderPath,
   excludedPaths,
   items,
+  sourceItems = [],
+  getSourceItemsLabel = (count) => `${count} items`,
+  destinationLabel,
   ...restProps
 }: DestinationFolderPopupProps) => {
   const [showHiddenFiles, setShowHiddenFiles] = useState(false);
@@ -211,6 +229,47 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
     return sourceFolder === path;
   }, [path, sourceFolder]);
 
+  const confirmLabel = mode === 'copy' ? copyLabel : moveLabel;
+
+  if (isMobile) {
+    const ConfirmIcon =
+      mode === DestinationFolderMode.Copy ? CopyToIcon : MoveToIcon;
+
+    return (
+      <DestinationFolderSheet
+        open={open}
+        title={typeof header === 'string' ? header : defaultTitle}
+        items={visibleItems}
+        sourceItems={sourceItems}
+        sourceItemsLabel={getSourceItemsLabel(sourceItems.length)}
+        destinationLabel={
+          destinationLabel ??
+          (mode === DestinationFolderMode.Copy
+            ? 'Copy to folder'
+            : 'Move to folder')
+        }
+        confirmLabel={confirmLabel}
+        confirmIcon={
+          <ConfirmIcon
+            width={FILE_MANAGER_ICON_PROPS.size}
+            height={FILE_MANAGER_ICON_PROPS.size}
+          />
+        }
+        isConfirmDisabled={isDestinationDisabled}
+        disabledConfirmTooltip={disabledPathTooltip}
+        selectedPath={path}
+        loadedPaths={restProps.treeOptions?.loadedPaths}
+        loadingPaths={restProps.treeOptions?.loadingPaths}
+        emptyStateTitle={restProps.emptyStateTitle}
+        emptyStateDescription={restProps.emptyStateDescription}
+        alertProps={alertProps}
+        onSelectFolder={handleOnPathChange}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />
+    );
+  }
+
   return (
     <Popup
       open={open}
@@ -270,16 +329,13 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
               <Tooltip tooltip={disabledPathTooltip}>
                 <PrimaryButton
                   onClick={onConfirm}
-                  label={mode === 'copy' ? copyLabel : moveLabel}
+                  label={confirmLabel}
                   disabled={isDestinationDisabled}
                   aria-disabled={isDestinationDisabled}
                 />
               </Tooltip>
             ) : (
-              <PrimaryButton
-                onClick={onConfirm}
-                label={mode === 'copy' ? copyLabel : moveLabel}
-              />
+              <PrimaryButton onClick={onConfirm} label={confirmLabel} />
             )}
           </div>
         </div>

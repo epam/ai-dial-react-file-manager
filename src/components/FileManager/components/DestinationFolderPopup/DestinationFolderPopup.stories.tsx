@@ -37,6 +37,7 @@ const StoryWrapper = (args: DestinationFolderPopupProps) => {
           setCurrentPath(path);
           args.onPathChange?.(path);
         }}
+        setDestinationFolderPath={setCurrentPath}
         onClose={() => {
           setIsOpen(false);
           args.onClose?.();
@@ -211,5 +212,32 @@ export const ExcludedRootFolder: Story = {
     // current user doesn't own it), so it's hidden from this popup only —
     // the main File Manager tree/grid are unaffected.
     excludedPaths: ['/Shared with me'],
+  },
+};
+
+export const PhoneSheet: Story = {
+  globals: { viewport: { value: 'mobile1', isRotated: false } },
+  args: {
+    mode: 'move',
+    header: 'Move file',
+    sourceFolder: 'All files',
+    path: 'All files',
+    sourceItems: [
+      {
+        id: 'report',
+        name: 'report.pdf',
+        path: 'All files/report.pdf',
+        parentPath: 'All files',
+        nodeType: DialFileNodeType.ITEM,
+      },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Below 640px the picker is a bottom sheet: the item being moved, a folders-only tree and full-width Move and Cancel buttons.',
+      },
+    },
   },
 };

@@ -238,7 +238,13 @@ export const useFileClipboard = ({
     [getMoveHeader],
   );
 
+  const sourceItems =
+    destinationFolderMode === DestinationFolderMode.Copy
+      ? copiedFiles
+      : movedFiles;
+
   return {
+    sourceItems,
     handleDuplicate,
     handleCloseDestinationFolderPopup,
     handleOpenDestinationFolderPopup,
