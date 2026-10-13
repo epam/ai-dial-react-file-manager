@@ -89,6 +89,7 @@ import {
   type DialFileManagerBulkActionsToolbarProps,
 } from './components/FileManagerBulkActionsToolbar/FileManagerBulkActionsToolbar';
 import { FileManagerDeleteConfirmationPopup } from './components/FileManagerDeleteConfirmationPopup/FileManagerDeleteConfirmationPopup';
+import { FileManagerUnshareConfirmationPopup } from './components/FileManagerUnshareConfirmationPopup/FileManagerUnshareConfirmationPopup';
 import {
   DialFileManagerNavigationPanel,
   type DialFileManagerNavigationPanelProps,
@@ -247,6 +248,12 @@ export interface DeleteConfirmationOptions {
   /** Receives the names and the items, like `titleRenderer`. */
   contentRenderer?: (fileNames: string[], items: DialFile[]) => ReactNode;
 }
+
+/**
+ * Same shape as the delete options. Passing it turns the confirmation on;
+ * without it `onUnshareFiles` fires straight from the action.
+ */
+export type UnshareConfirmationOptions = DeleteConfirmationOptions;
 
 /**
  * The breadcrumb trail and the search field are configured together but render
@@ -412,6 +419,7 @@ export interface DialFileManagerProps {
   gridOptions?: GridOptions;
   bulkActionsToolbarOptions?: BulkActionsToolbarOptions;
   deleteConfirmationOptions?: DeleteConfirmationOptions;
+  unshareConfirmationOptions?: UnshareConfirmationOptions;
   destinationFolderPopupOptions?: DialFileManagerDestinationFolderPopupOptions;
   conflictResolutionPopupOptions?: DialFileManagerConflictResolutionPopupOptions;
 
@@ -605,6 +613,7 @@ export interface DialFileManagerProps {
  * @param [gridOptions] - Options forwarded to `Grid`; supports `columnDefs` override and `filterable` flag and date locale/options
  * @param [bulkActionsToolbarOptions] - Options for the bulk actions toolbar shown when items are selected
  * @param [deleteConfirmationOptions] - Options for the delete confirmation popup
+ * @param [unshareConfirmationOptions] - Options for the unshare confirmation popup; when omitted, unshare runs without a confirmation
  * @param [destinationFolderPopupOptions.excludedPaths] - Paths to hide from the Copy/Move destination popup only (e.g. a root folder that shouldn't be a valid destination); the main tree/grid are unaffected
  * @param [destinationFolderPopupOptions.filesLoading] - When true, the Copy/Move destination grid shows its loading state (e.g. while the destination folder's contents load); falls back to the main `filesLoading`
  * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view.
@@ -679,6 +688,7 @@ export const DialFileManagerView: FC = () => {
     toolbarOptions,
     bulkActionsToolbarOptions,
     deleteConfirmationOptions,
+    unshareConfirmationOptions,
     destinationFolderPopupOptions,
     conflictResolutionPopupOptions,
     compactViewWidthBreakpoint = DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT,
@@ -728,6 +738,10 @@ export const DialFileManagerView: FC = () => {
     confirmDelete,
     deleteConfirmationOpen,
     itemsToDelete,
+    unshareConfirmationOpen,
+    itemsToUnshare,
+    closeUnshareConfirmation,
+    confirmUnshare,
     renamedPath,
     renamedItem,
     onRename,
@@ -1945,6 +1959,13 @@ export const DialFileManagerView: FC = () => {
           itemsToDelete={itemsToDelete}
           onClose={closeDeleteConfirmation}
           onConfirm={confirmDelete}
+        />
+        <FileManagerUnshareConfirmationPopup
+          {...unshareConfirmationOptions}
+          open={unshareConfirmationOpen}
+          itemsToUnshare={itemsToUnshare}
+          onClose={closeUnshareConfirmation}
+          onConfirm={confirmUnshare}
         />
         <DialDestinationFolderPopup
           {...destinationFolderPopupOptions}

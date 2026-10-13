@@ -95,6 +95,24 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
+  test('keeps inline item actions when showItemActionsButton is false', () => {
+    render(
+      <DialFoldersTree
+        items={mockItems}
+        getContextMenuItems={getMenu}
+        showItemActionsButton={false}
+        renderItemActions={(item) => (
+          <button type="button" aria-label={`Delete ${item.name}`} />
+        )}
+      />,
+    );
+
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    expect(
+      screen.getByRole('button', { name: /^Delete / }),
+    ).toBeInTheDocument();
+  });
+
   test('shows subfolders when expanded', () => {
     render(
       <DialFoldersTree
@@ -195,6 +213,26 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
     );
 
     expect(screen.queryByText('Shared')).not.toBeInTheDocument();
+  });
+
+  test('renders inline item actions only for nodes that return them', () => {
+    const onDelete = vi.fn();
+    render(
+      <DialFoldersTree
+        items={mockItems}
+        showFiles
+        expandedPaths={new Set(['/root', '/root/Subfolder'])}
+        renderItemActions={(item) =>
+          item.nodeType === DialFileNodeType.ITEM ? (
+            <button aria-label={`Delete ${item.name}`} onClick={onDelete} />
+          ) : null
+        }
+      />,
+    );
+
+    expect(screen.getAllByRole('button', { name: /^Delete/ })).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete File.txt' }));
+    expect(onDelete).toHaveBeenCalledTimes(1);
   });
 
   describe('tree semantics and keyboard', () => {

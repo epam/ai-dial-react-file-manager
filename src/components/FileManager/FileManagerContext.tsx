@@ -16,6 +16,7 @@ import type {
   BulkActionsToolbarOptions,
   DialFileManagerProps,
   DeleteConfirmationOptions,
+  UnshareConfirmationOptions,
   DialFileManagerDestinationFolderPopupOptions,
   DialFileManagerConflictResolutionPopupOptions,
   FileMetadataPopupOptions,
@@ -68,6 +69,7 @@ export interface FileManagerContextValue {
   toolbarOptions?: ToolbarOptions;
   bulkActionsToolbarOptions?: BulkActionsToolbarOptions;
   deleteConfirmationOptions?: DeleteConfirmationOptions;
+  unshareConfirmationOptions?: UnshareConfirmationOptions;
   destinationFolderPopupOptions?: DialFileManagerDestinationFolderPopupOptions & {
     sourceFolder?: string;
   };
@@ -130,6 +132,11 @@ export interface FileManagerContextValue {
   confirmDelete: () => void;
   deleteConfirmationOpen: boolean;
   itemsToDelete: DialFile[];
+
+  unshareConfirmationOpen: boolean;
+  itemsToUnshare: DialFile[];
+  closeUnshareConfirmation: () => void;
+  confirmUnshare: () => void;
 
   handlePathChange: (nextPath?: string) => void;
   handleTreeItemClick: (item: DialFile) => void;
@@ -195,6 +202,7 @@ export interface FileManagerContextValue {
   closeMetadataPopup: () => void;
   onGetInfo?: (file: DialFile) => void | Promise<void>;
 
+  /** Opens the unshare confirmation when `unshareConfirmationOptions` is set, otherwise unshares straight away. */
   onUnshareFiles?: (file: DialFile[]) => void;
   onRemoveFilesAccess?: (file: DialFile[]) => void;
 

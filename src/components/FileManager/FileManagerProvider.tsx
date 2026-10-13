@@ -28,6 +28,7 @@ import { useCollapseTree } from './hooks/use-collapse-tree';
 import { useFileClipboard } from './hooks/use-file-clipboard';
 import { useCurrentPath } from './hooks/use-current-path';
 import { useFileDelete } from './hooks/use-file-delete';
+import { useFileUnshare } from './hooks/use-file-unshare';
 import { useFileDownload } from './hooks/use-file-download';
 import { useFileUpload } from './hooks/use-file-upload';
 import {
@@ -84,6 +85,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   navigationPanelOptions,
   sortOptions,
   deleteConfirmationOptions,
+  unshareConfirmationOptions,
   gridOptions: rawGridOptions,
   toolbarOptions,
   bulkActionsToolbarOptions,
@@ -423,6 +425,17 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   } = useFileDelete({
     onDeleteFiles,
     onDeleteSuccess: clearSelection,
+  });
+
+  const {
+    unshareConfirmationOpen,
+    itemsToUnshare,
+    requestUnshare,
+    closeUnshareConfirmation,
+    confirmUnshare,
+  } = useFileUnshare({
+    onUnshareFiles,
+    isConfirmationEnabled: unshareConfirmationOptions != null,
   });
 
   const { handleDownloadFiles } = useFileDownload({
@@ -912,6 +925,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     toolbarOptions,
     bulkActionsToolbarOptions,
     deleteConfirmationOptions,
+    unshareConfirmationOptions,
     destinationFolderPopupOptions: {
       ...destinationFolderPopupOptions,
       destinationFolderPath,
@@ -980,6 +994,11 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     deleteConfirmationOpen,
     itemsToDelete,
 
+    unshareConfirmationOpen,
+    itemsToUnshare,
+    closeUnshareConfirmation,
+    confirmUnshare,
+
     handlePathChange,
     handleTreeItemClick,
     handleBreadcrumbItemClick,
@@ -1040,7 +1059,8 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     closeMetadataPopup: handleCloseMetadataPopup,
     onGetInfo,
 
-    onUnshareFiles,
+    /* Kept undefined without a host handler: its presence gates the Unshare action. */
+    onUnshareFiles: onUnshareFiles ? requestUnshare : undefined,
     onRemoveFilesAccess,
 
     actionsRef,

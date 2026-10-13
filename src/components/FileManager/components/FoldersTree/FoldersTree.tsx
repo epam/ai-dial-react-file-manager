@@ -56,6 +56,8 @@ export interface DialFoldersTreeProps {
   onCreateFolderSave?: (value: string) => void;
   onCreateFolderCancel?: () => void;
   getContextMenuItems?: (item: DialFile) => DropdownItem[];
+  /** Inline row actions shown on hover, before the context-menu trigger. */
+  renderItemActions?: (item: DialFile) => ReactNode;
   areHiddenFilesVisible?: boolean;
   onExpandedPathsChange?: (expandedPaths: Set<string>) => void;
   forbiddenSymbolsRegExp?: RegExp;
@@ -188,6 +190,7 @@ const collectVisibleRows = (
  * @param [onRenameCancel] - Callback fired when editing is cancelled.
  * @param [onRenameValidate] - Function to validate the new name during editing. Should return an error string or `null` if valid.
  * @param [getContextMenuItems] - Function returning context menu items for a given node.
+ * @param [renderItemActions] - Function returning inline actions shown on row hover (e.g. a delete button).
  * @param [areHiddenFilesVisible=false] - Whether hidden files (dotfiles) should be visible in the tree.
  * @param [rootItemPath] - Path of the folder to treat as the custom root node (no context menu, special label).
  * @param [rootItemLabel] - Label to display for the root node instead of its actual name.
@@ -231,6 +234,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   rootItemPath,
   onItemClick,
   getContextMenuItems,
+  renderItemActions,
   onRenameSave,
   onRenameCancel,
   onRenameValidate,
@@ -398,6 +402,13 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       const selectedClass = isSelected ? 'bg-control-accent-alpha' : '';
 
       const menuItems = isRootFolder ? [] : (getContextMenuItems?.(node) ?? []);
+      const itemActions =
+        isRootFolder || isRenaming ? null : renderItemActions?.(node);
+      const isContextMenuButtonShown =
+        showItemActionsButton &&
+        menuItems.length > 0 &&
+        !isRenaming &&
+        !isRootFolder;
       const tooltipContent = forbiddenSymbolsRegExp
         ? getForbiddenSymbolsTooltip(
             { name: node.name, isFolder },
@@ -505,11 +516,14 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                   </>
                 </div>
 
-                {showItemActionsButton &&
-                  menuItems.length > 0 &&
-                  !isRenaming &&
-                  !isRootFolder && (
-                    <div className="flex-1 flex justify-end">
+                {(itemActions || isContextMenuButtonShown) && (
+                  <div className="flex-1 flex justify-end items-center gap-1">
+                    {itemActions && (
+                      <div className="relative flex items-center invisible group-hover/item:visible group-focus-within/item:visible">
+                        {itemActions}
+                      </div>
+                    )}
+                    {isContextMenuButtonShown && (
                       <Dropdown
                         placement="bottom-start"
                         allowedPlacements={['top-start', 'top-end']}
@@ -524,8 +538,9 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                           }
                         />
                       </Dropdown>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                )}
               </div>
             </Dropdown>
 
