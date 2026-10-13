@@ -51,10 +51,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
   wrapper's `aria-label="folder"` are gone — both were names on generic
   elements that no assistive technology announced.
 
-- **`DialFoldersTree` — `selectOnCaretClick` / `showItemActionsButton`** —
+- **`DialFoldersTree` — `selectOnCaretClick` / `showContextMenuButton`** —
   whether clicking a folder's caret also selects it, and whether rows show the
-  hover "more" button for their context menu. Both default to `true`; the
-  compact view turns them off unless `treeOptions` sets them.
+  hover "more" button that opens the `getContextMenuItems` menu (the
+  right-click menu and `renderItemActions` stay either way). Both default to
+  `true`; the compact view turns them off unless `treeOptions` sets them.
 - **`DialFileManagerSortDropdown` — `iconOnly`** — renders a round icon-only
   trigger named by `label`. The compact view turns it on unless `sortOptions`
   sets it.

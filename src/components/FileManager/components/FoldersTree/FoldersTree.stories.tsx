@@ -370,7 +370,7 @@ export const CaretOnlyExpands: Story = {
     sharedByMePaths,
     getContextMenuItems: getMenuFunction({}),
     selectOnCaretClick: false,
-    showItemActionsButton: false,
+    showContextMenuButton: false,
   },
   parameters: {
     docs: {

@@ -79,7 +79,7 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
     );
   });
 
-  test('hides the hover actions button but keeps the menu items when showItemActionsButton is false', () => {
+  test('hides the context menu button but keeps the right-click menu when showContextMenuButton is false', () => {
     const { rerender } = render(
       <DialFoldersTree items={mockItems} getContextMenuItems={getMenu} />,
     );
@@ -89,18 +89,18 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
       <DialFoldersTree
         items={mockItems}
         getContextMenuItems={getMenu}
-        showItemActionsButton={false}
+        showContextMenuButton={false}
       />,
     );
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
-  test('keeps inline item actions when showItemActionsButton is false', () => {
+  test('keeps inline item actions when showContextMenuButton is false', () => {
     render(
       <DialFoldersTree
         items={mockItems}
         getContextMenuItems={getMenu}
-        showItemActionsButton={false}
+        showContextMenuButton={false}
         renderItemActions={(item) => (
           <button type="button" aria-label={`Delete ${item.name}`} />
         )}

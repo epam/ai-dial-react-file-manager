@@ -1441,8 +1441,8 @@ export const DialFileManagerView: FC = () => {
         selectOnCaretClick={
           forwardedTreeProps.selectOnCaretClick ?? !isCompactView
         }
-        showItemActionsButton={
-          forwardedTreeProps.showItemActionsButton ?? !isCompactView
+        showContextMenuButton={
+          forwardedTreeProps.showContextMenuButton ?? !isCompactView
         }
         onEscape={
           forwardedTreeProps.onEscape ??
