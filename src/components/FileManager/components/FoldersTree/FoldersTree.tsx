@@ -21,6 +21,7 @@ import {
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import {
+  caretHitAreaClassName,
   CARET_ICON_PROPS,
   FOLDER_LEVEL_PADDING,
   NEW_FOLDER_TEMP_NAME,
@@ -68,6 +69,10 @@ export interface DialFoldersTreeProps {
   autoFocus?: boolean;
   /** Called when Escape is pressed on a row, e.g. to close an overlay hosting the tree. */
   onEscape?: () => void;
+  /** Whether clicking a folder's caret also selects it. Defaults to `true`; when `false` the caret only expands or collapses the folder. */
+  selectOnCaretClick?: boolean;
+  /** Whether rows show the hover "more" button that opens the `getContextMenuItems` menu. Defaults to `true`; the right-click menu and `renderItemActions` stay either way. */
+  showContextMenuButton?: boolean;
 }
 
 interface VisibleRow {
@@ -198,6 +203,8 @@ const collectVisibleRows = (
  * @param [ariaLabel='Folders'] - Accessible name of the `role="tree"` root.
  * @param [autoFocus=false] - Moves focus to the selected row (or the first row) on mount.
  * @param [onEscape] - Callback fired when Escape is pressed on a row.
+ * @param [selectOnCaretClick=true] - Whether clicking a folder's caret also selects it; when `false` the caret only expands or collapses the folder.
+ * @param [showContextMenuButton=true] - Whether rows show the hover "more" button that opens the `getContextMenuItems` menu; the right-click menu and `renderItemActions` stay either way.
  * @remarks
  * - Folder and file data must follow the `DialFile` model.
  * - The `expandedPaths`, `loadingPaths`, `selectedPath`, and `renamedPath` props are externally controlled.
@@ -240,6 +247,8 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   ariaLabel = 'Folders',
   autoFocus = false,
   onEscape,
+  selectOnCaretClick = true,
+  showContextMenuButton = true,
 }) => {
   const { expandedPaths, togglePath } = useExpandedPaths({
     expandedPaths: externalExpandedPaths ?? new Set(),
@@ -395,6 +404,11 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       const menuItems = isRootFolder ? [] : (getContextMenuItems?.(node) ?? []);
       const itemActions =
         isRootFolder || isRenaming ? null : renderItemActions?.(node);
+      const isContextMenuButtonShown =
+        showContextMenuButton &&
+        menuItems.length > 0 &&
+        !isRenaming &&
+        !isRootFolder;
       const tooltipContent = forbiddenSymbolsRegExp
         ? getForbiddenSymbolsTooltip(
             { name: node.name, isFolder },
@@ -402,6 +416,17 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
             forbiddenSymbolsTooltip,
           )
         : undefined;
+
+      const caretIcon = (
+        <IconCaretRightFilled
+          {...CARET_ICON_PROPS}
+          className={mergeClasses(
+            'flex-shrink-0 text-secondary',
+            isExpanded && 'rotate-90 transition-all',
+            isLoaded && !hasValidItems && 'text-transparent',
+          )}
+        />
+      );
 
       return (
         <div key={`${path}-children`} className="cursor-pointer">
@@ -449,16 +474,20 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                   onClick={() => !isRenaming && handleFolderClick(node)}
                 >
                   <>
-                    {isFolder && (
-                      <IconCaretRightFilled
-                        {...CARET_ICON_PROPS}
-                        className={mergeClasses(
-                          'flex-shrink-0 text-secondary',
-                          isExpanded && 'rotate-90 transition-all',
-                          isLoaded && !hasValidItems && 'text-transparent',
-                        )}
-                      />
-                    )}
+                    {isFolder &&
+                      (selectOnCaretClick ? (
+                        caretIcon
+                      ) : (
+                        <span
+                          className={caretHitAreaClassName}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            togglePath(node.path);
+                          }}
+                        >
+                          {caretIcon}
+                        </span>
+                      ))}
                     <DialFileManagerItemName
                       elementId={`${path}-tree-item`}
                       name={isRootFolder ? rootItemLabel : name}
@@ -487,15 +516,14 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                   </>
                 </div>
 
-                {(itemActions ||
-                  (menuItems.length > 0 && !isRenaming && !isRootFolder)) && (
+                {(itemActions || isContextMenuButtonShown) && (
                   <div className="flex-1 flex justify-end items-center gap-1">
                     {itemActions && (
                       <div className="relative flex items-center invisible group-hover/item:visible group-focus-within/item:visible">
                         {itemActions}
                       </div>
                     )}
-                    {menuItems.length > 0 && !isRenaming && !isRootFolder && (
+                    {isContextMenuButtonShown && (
                       <Dropdown
                         placement="bottom-start"
                         allowedPlacements={['top-start', 'top-end']}

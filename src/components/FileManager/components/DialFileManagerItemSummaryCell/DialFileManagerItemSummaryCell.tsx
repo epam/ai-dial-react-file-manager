@@ -27,9 +27,9 @@ interface DialFileManagerItemSummaryCellProps {
  * Displays the item name with an icon (via `DialFileManagerItemName`),
  * followed by a small details row:
  *
- * - File size (e.g., `"15 KB"`)
- * - A separator dot
  * - Formatted update date (via `DateCellRenderer`)
+ * - A separator dot
+ * - File size (e.g., `"15 KB"`), for files only
  *
  * The component automatically determines whether to show a **file** or **folder**
  * icon based on `nodeType`.
@@ -82,6 +82,8 @@ export const DialFileManagerItemSummaryCell: FC<
   forbiddenSymbolsRegExp,
   forbiddenSymbolsTooltip,
 }) => {
+  const isFile = nodeType === DialFileNodeType.ITEM;
+
   return (
     <div className="flex">
       <div className="flex flex-1 min-w-0">
@@ -101,12 +103,6 @@ export const DialFileManagerItemSummaryCell: FC<
           forbiddenSymbolsTooltip={forbiddenSymbolsTooltip}
           details={
             <div className="flex items-center gap-1 dial-tiny-text text-secondary">
-              <span>
-                {nodeType === DialFileNodeType.ITEM ? formatBytes(size) : ''}
-              </span>
-              {updatedAt && size && (
-                <IconCircleFilled size={2} className="text-secondary" />
-              )}
               {updatedAt ? (
                 <span>
                   <DateCellRenderer
@@ -118,6 +114,10 @@ export const DialFileManagerItemSummaryCell: FC<
                   />
                 </span>
               ) : null}
+              {updatedAt && isFile ? (
+                <IconCircleFilled size={2} className="text-secondary" />
+              ) : null}
+              {isFile ? <span>{formatBytes(size)}</span> : null}
             </div>
           }
         />

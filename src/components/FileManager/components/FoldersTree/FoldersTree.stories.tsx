@@ -361,3 +361,23 @@ export const EmptyState: Story = {
     emptyStateTitle: 'No folders available',
   },
 };
+
+export const CaretOnlyExpands: Story = {
+  args: {
+    items: mockFolders,
+    expandedPaths: new Set(['/root']),
+    showFiles: false,
+    sharedByMePaths,
+    getContextMenuItems: getMenuFunction({}),
+    selectOnCaretClick: false,
+    showContextMenuButton: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The tree as the compact view\'s navigation card shows it: a folder\'s caret only expands or collapses it, and rows drop the hover "more" button while the right-click menu stays.',
+      },
+    },
+  },
+};

@@ -51,4 +51,38 @@ describe('Dial UI Kit :: FileManagerItemSummaryCell', () => {
 
     expect(screen.getByText('7/20/2025')).toBeInTheDocument();
   });
+
+  test('lists the date before the size', () => {
+    render(
+      <DialFileManagerItemSummaryCell
+        {...baseProps}
+        dateLocale="en-US"
+        dateOptions={{ timeZone: 'UTC' }}
+      />,
+    );
+
+    const date = screen.getByText('7/20/2025');
+    const size = screen.getByText('15 KB');
+    expect(
+      date.compareDocumentPosition(size) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  test('shows only the date for a folder', () => {
+    render(
+      <DialFileManagerItemSummaryCell
+        {...baseProps}
+        name="Docs"
+        nodeType={DialFileNodeType.FOLDER}
+        dateLocale="en-US"
+        dateOptions={{ timeZone: 'UTC' }}
+      />,
+    );
+
+    const details = screen
+      .getByText('7/20/2025')
+      .closest('span')?.parentElement;
+    expect(details).toHaveTextContent(/^7\/20\/2025$/);
+    expect(screen.queryByText('15 KB')).not.toBeInTheDocument();
+  });
 });
