@@ -81,7 +81,7 @@
     "mime-types": "^3.0.2"
   },
   "peerDependencies": {
-    "@epam/ai-dial-ui-kit": "^0.16.0-dev.2",
+    "@epam/ai-dial-ui-kit": "^0.16.0-dev.9",
     "ag-grid-community": "^35.2.1",
     "ag-grid-react": "^35.2.1",
     "react": "^19.2.5",
@@ -89,13 +89,14 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.1.2",
-    "@epam/ai-dial-ui-kit": "^0.16.0-dev.2",
+    "@epam/ai-dial-ui-kit": "^0.16.0-dev.9",
     "@eslint/js": "^9.39.2",
     "@floating-ui/react": "^0.27.19",
     "@storybook/addon-a11y": "^10.3.6",
     "@storybook/addon-docs": "^10.3.6",
     "@storybook/addon-vitest": "^10.3.6",
     "@storybook/react-vite": "^10.3.6",
+    "@tailwindcss/cli": "^4.3.3",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -107,7 +108,6 @@
     "@typescript-eslint/parser": "^8.59.1",
     "@vitejs/plugin-react": "^4.6.0",
     "@vitest/coverage-v8": "^4.1.11",
-    "autoprefixer": "^10.5.0",
     "concurrently": "^9.2.4",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
@@ -117,28 +117,30 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-storybook": "^10.2.17",
-    "eslint-plugin-tailwindcss": "^3.18.3",
+    "eslint-plugin-tailwindcss": "4.4.1-beta.1",
     "globals": "^16.3.0",
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.2",
     "postcss": "^8.5.25",
-    "postcss-import": "^16.1.1",
     "prettier": "^3.8.3",
     "sass": "^1.99.0",
     "sass-embedded": "^1.99.0",
     "storybook": "^10.3.6",
     "storybook-addon-pseudo-states": "^10.3.6",
-    "tailwindcss": "^3.4.19",
+    "tailwindcss": "^4.3.3",
     "tsx": "^4.20.5",
     "typescript": "~5.9.3",
     "vite": "^7.1.5",
-    "vite-plugin-dts": "^4.5.4",
+    "vite-plugin-dts": "~5.1.2",
     "vite-plugin-svgr": "^4.5.0",
     "vitest": "^4.1.11"
   },
   "overrides": {
     "postcss-selector-parser": "^7.1.6",
+    "@tailwindcss/cli": {
+      "@parcel/watcher": "2.6.0"
+    },
     "storybook": {
       ".": "$storybook",
       "esbuild": "^0.28.1"
