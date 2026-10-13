@@ -42,6 +42,13 @@ export const gridPanelClassName =
 export const gridBaseClassName =
   'flex-1 w-full text-secondary overflow-auto min-h-0 min-w-0 rounded-xl shadow-sm';
 
+/*
+ * Out of flow but still full width while the compact navigation card covers
+ * it, so the grid keeps its columns and scroll position.
+ */
+export const gridRegionCollapsedClassName =
+  'invisible absolute inset-x-0 bottom-0 h-0 overflow-hidden';
+
 /* Drag-over outlines sit on the rounded grid region so they follow its radius. */
 export const gridDragOverClassName =
   'outline outline-1 -outline-offset-1 outline-dashed outline-info';
@@ -78,7 +85,7 @@ export const AG_GRID_SELECTION_COLUMN_ID = 'ag-Grid-SelectionColumn';
 
 export const COMPACT_VIEW_HEADER_HEIGHT = 44;
 
-export const COMPACT_VIEW_FILE_ROW_HEIGHT = 56;
+export const COMPACT_VIEW_FILE_ROW_HEIGHT = 68;
 
 export const DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT = 800;
 

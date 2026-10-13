@@ -48,6 +48,7 @@ interface MockCellClickedEvent<Row extends GridRowLike> {
 
 interface MockAdditionalGridOptions<Row extends GridRowLike> {
   onCellClicked?: (event: MockCellClickedEvent<Row>) => void;
+  rowHeight?: number;
 }
 
 interface MockGridProps<Row extends GridRowLike> {
@@ -160,7 +161,7 @@ vi.mock('@epam/ai-dial-ui-kit', async (importOriginal) => {
         role={'grid'}
         aria-label="File Manager Grid View"
       >
-        <table role="table">
+        <table role="table" data-row-height={additionalGridOptions?.rowHeight}>
           {!filtersDisabled && (
             <thead>
               <tr>
@@ -771,7 +772,7 @@ describe('Dial UI Kit :: FileManager', () => {
         };
       });
 
-      test('keeps the filter row in the content column once the folders panel is gone', async () => {
+      test('opens the navigation card into the filter row and keeps it open on a section change', async () => {
         const onTabChange = vi.fn();
 
         renderWithinSizedShell(
@@ -792,6 +793,13 @@ describe('Dial UI Kit :: FileManager', () => {
         expect(
           screen.queryByRole('complementary', { name: 'File storage' }),
         ).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole('group', { name: 'File storage' }),
+        ).not.toBeInTheDocument();
+
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
 
         const chipRow = screen.getByRole('group', { name: 'File storage' });
         expect(
@@ -803,6 +811,9 @@ describe('Dial UI Kit :: FileManager', () => {
         );
 
         expect(onTabChange).toHaveBeenCalledWith(DialFileManagerTabs.Shared);
+        expect(
+          screen.getByRole('button', { name: 'All files', expanded: true }),
+        ).toBeInTheDocument();
       });
 
       test('names the compact filter row from tabsAriaLabel when the header is not text', async () => {
@@ -820,10 +831,350 @@ describe('Dial UI Kit :: FileManager', () => {
         );
 
         await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
 
         expect(
           screen.getByRole('group', { name: 'File storage sections' }),
         ).toBeInTheDocument();
+      });
+
+      test('gives grid rows the taller compact height', async () => {
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        const grid = await waitForGridTable();
+
+        expect(within(grid).getByRole('table')).toHaveAttribute(
+          'data-row-height',
+          '68',
+        );
+      });
+
+      test('keeps the default row height outside the compact view', async () => {
+        widthBreakpoint.isBelowBreakpoint = false;
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        const grid = await waitForGridTable();
+
+        expect(within(grid).getByRole('table')).toHaveAttribute(
+          'data-row-height',
+          '44',
+        );
+      });
+
+      test('takes the grid out of view while the navigation card is open', async () => {
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        await waitForGridTable();
+        const gridRegion = screen.getByRole('region', {
+          name: 'File Manager Grid View',
+        });
+        expect(gridRegion).not.toHaveClass('invisible');
+
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+
+        expect(gridRegion).toHaveClass('invisible');
+        expect(
+          screen.getByRole('search', { name: 'Search' }),
+        ).toBeInTheDocument();
+      });
+
+      test('lets sortOptions.iconOnly override the compact default', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            sortOptions={{ iconOnly: false }}
+          />,
+        );
+
+        await waitForGridTable();
+
+        expect(screen.getByRole('button', { name: 'Sort' })).toHaveTextContent(
+          'Sort',
+        );
+      });
+
+      test('names the navigation card after the active section while no folder is loaded', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={[]}
+            treeOptions={{
+              tabs: tabsMock,
+              activeTab: DialFileManagerTabs.Shared,
+              onTabChange: vi.fn(),
+            }}
+          />,
+        );
+
+        expect(
+          await screen.findByRole('button', {
+            name: 'Shared',
+            expanded: false,
+          }),
+        ).toBeInTheDocument();
+      });
+
+      test('closes the navigation card on Escape and returns focus to it', async () => {
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+        within(screen.getByRole('tree'))
+          .getByRole('treeitem', { name: 'All files' })
+          .focus();
+        await userEvent.keyboard('{Escape}');
+
+        const trigger = screen.getByRole('button', {
+          name: 'All files',
+          expanded: false,
+        });
+        expect(trigger).toHaveFocus();
+      });
+
+      test('returns focus to the navigation card once a folder is picked from the keyboard', async () => {
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+        within(screen.getByRole('tree'))
+          .getByRole('treeitem', { name: 'All files' })
+          .focus();
+        await userEvent.keyboard('{Enter}');
+
+        expect(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        ).toHaveFocus();
+      });
+
+      test('lets treeOptions.selectOnCaretClick override the compact default', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            treeOptions={{ selectOnCaretClick: true }}
+          />,
+        );
+
+        await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+
+        const rootRow = within(screen.getByRole('tree')).getByRole('treeitem', {
+          name: 'All files',
+        });
+        await userEvent.click(rootRow.querySelector('svg')!);
+
+        expect(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        ).toBeInTheDocument();
+      });
+
+      test('keeps the navigation card open while a folder is expanded from its caret', async () => {
+        renderWithinSizedShell(
+          <DialFileManager items={itemsMock} path="/All files" />,
+        );
+
+        await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+
+        const rootRow = within(screen.getByRole('tree')).getByRole('treeitem', {
+          name: 'All files',
+        });
+        const wasExpanded = rootRow.getAttribute('aria-expanded');
+        // The caret is a decorative icon with no role of its own.
+        await userEvent.click(rootRow.querySelector('svg')!);
+
+        expect(rootRow.getAttribute('aria-expanded')).not.toBe(wasExpanded);
+        expect(
+          screen.getByRole('button', { name: 'All files', expanded: true }),
+        ).toBeInTheDocument();
+      });
+
+      describe('toolbar menus', () => {
+        const writableItems: DialFile[] = [
+          {
+            name: 'My files',
+            path: '/My files',
+            folderId: 'root',
+            nodeType: DialFileNodeType.FOLDER,
+            permissions: [DialFilePermission.READ, DialFilePermission.WRITE],
+            items: [
+              {
+                name: 'notes.txt',
+                path: '/My files/notes.txt',
+                folderId: 'root',
+                nodeType: DialFileNodeType.ITEM,
+              },
+            ],
+          },
+        ];
+
+        const openCard = async () => {
+          renderWithinSizedShell(
+            <DialFileManager
+              items={writableItems}
+              path="/My files"
+              toolbarOptions={{
+                newActions: { newFolder: { label: 'New Folder' } },
+              }}
+              onCreateFolder={vi.fn()}
+            />,
+          );
+          await waitForGridTable();
+          await userEvent.click(
+            screen.getByRole('button', { name: 'My files', expanded: false }),
+          );
+        };
+
+        const expectCardOpen = (isOpen: boolean) =>
+          expect(
+            screen.getByRole('button', { name: 'My files', expanded: isOpen }),
+          ).toBeInTheDocument();
+
+        test('closes the card once Show hidden files is picked, not when the menu opens', async () => {
+          await openCard();
+
+          await userEvent.click(
+            screen.getByRole('button', { name: 'More actions' }),
+          );
+          expectCardOpen(true);
+
+          await userEvent.click(
+            await screen.findByRole('menuitem', { name: 'Show hidden files' }),
+          );
+          expectCardOpen(false);
+        });
+
+        test('closes the card once a sort is picked, not when the menu opens', async () => {
+          await openCard();
+
+          await userEvent.click(screen.getByRole('button', { name: 'Sort' }));
+          expectCardOpen(true);
+
+          await userEvent.click(
+            await screen.findByRole('menuitemradio', { name: 'Size' }),
+          );
+          expectCardOpen(false);
+        });
+
+        test('closes the card once New Folder is picked, not when the menu opens', async () => {
+          await openCard();
+
+          await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+          expectCardOpen(true);
+
+          await userEvent.click(
+            await screen.findByRole('menuitem', { name: 'New Folder' }),
+          );
+          expectCardOpen(false);
+        });
+      });
+
+      test('closes the navigation card once a search query is typed', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            navigationPanelOptions={{ searchable: true }}
+          />,
+        );
+
+        await waitForGridTable();
+        await userEvent.click(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        );
+        await userEvent.type(
+          within(screen.getByRole('search', { name: 'Search' })).getByRole(
+            'textbox',
+          ),
+          'svg',
+        );
+
+        expect(
+          screen.getByRole('button', { name: 'All files', expanded: false }),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole('region', { name: 'File Manager Grid View' }),
+        ).not.toHaveClass('invisible');
+      });
+
+      test('moves the toolbar into the search row after the search field', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            navigationPanelOptions={{ searchable: true }}
+            toolbarOptions={{}}
+          />,
+        );
+
+        await waitForGridTable();
+
+        const toolbar = screen.getByRole('toolbar', {
+          name: 'File Manager Toolbar',
+        });
+        const searchInput = within(
+          screen.getByRole('search', { name: 'Search' }),
+        ).getByRole('textbox');
+
+        expect(
+          within(toolbar)
+            .getAllByRole('button')
+            .map((button) => button.getAttribute('aria-label')),
+        ).toEqual(['More actions', 'Sort']);
+        expect(within(toolbar).queryByRole('switch')).not.toBeInTheDocument();
+        expect(
+          searchInput.compareDocumentPosition(toolbar) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
+      });
+
+      test('keeps the labelled sort beside the toolbar outside the compact view', async () => {
+        widthBreakpoint.isBelowBreakpoint = false;
+
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            navigationPanelOptions={{ searchable: true }}
+            toolbarOptions={{}}
+          />,
+        );
+
+        await waitForGridTable();
+
+        const toolbar = screen.getByRole('toolbar', {
+          name: 'File Manager Toolbar',
+        });
+
+        expect(within(toolbar).getByRole('switch')).toBeInTheDocument();
+        expect(
+          within(toolbar).queryByRole('button', { name: 'Sort' }),
+        ).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /sort/i })).toHaveTextContent(
+          'Sort',
+        );
       });
 
       describe('with several roots', () => {
@@ -875,43 +1226,38 @@ describe('Dial UI Kit :: FileManager', () => {
           );
         };
 
-        const getBreadcrumbs = () =>
-          screen.getByRole('navigation', { name: 'Breadcrumb' });
-
-        test('opens on the list of roots rather than the first root', async () => {
+        test('opens on the current root and names it on the navigation card', async () => {
           renderWithinSizedShell(<ControlledRoots />);
 
           const grid = await waitForGridTable();
 
-          expect(within(grid).getByText('My files')).toBeInTheDocument();
-          expect(within(grid).getByText('Shared')).toBeInTheDocument();
-          expect(within(grid).queryByText('mine.txt')).not.toBeInTheDocument();
-          expect(within(getBreadcrumbs()).getByText('All')).toBeInTheDocument();
+          expect(within(grid).getByText('mine.txt')).toBeInTheDocument();
           expect(
-            within(getBreadcrumbs()).queryByText('My files'),
+            screen.getByRole('button', { name: 'My files', expanded: false }),
+          ).toBeInTheDocument();
+          expect(
+            screen.queryByRole('navigation', { name: 'Breadcrumb' }),
           ).not.toBeInTheDocument();
         });
 
-        test('enters a root on click and returns through the top breadcrumb', async () => {
+        test('picks another root from the card tree and closes the card', async () => {
           renderWithinSizedShell(<ControlledRoots />);
 
           const grid = await waitForGridTable();
-          await userEvent.click(within(grid).getByText('Shared'));
+          await userEvent.click(
+            screen.getByRole('button', { name: 'My files', expanded: false }),
+          );
+          await userEvent.click(
+            within(screen.getByRole('tree')).getByText('Shared'),
+          );
 
           expect(
             await within(grid).findByText('theirs.txt'),
           ).toBeInTheDocument();
-          expect(within(grid).queryByText('My files')).not.toBeInTheDocument();
-
-          await userEvent.click(
-            within(getBreadcrumbs()).getByRole('button', { name: 'All' }),
-          );
-
-          expect(await within(grid).findByText('My files')).toBeInTheDocument();
-          expect(within(grid).getByText('Shared')).toBeInTheDocument();
+          expect(screen.queryByRole('tree')).not.toBeInTheDocument();
           expect(
-            within(grid).queryByText('theirs.txt'),
-          ).not.toBeInTheDocument();
+            screen.getByRole('button', { name: 'Shared', expanded: false }),
+          ).toBeInTheDocument();
         });
 
         test('keeps the wide view on the current root', async () => {

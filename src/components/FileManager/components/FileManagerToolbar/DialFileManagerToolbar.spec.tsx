@@ -1,5 +1,6 @@
 import { render, fireEvent, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+import { ButtonVariant } from '@epam/ai-dial-ui-kit';
 import { DialFileManagerToolbar } from './DialFileManagerToolbar';
 
 describe('Dial UI Kit :: DialFileManagerToolbar', () => {
@@ -157,5 +158,99 @@ describe('Dial UI Kit :: DialFileManagerToolbar', () => {
     );
 
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+  });
+
+  it('renders the compact layout as more menu, slot, then round Add button', () => {
+    render(
+      <DialFileManagerToolbar
+        areHiddenFilesVisible={false}
+        onToggleHiddenFiles={vi.fn()}
+        isCompactView
+        isNewButtonVisible
+        newButtonLabel="Add"
+        newButtonDropdownItems={[{ key: '1', label: 'New File' }]}
+        additionalButtons={<button type="button">Sort</button>}
+      />,
+    );
+
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole('button')
+        .map(
+          (button) => button.textContent || button.getAttribute('aria-label'),
+        ),
+    ).toEqual(['More actions', 'Sort', 'Add']);
+  });
+
+  it('offers the hidden files toggle from the compact more menu', async () => {
+    const onToggleHiddenFiles = vi.fn();
+    render(
+      <DialFileManagerToolbar
+        areHiddenFilesVisible={false}
+        onToggleHiddenFiles={onToggleHiddenFiles}
+        isCompactView
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'More actions' }));
+    fireEvent.click(await screen.findByText('Show hidden files'));
+
+    expect(onToggleHiddenFiles).toHaveBeenCalledWith(true);
+  });
+
+  it('drops the compact more menu when the hidden files toggle is off', () => {
+    render(
+      <DialFileManagerToolbar
+        areHiddenFilesVisible={false}
+        onToggleHiddenFiles={vi.fn()}
+        isCompactView
+        showHiddenFilesToggle={false}
+        isNewButtonVisible
+        newButtonDropdownItems={[{ key: '1', label: 'New File' }]}
+      />,
+    );
+
+    expect(
+      screen.queryByRole('button', { name: 'More actions' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add' })).toBeInTheDocument();
+  });
+
+  it('styles the compact Add button after newButtonVariant', () => {
+    const renderAddButton = (newButtonVariant: ButtonVariant) => {
+      const { unmount } = render(
+        <DialFileManagerToolbar
+          areHiddenFilesVisible={false}
+          onToggleHiddenFiles={vi.fn()}
+          isCompactView
+          isNewButtonVisible
+          newButtonVariant={newButtonVariant}
+          newButtonDropdownItems={[{ key: '1', label: 'New File' }]}
+        />,
+      );
+      const { className } = screen.getByRole('button', { name: 'Add' });
+      unmount();
+      return className;
+    };
+
+    expect(renderAddButton(ButtonVariant.Neutral)).not.toBe(
+      renderAddButton(ButtonVariant.Primary),
+    );
+  });
+
+  it('keeps the desktop layout when isCompactView is false', () => {
+    render(
+      <DialFileManagerToolbar
+        areHiddenFilesVisible={false}
+        onToggleHiddenFiles={vi.fn()}
+        isCompactView={false}
+      />,
+    );
+
+    expect(screen.getByRole('switch')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'More actions' }),
+    ).not.toBeInTheDocument();
   });
 });
