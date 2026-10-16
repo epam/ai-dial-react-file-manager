@@ -67,6 +67,9 @@ export interface UseFileManagerColumnsResult {
   columnDefs: ColDef<GridRow>[];
 }
 
+/* Select all, copy, paste, cut, undo: native text-editing shortcuts. */
+const TEXT_EDITING_SHORTCUT_KEYS = new Set(['a', 'c', 'v', 'x', 'z']);
+
 const suppressKeyboardEventForInput = (
   params: SuppressKeyboardEventParams<GridRow>,
 ) => {
@@ -75,6 +78,14 @@ const suppressKeyboardEventForInput = (
 
   const input = target?.closest('input');
   if (!input || !e) return false;
+
+  if (
+    (e.ctrlKey || e.metaKey) &&
+    !e.altKey &&
+    TEXT_EDITING_SHORTCUT_KEYS.has(e.key.toLowerCase())
+  ) {
+    return true;
+  }
 
   switch (e.key) {
     case 'ArrowLeft':
