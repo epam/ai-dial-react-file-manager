@@ -207,6 +207,34 @@ describe('Dial UI Kit :: FileManager :: useFileManagerColumns', () => {
     expect(call('a')).toBe(false);
   });
 
+  it('injected suppressKeyboardEvent keeps text-editing shortcuts inside input', () => {
+    const { result } = renderHook(() => useFileManagerColumns(makeArgs()));
+
+    const nameCol = result.current.columnDefs.find(
+      (c) => c.colId === FileManagerColumnKey.Name,
+    )!;
+    const suppress = nameCol.suppressKeyboardEvent!;
+
+    const input = document.createElement('input');
+    const div = document.createElement('div');
+    document.body.append(input, div);
+
+    const call = (target: HTMLElement, init: Partial<KeyboardEvent>) =>
+      suppress({
+        event: { target, ...init } as unknown as KeyboardEvent,
+      } as SuppressKeyboardEventParams<FileManagerGridRow>);
+
+    for (const key of ['a', 'A', 'c', 'v', 'x', 'z']) {
+      expect(call(input, { key, metaKey: true })).toBe(true);
+      expect(call(input, { key, ctrlKey: true })).toBe(true);
+    }
+
+    expect(call(input, { key: 'a' })).toBe(false);
+    expect(call(input, { key: 'a', metaKey: true, altKey: true })).toBe(false);
+    expect(call(input, { key: 'k', metaKey: true })).toBe(false);
+    expect(call(div, { key: 'a', metaKey: true })).toBe(false);
+  });
+
   it('injected suppressKeyboardEvent returns false when target is not inside input', () => {
     const { result } = renderHook(() => useFileManagerColumns(makeArgs()));
 

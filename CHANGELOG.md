@@ -331,6 +331,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Cmd/Ctrl+A selected every row while renaming** — in the inline rename and
+  new-folder inputs, the text-editing shortcuts Cmd/Ctrl+A, C, V, X and Z
+  reached AG Grid, which selected all rows instead of the input text and left
+  copy, paste, cut and undo unusable. The Name column now keeps them inside the
+  input, as it already did for the arrow, Home and End keys. Cmd/Ctrl+A with
+  focus on the grid itself still selects all rows.
+
 - **`gridOptions.className` no longer replaces the grid's own classes** — it is
   merged with them, so the default minimum height and overflow, and the
   compact view's bottom inset under the selection bar, stay unless the host
