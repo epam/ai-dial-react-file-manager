@@ -331,6 +331,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **`DialFoldersTree` — file and folder icons line up** — with `showFiles`, a
+  folder row starts with its 10px expand caret and a file row did not, so a
+  file's icon sat a caret's width to the start of a sibling folder's icon and
+  the two read as different levels. A file row now keeps an empty slot the
+  width of the caret, so every icon on one level shares a column. Reported on
+  the skill editor's file tree in ai-dial-chat.
+
 - **A folder could be moved into itself** — the Move destination picker only
   disabled the moved items' own parent folder, so opening a moved folder, or
   any folder inside it, left **Move** enabled and confirming nested the folder
