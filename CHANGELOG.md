@@ -331,6 +331,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A folder could be moved into itself** — the Move destination picker only
+  disabled the moved items' own parent folder, so opening a moved folder, or
+  any folder inside it, left **Move** enabled and confirming nested the folder
+  inside itself. In move mode the confirm button is now disabled whenever the
+  destination is a moved folder or lies inside one, on the popup and the phone
+  sheet alike. Its tooltip comes from the new optional
+  `destinationFolderPopupOptions.movedIntoItselfTooltip`, defaulting to
+  `"A folder can't be moved into itself or its subfolders"`. Copy is unchanged.
+
 - **Cmd/Ctrl+A selected every row while renaming** — in the inline rename and
   new-folder inputs, the text-editing shortcuts Cmd/Ctrl+A, C, V, X and Z
   reached AG Grid, which selected all rows instead of the input text and left
