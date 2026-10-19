@@ -1467,9 +1467,7 @@ export const DialFileManagerView: FC = () => {
         forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
         forbiddenSymbolsTooltip={forbiddenSymbolsTooltip}
         onItemClick={handleFoldersTreeItemClick}
-        selectOnCaretClick={
-          forwardedTreeProps.selectOnCaretClick ?? !isCompactView
-        }
+        selectOnCaretClick={forwardedTreeProps.selectOnCaretClick}
         showContextMenuButton={
           forwardedTreeProps.showContextMenuButton ?? !isCompactView
         }

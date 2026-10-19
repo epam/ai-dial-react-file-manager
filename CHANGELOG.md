@@ -93,6 +93,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **`DialFoldersTree` — the caret and the row follow the 2.0 tree item** —
+  clicking a row selected the folder and toggled it, so clicking an open
+  folder collapsed it, and on desktop clicking the caret did the same as the
+  row. Now clicking the caret only expands or collapses the folder and never
+  selects it. Clicking the row selects the folder and expands it when it is
+  closed, but never collapses it. Hovering the caret shows a 20px round tint of
+  its own. `selectOnCaretClick` now defaults to `false` in `DialFoldersTree`
+  and in `DialFileManager` (it was `true` outside the compact view); pass
+  `true` to get the old caret behaviour back. Keyboard navigation is unchanged.
+
 - **The Unshare action uses the trash-x icon** — in the tree context menu,
   the grid row menu, and the bulk toolbar, matching the "Remove from My List"
   action hosts show for other shared-with-me entities. The bundled
