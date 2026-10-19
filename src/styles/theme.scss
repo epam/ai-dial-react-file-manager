@@ -65,10 +65,18 @@
     --bg-control-accent-alpha-hover,
     #2764d924
   ); /* blue-500 alpha-14 */
+  --background-color-control-accent-alpha-hover-subtle: var(
+    --bg-control-accent-alpha-hover-subtle,
+    #2764d90a
+  ); /* blue-500 alpha-4 */
   --background-color-control-accent-alpha-active: var(
     --bg-control-accent-alpha-active,
     #2764d933
   ); /* blue-500 alpha-20 */
+  --background-color-control-accent-alpha-active-subtle: var(
+    --bg-control-accent-alpha-active-subtle,
+    #2764d914
+  ); /* blue-500 alpha-8 */
   --background-color-control-accent: var(
     --bg-control-accent,
     #1d4ed8

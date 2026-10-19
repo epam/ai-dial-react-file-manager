@@ -331,6 +331,21 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Section chips are semibold in every state** — the All / My files / Shared /
+  Organization chips came from the kit's selectable chip, which is regular until
+  selected, while the design and the chat panel's filter row keep every chip
+  semibold. Both chip rows (the folders panel and the compact navigation) now
+  pass `dial-tiny-semi-text` to every chip.
+
+- **Tree items and the grid's name cell use the subtle hover and selected
+  backgrounds** — `DialFoldersTree` rows hovered with
+  `--bg-control-accent-alpha-hover` and marked the selected row with
+  `--bg-control-accent-alpha`, and the shared-by-me indicator in the grid's name
+  cell did the same, while the grid rows themselves already use the kit Grid's
+  `--bg-control-accent-alpha-hover-subtle` / `--bg-control-accent-alpha-active-subtle`.
+  All of them now use the subtle pair, so the indicator matches its row again.
+  Both tokens are added to the theme.
+
 - **A folder could be moved into itself** — the Move destination picker only
   disabled the moved items' own parent folder, so opening a moved folder, or
   any folder inside it, left **Move** enabled and confirming nested the folder

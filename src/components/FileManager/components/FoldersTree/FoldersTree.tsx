@@ -399,7 +399,9 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       const validateHandler =
         onRenameValidate && ((value: string) => onRenameValidate(value, node));
 
-      const selectedClass = isSelected ? 'bg-control-accent-alpha' : '';
+      const selectedClass = isSelected
+        ? 'bg-control-accent-alpha-active-subtle'
+        : '';
 
       const menuItems = isRootFolder ? [] : (getContextMenuItems?.(node) ?? []);
       const itemActions =
@@ -458,7 +460,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                 }}
                 style={{ paddingLeft: `${level * FOLDER_LEVEL_PADDING}px` }}
                 className={mergeClasses(
-                  'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover rounded-full group/item w-full relative',
+                  'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover-subtle rounded-full group/item w-full relative',
                   'outline-hidden focus-visible:outline focus-visible:outline-focus focus-visible:-outline-offset-1',
                   selectedClass,
                 )}
@@ -495,8 +497,8 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       loading={isLoading}
                       shared={isSharedByMe}
                       sharedIndicatorClassName={mergeClasses(
-                        'group-hover/item:bg-control-accent-alpha-hover',
-                        isSelected && 'bg-control-accent-alpha',
+                        'group-hover/item:bg-control-accent-alpha-hover-subtle',
+                        isSelected && 'bg-control-accent-alpha-active-subtle',
                       )}
                       iconSize={BASE_FILE_MANAGER_ICON_SIZE}
                       forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}

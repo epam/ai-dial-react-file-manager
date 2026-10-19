@@ -153,6 +153,13 @@ import { useTriggerViewCreateFolder } from './hooks/use-trigger-view-create-fold
 
 type GridRow = FileManagerGridRow;
 
+/*
+ * Section chips keep a semibold label in every state, as in the design and the
+ * chat panel's filter row. The kit's selectable chip is regular until selected;
+ * this class follows its own in the stylesheet, so it wins.
+ */
+const SECTION_CHIP_CLASS_NAME = 'dial-tiny-semi-text';
+
 const DEFAULT_SORT: FileManagerSort = {
   field: FileManagerSortField.Name,
   direction: FileManagerSortDirection.Asc,
@@ -1557,6 +1564,7 @@ export const DialFileManagerView: FC = () => {
                 aria-labelledby={header ? sidebarHeadingId : undefined}
                 aria-label={header ? undefined : tabsAriaLabel}
                 className="shrink-0"
+                chipClassName={SECTION_CHIP_CLASS_NAME}
               />
             </div>
           ) : null}
@@ -1604,6 +1612,7 @@ export const DialFileManagerView: FC = () => {
             onChange={handleTabChange}
             aria-label={typeof header === 'string' ? header : tabsAriaLabel}
             className="shrink-0 overflow-x-auto"
+            chipClassName={SECTION_CHIP_CLASS_NAME}
           />
         ) : null}
         <div className="min-h-0 flex-1 overflow-auto">{foldersTree}</div>
