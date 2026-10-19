@@ -93,6 +93,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **`@epam/ai-dial-ui-kit` peer range raised to `^0.16.0-dev.18`** (was
+  `^0.16.0-dev.9`). A host on an older 0.16 prerelease gets a peer warning and
+  should update the kit alongside this package.
+
 - **`DialFoldersTree` — the caret and the row follow the 2.0 tree item** —
   clicking a row selected the folder and toggled it, so clicking an open
   folder collapsed it, and on desktop clicking the caret did the same as the
