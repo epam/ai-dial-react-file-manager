@@ -19,6 +19,7 @@ import {
   excludePathsFromTree,
   getAncestorPaths,
   searchFoldersByName,
+  isPathWithinFolders,
 } from './utils';
 
 describe('Dial UI Kit :: splitPathAndName', () => {
@@ -562,5 +563,27 @@ describe('Dial UI Kit :: getAncestorPaths', () => {
   it('returns nothing for a top-level path', () => {
     expect(getAncestorPaths('/a')).toEqual([]);
     expect(getAncestorPaths('All files')).toEqual([]);
+  });
+});
+
+describe('Dial UI Kit :: isPathWithinFolders', () => {
+  it.each([
+    ['/Docs', ['/Docs']],
+    ['/Docs/', ['/Docs']],
+    ['/Docs', ['/Docs/']],
+    ['/Docs/a/b', ['/Docs/']],
+    ['/Other/x', ['/Docs', '/Other']],
+  ])('matches %s inside %j', (path, folders) => {
+    expect(isPathWithinFolders(path, folders)).toBe(true);
+  });
+
+  it.each([
+    ['/Docs-old', ['/Docs']],
+    ['/Do', ['/Docs']],
+    ['/', ['/Docs']],
+    ['/Docs', []],
+    ['/Docs', ['/']],
+  ])('does not match %s inside %j', (path, folders) => {
+    expect(isPathWithinFolders(path, folders)).toBe(false);
   });
 });

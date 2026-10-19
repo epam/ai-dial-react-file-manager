@@ -176,6 +176,7 @@ export type DialFileManagerDestinationFolderPopupOptions = Pick<
   | 'onCreateFolderValidate'
   | 'folderCreationValidationMessages'
   | 'disabledPathTooltip'
+  | 'movedIntoItselfTooltip'
   | 'emptyStateTitle'
   | 'emptyStateDescription'
   | 'excludedPaths'
@@ -619,6 +620,7 @@ export interface DialFileManagerProps {
  * @param [bulkActionsToolbarOptions] - Options for the bulk actions toolbar shown when items are selected
  * @param [deleteConfirmationOptions] - Options for the delete confirmation popup
  * @param [unshareConfirmationOptions] - Options for the unshare confirmation popup; when omitted, unshare runs without a confirmation
+ * @param [destinationFolderPopupOptions.movedIntoItselfTooltip] - Tooltip on the disabled Move button when the destination is a moved folder or lies inside one; defaults to "A folder can't be moved into itself or its subfolders"
  * @param [destinationFolderPopupOptions.excludedPaths] - Paths to hide from the Copy/Move destination popup only (e.g. a root folder that shouldn't be a valid destination); the main tree/grid are unaffected
  * @param [destinationFolderPopupOptions.getSourceItemsLabel] - Text naming several items being copied or moved in the phone sheet; defaults to "N items"
  * @param [destinationFolderPopupOptions.destinationLabel] - Heading above the folders tree in the phone sheet; defaults to "Copy to folder" or "Move to folder"

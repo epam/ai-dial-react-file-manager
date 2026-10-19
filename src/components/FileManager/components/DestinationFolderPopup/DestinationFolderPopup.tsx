@@ -27,8 +27,11 @@ import {
   useRef,
   useState,
 } from 'react';
-import { excludePathsFromTree } from '@/components/FileManager/utils';
-import type { DialFile } from '@/models/file';
+import {
+  excludePathsFromTree,
+  isPathWithinFolders,
+} from '@/components/FileManager/utils';
+import { type DialFile, DialFileNodeType } from '@/models/file';
 import CopyToIcon from '@/assets/icons/copy-to.svg?react';
 import MoveToIcon from '@/assets/icons/move-to.svg?react';
 import { DestinationFolderSheet } from './DestinationFolderSheet';
@@ -49,6 +52,7 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
   header?: ReactNode;
   sourceFolder?: string;
   disabledPathTooltip?: string;
+  movedIntoItselfTooltip?: string;
   collapsedFileTree?: boolean;
   alertProps?: ComponentProps<typeof Notification>;
   onFolderPopupPathChange?: (newPath?: string) => void;
@@ -98,6 +102,7 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
  * @param onPathChange - Callback fired when the path changes
  * @param [sourceFolder] - The source folder path for move operations
  * @param [disabledPathTooltip="Unavailable for the original path. Please select another folder"] - Tooltip text when destination is disabled
+ * @param [movedIntoItselfTooltip="A folder can't be moved into itself or its subfolders"] - Tooltip text when, in move mode, the destination is a moved folder or lies inside one
  * @param [collapsedFileTree=false] - Whether the file tree should be initially collapsed
  * @param [processDestinationFolderPath] - Optional function to process the destination folder path before setting it
  * @param [excludedPaths] - Paths to hide from this popup's tree and grid (e.g. a root folder that shouldn't be a valid destination). Matching items and their subtree are excluded.
@@ -132,6 +137,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
   header,
   sourceFolder,
   disabledPathTooltip = 'Unavailable for the original path. Please select another folder',
+  movedIntoItselfTooltip = "A folder can't be moved into itself or its subfolders",
   path,
   collapsedFileTree = false,
   alertProps,
@@ -180,13 +186,32 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
     ? 'Copy to folder'
     : 'Move to folder';
 
+  /* A folder cannot be moved into itself or into one of its own subfolders. */
+  const isDestinationInsideMovedFolder = useMemo(() => {
+    if (isCopyMode || !path) {
+      return false;
+    }
+    const movedFolderPaths = sourceItems
+      .filter((item) => item.nodeType === DialFileNodeType.FOLDER)
+      .map((item) => item.path);
+
+    return isPathWithinFolders(path, movedFolderPaths);
+  }, [isCopyMode, path, sourceItems]);
+
   const isDestinationDisabled = useMemo(() => {
+    if (isDestinationInsideMovedFolder) {
+      return true;
+    }
     if (!path || !sourceFolder) {
       return false;
     }
 
     return sourceFolder === path;
-  }, [path, sourceFolder]);
+  }, [isDestinationInsideMovedFolder, path, sourceFolder]);
+
+  const disabledConfirmTooltip = isDestinationInsideMovedFolder
+    ? movedIntoItselfTooltip
+    : disabledPathTooltip;
 
   const confirmLabel = isCopyMode ? copyLabel : moveLabel;
 
@@ -209,7 +234,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
           />
         }
         isConfirmDisabled={isDestinationDisabled}
-        disabledConfirmTooltip={disabledPathTooltip}
+        disabledConfirmTooltip={disabledConfirmTooltip}
         selectedPath={path}
         rootItemPath={restProps.rootItem?.path}
         rootItemLabel={restProps.rootItem?.label}
@@ -267,7 +292,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
           <div className="flex space-x-4 items-center">
             <NeutralButton onClick={onClose} label="Cancel" />
             {isDestinationDisabled ? (
-              <Tooltip tooltip={disabledPathTooltip}>
+              <Tooltip tooltip={disabledConfirmTooltip}>
                 <PrimaryButton
                   onClick={onConfirm}
                   label={confirmLabel}

@@ -91,6 +91,29 @@ export const excludePathsFromTree = (
 };
 
 /**
+ * Checks whether a path is one of the given folders or lies inside one.
+ * Trailing slashes are ignored, so `/Docs` and `/Docs/` name the same folder,
+ * and a sibling that only shares a prefix (`/Docs-old`) does not match.
+ *
+ * @param path - Path to check
+ * @param folderPaths - Folder paths to check against
+ * @returns `true` when `path` equals or descends from any of `folderPaths`
+ */
+export const isPathWithinFolders = (
+  path: string,
+  folderPaths: string[],
+): boolean => {
+  const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
+  const target = trimTrailingSlash(path);
+
+  return folderPaths.some((folderPath) => {
+    const folder = trimTrailingSlash(folderPath);
+    if (!folder) return false;
+    return target === folder || target.startsWith(`${folder}/`);
+  });
+};
+
+/**
  * Finds the folders whose name contains the query, case-insensitively. A
  * matching folder keeps its whole subtree; other folders stay only when they
  * lead to a match. Files and hidden dot-folders outside a match are dropped.

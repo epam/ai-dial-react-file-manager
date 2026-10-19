@@ -589,6 +589,112 @@ describe('Dial UI Kit :: DialDestinationFolderPopup', () => {
     expect(moveButton).not.toBeDisabled();
   });
 
+  describe('moving a folder into itself', () => {
+    const rootItem: DialFile = {
+      id: 'root',
+      name: 'Root',
+      path: '/',
+      folderId: 'root-folder',
+      nodeType: DialFileNodeType.FOLDER,
+      label: 'Root',
+    };
+    const movedFolder = mockFiles[0];
+
+    test.each([
+      ['the moved folder', '/Documents'],
+      ['the moved folder with a trailing slash', '/Documents/'],
+      ['a subfolder of the moved folder', '/Documents/Reports/2024'],
+    ])('disables Move when the destination is %s', (_label, path) => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          items={mockFiles}
+          rootItem={rootItem}
+          sourceFolder="/"
+          sourceItems={[movedFolder]}
+          path={path}
+        />,
+      );
+
+      expect(screen.getByRole('button', { name: 'Move' })).toBeDisabled();
+    });
+
+    test('keeps Move enabled for a sibling that only shares a name prefix', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          items={mockFiles}
+          rootItem={rootItem}
+          sourceFolder="/"
+          sourceItems={[movedFolder]}
+          path="/Documents-old"
+        />,
+      );
+
+      expect(screen.getByRole('button', { name: 'Move' })).not.toBeDisabled();
+    });
+
+    test('keeps Move enabled when only a file named like the destination is moved', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          items={mockFiles}
+          rootItem={rootItem}
+          sourceFolder="/"
+          sourceItems={[{ ...movedFolder, nodeType: DialFileNodeType.ITEM }]}
+          path="/Documents"
+        />,
+      );
+
+      expect(screen.getByRole('button', { name: 'Move' })).not.toBeDisabled();
+    });
+
+    test('does not apply the rule in copy mode', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="copy"
+          items={mockFiles}
+          rootItem={rootItem}
+          sourceFolder="/"
+          sourceItems={[movedFolder]}
+          path="/Documents"
+        />,
+      );
+
+      expect(screen.getByRole('button', { name: 'Copy' })).not.toBeDisabled();
+    });
+
+    test('explains why Move is disabled', async () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          items={mockFiles}
+          rootItem={rootItem}
+          sourceFolder="/"
+          sourceItems={[movedFolder]}
+          path="/Documents"
+          movedIntoItselfTooltip="Not into itself"
+        />,
+      );
+
+      fireEvent.mouseEnter(
+        screen.getByRole('button', { name: 'Move' }).parentElement!,
+      );
+
+      expect(await screen.findByText('Not into itself')).toBeInTheDocument();
+    });
+  });
+
   test('displays tooltip when button is disabled', async () => {
     render(
       <DialDestinationFolderPopup
@@ -824,6 +930,22 @@ describe('Dial UI Kit :: DialDestinationFolderPopup', () => {
           path="/Documents"
           sourceFolder="/Documents"
           sourceItems={[sourceFile]}
+        />,
+      );
+
+      expect(screen.getByRole('button', { name: 'Move' })).toBeDisabled();
+    });
+
+    test('disables the confirm button inside the moved folder', () => {
+      render(
+        <DialDestinationFolderPopup
+          open
+          onClose={vi.fn()}
+          mode="move"
+          items={mockFiles}
+          path="/Documents/Reports"
+          sourceFolder="/"
+          sourceItems={[mockFiles[0]]}
         />,
       );
 
