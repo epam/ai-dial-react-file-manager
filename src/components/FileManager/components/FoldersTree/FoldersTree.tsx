@@ -494,6 +494,15 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                           {caretIcon}
                         </span>
                       ))}
+                    {/* A file has no caret; keep its slot so file and folder
+                        icons on the same level line up. */}
+                    {!isFolder && (
+                      <span
+                        aria-hidden
+                        className="shrink-0"
+                        style={{ width: CARET_ICON_PROPS.size }}
+                      />
+                    )}
                     <DialFileManagerItemName
                       elementId={`${path}-tree-item`}
                       name={isRootFolder ? rootItemLabel : name}

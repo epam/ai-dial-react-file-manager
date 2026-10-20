@@ -165,6 +165,26 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
     expect(screen.getByText('File.txt')).toBeInTheDocument();
   });
 
+  test('reserves the caret slot on a file row so file and folder icons line up', () => {
+    render(
+      <DialFoldersTree
+        items={mockItems}
+        expandedPaths={new Set(['/root', '/root/Subfolder'])}
+        showFiles
+      />,
+    );
+
+    /* Layout-only: no semantic query reaches the decorative slot. */
+    const slotOf = (name: string) =>
+      // eslint-disable-next-line testing-library/no-node-access
+      screen
+        .getByRole('treeitem', { name })
+        .querySelector('span[aria-hidden][style*="width"]');
+
+    expect(slotOf('File.txt')).toHaveStyle({ width: '10px' });
+    expect(slotOf('Subfolder')).toBeNull();
+  });
+
   test('does not show files when showFiles is false', () => {
     render(
       <DialFoldersTree
