@@ -69,7 +69,7 @@ export interface DialFoldersTreeProps {
   autoFocus?: boolean;
   /** Called when Escape is pressed on a row, e.g. to close an overlay hosting the tree. */
   onEscape?: () => void;
-  /** Whether clicking a folder's caret also selects it. Defaults to `true`; when `false` the caret only expands or collapses the folder. */
+  /** Whether clicking a folder's caret also selects it. Defaults to `false`: the caret only expands or collapses the folder. */
   selectOnCaretClick?: boolean;
   /** Whether rows show the hover "more" button that opens the `getContextMenuItems` menu. Defaults to `true`; the right-click menu and `renderItemActions` stay either way. */
   showContextMenuButton?: boolean;
@@ -203,7 +203,7 @@ const collectVisibleRows = (
  * @param [ariaLabel='Folders'] - Accessible name of the `role="tree"` root.
  * @param [autoFocus=false] - Moves focus to the selected row (or the first row) on mount.
  * @param [onEscape] - Callback fired when Escape is pressed on a row.
- * @param [selectOnCaretClick=true] - Whether clicking a folder's caret also selects it; when `false` the caret only expands or collapses the folder.
+ * @param [selectOnCaretClick=false] - Whether clicking a folder's caret also selects it; by default the caret only expands or collapses the folder.
  * @param [showContextMenuButton=true] - Whether rows show the hover "more" button that opens the `getContextMenuItems` menu; the right-click menu and `renderItemActions` stay either way.
  * @remarks
  * - Folder and file data must follow the `DialFile` model.
@@ -247,7 +247,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   ariaLabel = 'Folders',
   autoFocus = false,
   onEscape,
-  selectOnCaretClick = true,
+  selectOnCaretClick = false,
   showContextMenuButton = true,
 }) => {
   const { expandedPaths, togglePath } = useExpandedPaths({
@@ -285,9 +285,13 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /*
+   * Clicking a row opens the folder: it selects it and expands a collapsed
+   * one, but never collapses an expanded one — only the caret does that.
+   */
   const handleFolderClick = (node: DialFile) => {
     onItemClick?.(node);
-    togglePath(node.path);
+    if (!expandedPaths.has(node.path)) togglePath(node.path);
   };
 
   const moveFocusTo = (path: string | undefined) => {
@@ -399,7 +403,9 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       const validateHandler =
         onRenameValidate && ((value: string) => onRenameValidate(value, node));
 
-      const selectedClass = isSelected ? 'bg-control-accent-alpha' : '';
+      const selectedClass = isSelected
+        ? 'bg-control-accent-alpha-active-subtle'
+        : '';
 
       const menuItems = isRootFolder ? [] : (getContextMenuItems?.(node) ?? []);
       const itemActions =
@@ -458,7 +464,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                 }}
                 style={{ paddingLeft: `${level * FOLDER_LEVEL_PADDING}px` }}
                 className={mergeClasses(
-                  'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover rounded-full group/item w-full relative',
+                  'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover-subtle rounded-full group/item w-full relative',
                   'outline-hidden focus-visible:outline focus-visible:outline-focus focus-visible:-outline-offset-1',
                   selectedClass,
                 )}
@@ -470,7 +476,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                   />
                 )}
                 <div
-                  className="relative flex flex-row truncate items-center w-fit h-6 gap-x-1 pl-1"
+                  className="relative flex flex-row truncate items-center w-fit h-6 gap-x-1 pl-[5px]"
                   onClick={() => !isRenaming && handleFolderClick(node)}
                 >
                   <>
@@ -504,8 +510,8 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       loading={isLoading}
                       shared={isSharedByMe}
                       sharedIndicatorClassName={mergeClasses(
-                        'group-hover/item:bg-control-accent-alpha-hover',
-                        isSelected && 'bg-control-accent-alpha',
+                        'group-hover/item:bg-control-accent-alpha-hover-subtle',
+                        isSelected && 'bg-control-accent-alpha-active-subtle',
                       )}
                       iconSize={BASE_FILE_MANAGER_ICON_SIZE}
                       forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}

@@ -547,6 +547,10 @@ describe('Dial UI Kit :: FileManager', () => {
       expect(
         within(chipRow).getByRole('button', { name: 'Shared' }),
       ).toHaveAttribute('aria-pressed', 'false');
+      // Semibold in every state, not only once selected.
+      for (const chip of within(chipRow).getAllByRole('button')) {
+        expect(chip).toHaveClass('dial-tiny-semi-text');
+      }
 
       const toolbar = screen.getByRole('toolbar', {
         name: 'File Manager Toolbar',

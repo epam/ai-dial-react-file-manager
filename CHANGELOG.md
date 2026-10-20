@@ -93,6 +93,30 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **`shadow-sm` and `shadow-md` are the design's two-layer Shadow SM and
+  Shadow MD** — each was one blue layer. `shadow-sm` is now `4px 9px 16px 1px`
+  at 6% accent (`--shadow-sm-2`) plus a `0 -2px 4px 2px` halo at 4% accent
+  (`--shadow-sm-1`); `shadow-md` is `0 10px 30px 9px` at 6% accent
+  (`--shadow-md-2`) plus a `0 0 8px 2px` halo at 4% accent (`--shadow-md-1`),
+  matching the kit. The folders panel, the grid card, the destination folder
+  popup and the bulk-actions toolbar use `shadow-sm` and follow. A host that
+  themed the old `--shadow-sm` / `--shadow-md` colour keeps it on the drop
+  layer.
+
+- **`@epam/ai-dial-ui-kit` peer range raised to `^0.16.0-dev.19`** (was
+  `^0.16.0-dev.9`). A host on an older 0.16 prerelease gets a peer warning and
+  should update the kit alongside this package.
+
+- **`DialFoldersTree` — the caret and the row follow the 2.0 tree item** —
+  clicking a row selected the folder and toggled it, so clicking an open
+  folder collapsed it, and on desktop clicking the caret did the same as the
+  row. Now clicking the caret only expands or collapses the folder and never
+  selects it. Clicking the row selects the folder and expands it when it is
+  closed, but never collapses it. Hovering the caret shows a 20px round tint of
+  its own. `selectOnCaretClick` now defaults to `false` in `DialFoldersTree`
+  and in `DialFileManager` (it was `true` outside the compact view); pass
+  `true` to get the old caret behaviour back. Keyboard navigation is unchanged.
+
 - **The Unshare action uses the trash-x icon** — in the tree context menu,
   the grid row menu, and the bulk toolbar, matching the "Remove from My List"
   action hosts show for other shared-with-me entities. The bundled
@@ -330,6 +354,21 @@ and this project follows [Semantic Versioning](https://semver.org/).
   along with the `isCompactView` prop it belonged to.
 
 ### Fixed
+
+- **Section chips are semibold in every state** — the All / My files / Shared /
+  Organization chips came from the kit's selectable chip, which is regular until
+  selected, while the design and the chat panel's filter row keep every chip
+  semibold. Both chip rows (the folders panel and the compact navigation) now
+  pass `dial-tiny-semi-text` to every chip.
+
+- **Tree items and the grid's name cell use the subtle hover and selected
+  backgrounds** — `DialFoldersTree` rows hovered with
+  `--bg-control-accent-alpha-hover` and marked the selected row with
+  `--bg-control-accent-alpha`, and the shared-by-me indicator in the grid's name
+  cell did the same, while the grid rows themselves already use the kit Grid's
+  `--bg-control-accent-alpha-hover-subtle` / `--bg-control-accent-alpha-active-subtle`.
+  All of them now use the subtle pair, so the indicator matches its row again.
+  Both tokens are added to the theme.
 
 - **`DialFoldersTree` — file and folder icons line up** — with `showFiles`, a
   folder row starts with its 10px expand caret and a file row did not, so a

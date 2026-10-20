@@ -79,6 +79,35 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
     );
   });
 
+  test('by default the caret only toggles a folder, open or closed, and never selects it', () => {
+    const onItemClick = vi.fn();
+    render(<DialFoldersTree items={mockItems} onItemClick={onItemClick} />);
+
+    // The caret is a decorative icon with no role of its own.
+    const caret = () =>
+      // eslint-disable-next-line testing-library/no-node-access
+      screen.getByRole('treeitem', { name: 'Root' }).querySelector('svg')!;
+
+    fireEvent.click(caret());
+    expect(screen.getByText('Subfolder')).toBeInTheDocument();
+
+    fireEvent.click(caret());
+    expect(screen.queryByText('Subfolder')).not.toBeInTheDocument();
+    expect(onItemClick).not.toHaveBeenCalled();
+  });
+
+  test('clicking a row opens the folder: expands a closed one, never collapses an open one', () => {
+    const onItemClick = vi.fn();
+    render(<DialFoldersTree items={mockItems} onItemClick={onItemClick} />);
+
+    fireEvent.click(screen.getByText('Root'));
+    expect(screen.getByText('Subfolder')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Root'));
+    expect(screen.getByText('Subfolder')).toBeInTheDocument();
+    expect(onItemClick).toHaveBeenCalledTimes(2);
+  });
+
   test('hides the context menu button but keeps the right-click menu when showContextMenuButton is false', () => {
     const { rerender } = render(
       <DialFoldersTree items={mockItems} getContextMenuItems={getMenu} />,
