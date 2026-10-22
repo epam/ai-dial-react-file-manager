@@ -22,6 +22,7 @@ import {
   ButtonVariant,
   Checkbox,
   DateCellRenderer,
+  GhostButton,
   Switch,
   Popup,
   PopupSize,
@@ -1771,6 +1772,32 @@ export const WithoutFiles: Story = {
       description: {
         story:
           'File Manager configured to hide files in the grid, showing only folders in the tree view.',
+      },
+    },
+  },
+};
+
+const WithToolbarAdditionalButtonsComponent = (args: DialFileManagerProps) => {
+  return (
+    <div className="h-[640px]">
+      <DialFileManager
+        {...args}
+        toolbarOptions={{
+          ...(args.toolbarOptions ?? {}),
+          additionalButtons: <GhostButton label="Reset filters" />,
+        }}
+      />
+    </div>
+  );
+};
+
+export const WithToolbarAdditionalButtons: Story = {
+  render: WithToolbarAdditionalButtonsComponent,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Host controls passed through `toolbarOptions.additionalButtons` render in the header toolbar before the add button. In the compact view they sit before the Sort dropdown.',
       },
     },
   },
