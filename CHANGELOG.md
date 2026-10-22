@@ -75,6 +75,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - **`DialFileManagerSortDropdown` — `iconOnly`** — renders a round icon-only
   trigger named by `label`. The compact view turns it on unless `sortOptions`
   sets it.
+- **`toolbarOptions.additionalButtons`** — host controls rendered in the header
+  toolbar before the add button. In the compact view they sit before the sort
+  dropdown.
 - **`toolbarOptions.moreActionsLabel`** — accessible name of the compact
   "more" menu trigger, defaulting to `"More actions"`.
 - **`destinationFolderPopupOptions.getSourceItemsLabel` / `destinationLabel`**
