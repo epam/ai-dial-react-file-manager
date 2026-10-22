@@ -1181,6 +1181,59 @@ describe('Dial UI Kit :: FileManager', () => {
         );
       });
 
+      test('renders host additionalButtons before the sort in the compact toolbar', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            navigationPanelOptions={{ searchable: true }}
+            toolbarOptions={{
+              additionalButtons: <button type="button">Reset filters</button>,
+            }}
+          />,
+        );
+
+        await waitForGridTable();
+
+        const toolbar = screen.getByRole('toolbar', {
+          name: 'File Manager Toolbar',
+        });
+
+        expect(
+          within(toolbar)
+            .getAllByRole('button')
+            .map(
+              (button) =>
+                button.getAttribute('aria-label') ?? button.textContent,
+            ),
+        ).toEqual(['More actions', 'Reset filters', 'Sort']);
+      });
+
+      test('renders host additionalButtons in the toolbar outside the compact view', async () => {
+        widthBreakpoint.isBelowBreakpoint = false;
+
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            navigationPanelOptions={{ searchable: true }}
+            toolbarOptions={{
+              additionalButtons: <button type="button">Reset filters</button>,
+            }}
+          />,
+        );
+
+        await waitForGridTable();
+
+        const toolbar = screen.getByRole('toolbar', {
+          name: 'File Manager Toolbar',
+        });
+
+        expect(
+          within(toolbar).getByRole('button', { name: 'Reset filters' }),
+        ).toBeInTheDocument();
+      });
+
       describe('with several roots', () => {
         const makeRoot = (name: string, childName: string): DialFile => ({
           name,

@@ -365,7 +365,6 @@ export type ToolbarOptions = Omit<
   | 'areHiddenFilesVisible'
   | 'onToggleHiddenFiles'
   | 'isCompactView'
-  | 'additionalButtons'
   | 'onMenuItemClick'
 > & {
   newActions?: {
@@ -622,7 +621,7 @@ export interface DialFileManagerProps {
  * @param [showNavigationPanel] - Determines whether to display the breadcrumb trail.
  * @param [navigationPanelOptions] - Options for the breadcrumb trail and the search field above the grid (searchable, value/onSearchChange for controlled search)
  * @param [sortOptions] - Options for the "Sort" menu beside the search field (sortable, sort/defaultSort/onSortChange, labels). Defaults to name, ascending
- * @param [toolbarOptions] - Options for the header actions: the hidden-files switch and the add button
+ * @param [toolbarOptions] - Options for the header actions: the hidden-files switch and the add button; `additionalButtons` renders host controls before the add button
  * @param [gridOptions] - Options forwarded to `Grid`; supports `columnDefs` override and `filterable` flag and date locale/options
  * @param [bulkActionsToolbarOptions] - Options for the bulk actions toolbar shown when items are selected
  * @param [deleteConfirmationOptions] - Options for the delete confirmation popup
@@ -1328,8 +1327,20 @@ export const DialFileManagerView: FC = () => {
   );
 
   const renderToolbar = useCallback(
-    (additionalButtons?: ReactNode) => {
+    (sortButtons?: ReactNode) => {
       if (!toolbarOptions) return null;
+
+      // Host buttons come first, so the compact-view sort dropdown stays next to the add button.
+      const hostButtons = toolbarOptions.additionalButtons;
+      const additionalButtons =
+        hostButtons && sortButtons ? (
+          <>
+            {hostButtons}
+            {sortButtons}
+          </>
+        ) : (
+          (hostButtons ?? sortButtons)
+        );
 
       return (
         <div
