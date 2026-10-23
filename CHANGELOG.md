@@ -25,6 +25,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`treeOptions.header` in the compact view** — the folders panel's header is
+  now drawn as a heading above the compact navigation card. Until now the compact view dropped the folders panel, and the
+  heading with it, so a host's title showed in the panel but vanished once the
+  manager collapsed to one column. It follows the panel: a passed header is
+  drawn, the default "Files" is drawn, and `header: null` draws nothing.
+
 - **`unshareConfirmationOptions`** — opt-in confirmation before unsharing
   shared-with-me items from the tree, grid row, or bulk toolbar. Takes the
   same options as `deleteConfirmationOptions`; without it `onUnshareFiles`
