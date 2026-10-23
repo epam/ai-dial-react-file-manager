@@ -26,6 +26,11 @@ export const sidebarContentClassName = 'flex h-full min-h-0 flex-col gap-3';
 
 export const sidebarHeadingClassName = 'dial-h1-text text-primary';
 
+export const compactHeadingClassName =
+  'dial-h1-text text-primary flex min-h-12 shrink-0 items-center';
+
+export const compactNavigationGroupClassName = 'flex min-h-0 flex-col gap-2';
+
 export const sidebarHeadingRowClassName =
   'px-4 h-[64px] flex items-center justify-between gap-2';
 

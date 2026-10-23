@@ -132,6 +132,8 @@ import {
   searchRowClassName,
   mainGridClassName,
   sidebarContentClassName,
+  compactHeadingClassName,
+  compactNavigationGroupClassName,
   sidebarHeadingClassName,
   sidebarHeadingRowClassName,
   sidebarPanelClassName,
@@ -1598,8 +1600,9 @@ export const DialFileManagerView: FC = () => {
   /*
    * The compact view drops the folders panel for a card naming the current
    * folder; it opens into the section chips and the same tree, and closes
-   * once a folder is picked. The panel heading is not rendered here, so a
-   * plain-text header names the chip row directly.
+   * once a folder is picked. The panel has no heading of its own here, so the
+   * `treeOptions.header` is drawn above the card instead, as the panel draws
+   * it, and names the chip row.
    */
   const renderCompactNavigation = useCallback(() => {
     const activeTabLabel = tabs?.find((tab) => tab.value === activeTab)?.label;
@@ -1609,23 +1612,30 @@ export const DialFileManagerView: FC = () => {
         : (currentFolder?.name ?? activeTabLabel ?? rootItem?.label ?? '');
 
     return (
-      <DialFileManagerCompactNavigation
-        label={label}
-        isOpen={isCompactNavigationOpen}
-        onOpenChange={setIsCompactNavigationOpen}
+      <div
+        className={mergeClasses(compactNavigationGroupClassName, {
+          'flex-1': isCompactNavigationOpen,
+        })}
       >
-        {tabs?.length && activeTab ? (
-          <FilterChips
-            items={tabs}
-            value={activeTab}
-            onChange={handleTabChange}
-            aria-label={typeof header === 'string' ? header : tabsAriaLabel}
-            className="shrink-0 overflow-x-auto"
-            chipClassName={SECTION_CHIP_CLASS_NAME}
-          />
-        ) : null}
-        <div className="min-h-0 flex-1 overflow-auto">{foldersTree}</div>
-      </DialFileManagerCompactNavigation>
+        {header ? <h1 className={compactHeadingClassName}>{header}</h1> : null}
+        <DialFileManagerCompactNavigation
+          label={label}
+          isOpen={isCompactNavigationOpen}
+          onOpenChange={setIsCompactNavigationOpen}
+        >
+          {tabs?.length && activeTab ? (
+            <FilterChips
+              items={tabs}
+              value={activeTab}
+              onChange={handleTabChange}
+              aria-label={typeof header === 'string' ? header : tabsAriaLabel}
+              className="shrink-0 overflow-x-auto"
+              chipClassName={SECTION_CHIP_CLASS_NAME}
+            />
+          ) : null}
+          <div className="min-h-0 flex-1 overflow-auto">{foldersTree}</div>
+        </DialFileManagerCompactNavigation>
+      </div>
     );
   }, [
     rootItem?.label,

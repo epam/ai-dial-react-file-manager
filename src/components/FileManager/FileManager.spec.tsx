@@ -820,6 +820,72 @@ describe('Dial UI Kit :: FileManager', () => {
         ).toBeInTheDocument();
       });
 
+      test('draws an explicit treeOptions.header as a heading above the compact navigation', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            treeOptions={{
+              header: 'File storage',
+              tabs: tabsMock,
+              activeTab: DialFileManagerTabs.MyFiles,
+              onTabChange: vi.fn(),
+            }}
+          />,
+        );
+
+        await waitForGridTable();
+
+        const heading = screen.getByRole('heading', {
+          level: 1,
+          name: 'File storage',
+        });
+        const navigation = screen.getByRole('button', {
+          name: 'All files',
+          expanded: false,
+        });
+        expect(
+          heading.compareDocumentPosition(navigation) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
+      });
+
+      test('draws the default "Files" header in the compact view, as the panel does', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            treeOptions={{
+              tabs: tabsMock,
+              activeTab: DialFileManagerTabs.MyFiles,
+              onTabChange: vi.fn(),
+            }}
+          />,
+        );
+
+        await waitForGridTable();
+
+        expect(
+          screen.getByRole('heading', { level: 1, name: 'Files' }),
+        ).toBeInTheDocument();
+      });
+
+      test('does not draw a heading in the compact view when the host header is null', async () => {
+        renderWithinSizedShell(
+          <DialFileManager
+            items={itemsMock}
+            path="/All files"
+            treeOptions={{ header: null }}
+          />,
+        );
+
+        await waitForGridTable();
+
+        expect(
+          screen.queryByRole('heading', { level: 1 }),
+        ).not.toBeInTheDocument();
+      });
+
       test('names the compact filter row from tabsAriaLabel when the header is not text', async () => {
         renderWithinSizedShell(
           <DialFileManager
