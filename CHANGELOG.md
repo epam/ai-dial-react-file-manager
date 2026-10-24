@@ -118,7 +118,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   The compact navigation card uses `shadow-xs` and follows. `--shadow-xs-2` is
   no longer read by `shadow-xs`.
 
-- **`@epam/ai-dial-ui-kit` peer range raised to `^0.16.0-dev.19`** (was
+- **`@epam/ai-dial-ui-kit` peer range raised to `^0.16.0-dev.45`** (was
   `^0.16.0-dev.9`). A host on an older 0.16 prerelease gets a peer warning and
   should update the kit alongside this package.
 
