@@ -111,6 +111,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
   popup and the bulk-actions toolbar use `shadow-sm` and follow. A host that
   themed the old `--shadow-sm` / `--shadow-md` colour keeps it on the drop
   layer.
+- **`shadow-xs` and `shadow-lg` follow the design's Shadow XS and Shadow LG**
+  — `shadow-xs` is one centred `0 0 8px 1px` glow at 20% accent
+  (`--shadow-xs-1`) instead of a blue and a grey drop; `shadow-lg` is
+  `1px 10px 25px 12px` at 8% accent (was `0 8px 44px 0`), matching the kit.
+  The compact navigation card uses `shadow-xs` and follows. `--shadow-xs-2` is
+  no longer read by `shadow-xs`.
 
 - **`@epam/ai-dial-ui-kit` peer range raised to `^0.16.0-dev.19`** (was
   `^0.16.0-dev.9`). A host on an older 0.16 prerelease gets a peer warning and
