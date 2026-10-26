@@ -17,6 +17,7 @@ import {
   DialFileManagerConflictStrategies,
   DialFileManagerTabs,
   FileManagerColumnKey,
+  FileUploadValidationErrorReason,
 } from '@/types/file-manager';
 import {
   ButtonVariant,
@@ -29,7 +30,7 @@ import {
   PrimaryButton,
 } from '@epam/ai-dial-ui-kit';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
   IconBuildingCommunity,
   IconFileDescription,
@@ -47,6 +48,7 @@ import { FileManagerProvider } from './FileManagerProvider';
 import { itemsMock } from './__mocks__/files';
 import { mobileItemsByTab, mobileTabs } from './__mocks__/mobile-files';
 import { useDialFileManagerTabs } from './hooks/use-file-manager-tabs';
+import type { FileUploadValidationError } from './hooks/use-file-upload';
 
 const meta = {
   title: 'FileManager/FileManager',
@@ -2555,6 +2557,142 @@ export const MobileFileStorage: Story = {
       description: {
         story:
           'The compact (mobile) layout at phone width: a card naming the current folder that opens into the section chips and the folders tree, one action row with search, the "more" menu, Sort and Add, and two-line rows with the date and size.',
+      },
+    },
+  },
+};
+
+const UPLOAD_LIMIT_BYTES = 1024 * 1024;
+const UPLOAD_LIMIT_MESSAGE = 'Max file size is 1 MB.';
+
+const createSizedFile = (name: string, size: number): File =>
+  new File([new Uint8Array(size)], name, { type: 'text/plain' });
+
+/*
+ * Dispatches a native drop carrying a real DataTransfer. `fireEvent.drop`
+ * replaces `dataTransfer` with an empty copy in a real browser, so the files
+ * would never reach the file manager.
+ */
+const dropFilesOnGrid = (canvasElement: HTMLElement, files: File[]) => {
+  const dataTransfer = new DataTransfer();
+  files.forEach((file) => dataTransfer.items.add(file));
+  within(canvasElement)
+    .getByRole('region', { name: 'File Manager Grid View' })
+    .dispatchEvent(
+      new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer }),
+    );
+};
+
+const UploadedNames = ({ names }: { names: string[] }) => (
+  <p className="dial-small-text text-secondary px-5" aria-live="polite">
+    {names.length > 0
+      ? `Sent to onUploadFiles: ${names.join(', ')}`
+      : 'Nothing sent to onUploadFiles yet'}
+  </p>
+);
+
+const UploadOversizedFileComponent = (args: DialFileManagerProps) => {
+  const [uploadedNames, setUploadedNames] = useState<string[]>([]);
+
+  return (
+    <div className="h-[640px] flex flex-col gap-2">
+      <UploadedNames names={uploadedNames} />
+      <DialFileManager
+        {...args}
+        uploadEnabled
+        maxFileSize={UPLOAD_LIMIT_BYTES}
+        uploadValidationMessages={{ oversizedFiles: UPLOAD_LIMIT_MESSAGE }}
+        onUploadFiles={(files) =>
+          setUploadedNames((prev) => [
+            ...prev,
+            ...files.map((file) => file.name),
+          ])
+        }
+      />
+    </div>
+  );
+};
+
+export const UploadOversizedFile: Story = {
+  render: UploadOversizedFileComponent,
+  args: {
+    defaultPath: 'All files/Design/Mockups',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole('region', { name: 'File Manager Grid View' });
+
+    dropFilesOnGrid(canvasElement, [
+      createSizedFile('huge-video.mp4', 2 * UPLOAD_LIMIT_BYTES),
+      createSizedFile('notes.txt', 512),
+    ]);
+
+    await expect(await canvas.findByRole('alert')).toHaveTextContent(
+      UPLOAD_LIMIT_MESSAGE,
+    );
+    await expect(
+      canvas.getByText('Sent to onUploadFiles: notes.txt'),
+    ).toBeInTheDocument();
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Uploads are limited to 1 MB. The play function drops a 2 MB file together with a small one onto the grid: the file manager shows why the large file was rejected (a dismissible error message above the grid) and still sends the small one to `onUploadFiles`. Drop or pick your own file larger than 1 MB to try it manually.',
+      },
+    },
+  },
+};
+
+const UploadValidationErrorHandledByHostComponent = (
+  args: DialFileManagerProps,
+) => {
+  const [lastError, setLastError] = useState<FileUploadValidationError>();
+
+  return (
+    <div className="h-[640px] flex flex-col gap-2">
+      <p className="dial-small-text text-error px-5" role="status">
+        {lastError
+          ? `Host toast: ${lastError.message} (${lastError.reason}: ${lastError.fileNames.join(', ')})`
+          : 'The host shows upload rejections here'}
+      </p>
+      <DialFileManager
+        {...args}
+        uploadEnabled
+        maxFileSize={UPLOAD_LIMIT_BYTES}
+        uploadValidationMessages={{ oversizedFiles: UPLOAD_LIMIT_MESSAGE }}
+        onUploadValidationError={setLastError}
+        onUploadFiles={() => undefined}
+      />
+    </div>
+  );
+};
+
+export const UploadValidationErrorHandledByHost: Story = {
+  render: UploadValidationErrorHandledByHostComponent,
+  args: {
+    defaultPath: 'All files/Design/Mockups',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole('region', { name: 'File Manager Grid View' });
+
+    dropFilesOnGrid(canvasElement, [
+      createSizedFile('huge-video.mp4', 2 * UPLOAD_LIMIT_BYTES),
+    ]);
+
+    await waitFor(() =>
+      expect(canvas.getByRole('status')).toHaveTextContent(
+        `Host toast: ${UPLOAD_LIMIT_MESSAGE} (${FileUploadValidationErrorReason.OversizedFiles}: huge-video.mp4)`,
+      ),
+    );
+    await expect(canvas.queryByRole('alert')).toBeNull();
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `onUploadValidationError` the host owns the message (for example, its own toast) and the file manager shows nothing itself. The callback receives the reason, the shown message and the rejected file names.',
       },
     },
   },

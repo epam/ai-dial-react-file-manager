@@ -8,6 +8,7 @@ import type {
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
 import { DialFilePermission } from '@/models/file';
+import { FileUploadValidationErrorReason } from '@/types/file-manager';
 import type { DragEvent } from 'react';
 
 const writableFolder: DialFile = {
@@ -1126,7 +1127,7 @@ describe('Dial UI Kit :: FileManager :: useFileUpload', () => {
       ).toEqual(['newfile.txt']);
     });
 
-    it('validates all files and shows all oversized names', async () => {
+    it('names every oversized file and still uploads the files within the limit', async () => {
       const onUploadFiles = vi.fn();
       const maxFileSize = 1024;
       const { result } = renderUseFileUpload({
@@ -1157,8 +1158,135 @@ describe('Dial UI Kit :: FileManager :: useFileUpload', () => {
         expect(result.current.uploadError).toBeDefined();
         expect(result.current.uploadError).toContain('large1.txt');
         expect(result.current.uploadError).toContain('large2.txt');
-        expect(onUploadFiles).not.toHaveBeenCalled();
       });
+      expect(onUploadFiles).toHaveBeenCalledOnce();
+      expect(onUploadFiles).toHaveBeenCalledWith(
+        [expect.objectContaining({ name: 'small.txt' })],
+        '/folder',
+      );
+    });
+  });
+
+  describe('onUploadValidationError', () => {
+    const dropEvent = (files: File[]) =>
+      ({
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+        dataTransfer: { types: ['Files'], files },
+      }) as unknown as DragEvent;
+
+    it('reports oversized files with their names and the shown message', async () => {
+      const onUploadValidationError = vi.fn();
+      const { result } = renderUseFileUpload({
+        maxFileSize: 1024,
+        validationMessages: { oversizedFiles: 'Max file size is 1 KB.' },
+        onUploadValidationError,
+      });
+
+      await act(async () => {
+        await result.current.handleDrop(
+          dropEvent([createMockFile('large.txt', 2048)]),
+          '/folder',
+          [],
+        );
+      });
+
+      expect(onUploadValidationError).toHaveBeenCalledWith({
+        reason: FileUploadValidationErrorReason.OversizedFiles,
+        message: 'Max file size is 1 KB.',
+        fileNames: ['large.txt'],
+      });
+      expect(result.current.uploadError).toBe('Max file size is 1 KB.');
+    });
+
+    it('reports unsupported files', async () => {
+      const onUploadValidationError = vi.fn();
+      const { result } = renderUseFileUpload({
+        allowedFileTypes: ['image/png'],
+        onUploadValidationError,
+      });
+
+      await act(async () => {
+        await result.current.handleDrop(
+          dropEvent([createMockFile('notes.txt', 10)]),
+          '/folder',
+          [],
+        );
+      });
+
+      expect(onUploadValidationError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reason: FileUploadValidationErrorReason.UnsupportedFiles,
+          fileNames: ['notes.txt'],
+        }),
+      );
+    });
+
+    it('reports a failed onValidateUpload with its message', async () => {
+      const onUploadValidationError = vi.fn();
+      const { result } = renderUseFileUpload({
+        onValidateUpload: vi
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'Name is reserved' }),
+        onUploadValidationError,
+      });
+
+      await act(async () => {
+        await result.current.handleDrop(
+          dropEvent([createMockFile('a.txt', 10)]),
+          '/folder',
+          [],
+        );
+      });
+
+      expect(onUploadValidationError).toHaveBeenCalledWith({
+        reason: FileUploadValidationErrorReason.ValidationFailed,
+        message: 'Name is reserved',
+        fileNames: ['a.txt'],
+      });
+    });
+
+    it('validates only the files within the size limit', async () => {
+      const onValidateUpload = vi.fn().mockResolvedValue({ valid: true });
+      const { result } = renderUseFileUpload({
+        maxFileSize: 1024,
+        onValidateUpload,
+      });
+
+      await act(async () => {
+        await result.current.handleDrop(
+          dropEvent([
+            createMockFile('large.txt', 2048),
+            createMockFile('small.txt', 512),
+          ]),
+          '/folder',
+          [],
+        );
+      });
+
+      expect(onValidateUpload).toHaveBeenCalledWith(
+        [expect.objectContaining({ name: 'small.txt' })],
+        [],
+        '/folder',
+      );
+    });
+
+    it('is not called for an upload that passes every check', async () => {
+      const onUploadValidationError = vi.fn();
+      const { result } = renderUseFileUpload({
+        maxFileSize: 1024,
+        onUploadValidationError,
+      });
+
+      await act(async () => {
+        await result.current.handleDrop(
+          dropEvent([createMockFile('small.txt', 512)]),
+          '/folder',
+          [],
+        );
+      });
+
+      expect(onUploadValidationError).not.toHaveBeenCalled();
     });
   });
 

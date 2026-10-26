@@ -21,6 +21,7 @@ import type { FileManagerGridRow } from './FileManagerContext';
 import {
   DialFileManagerTabs,
   FileManagerColumnKey,
+  FileUploadValidationErrorReason,
 } from '@/types/file-manager';
 import { GridSelectionMode } from '@/models/selection-mode';
 import {
@@ -2880,5 +2881,98 @@ describe('Dial UI Kit :: FileManager', () => {
 
       expect(onNewFolderDepthExceeded).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('DialFileManager — upload rejection', () => {
+  const UPLOAD_PATH = 'All files/Design/Icons/SVG/24px';
+  const EXPANDED_PATHS = new Set([
+    'All files',
+    'All files/Design',
+    'All files/Design/Icons',
+    'All files/Design/Icons/SVG',
+  ]);
+
+  const sizedFile = (name: string, size: number): File => {
+    const file = new File([''], name, { type: 'text/plain' });
+    Object.defineProperty(file, 'size', { value: size });
+    return file;
+  };
+
+  const dropFiles = (files: File[]) =>
+    fireEvent.drop(getGridRegion(), {
+      dataTransfer: { files, types: ['Files'] },
+    });
+
+  const renderUploadable = (
+    props: Partial<React.ComponentProps<typeof DialFileManager>> = {},
+  ) =>
+    renderWithinSizedShell(
+      <DialFileManager
+        items={itemsMock}
+        path={UPLOAD_PATH}
+        treeOptions={{ expandedPaths: EXPANDED_PATHS }}
+        uploadEnabled
+        maxFileSize={1024}
+        uploadValidationMessages={{ oversizedFiles: 'Max file size is 1 KB.' }}
+        {...props}
+      />,
+    );
+
+  test('shows why an oversized file was rejected', async () => {
+    const onUploadFiles = vi.fn();
+    renderUploadable({ onUploadFiles });
+
+    dropFiles([sizedFile('huge.bin', 2048)]);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Max file size is 1 KB.',
+    );
+    expect(onUploadFiles).not.toHaveBeenCalled();
+  });
+
+  test('still uploads the files within the limit dropped alongside an oversized one', async () => {
+    const onUploadFiles = vi.fn();
+    renderUploadable({ onUploadFiles });
+
+    dropFiles([sizedFile('huge.bin', 2048), sizedFile('small.txt', 512)]);
+
+    await waitFor(() => expect(onUploadFiles).toHaveBeenCalledOnce());
+    expect(onUploadFiles).toHaveBeenCalledWith(
+      [expect.objectContaining({ name: 'small.txt' })],
+      UPLOAD_PATH,
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Max file size is 1 KB.',
+    );
+  });
+
+  test('dismisses the rejection message with its close button', async () => {
+    const user = userEvent.setup();
+    renderUploadable();
+
+    dropFiles([sizedFile('huge.bin', 2048)]);
+    await screen.findByRole('alert');
+    await user.click(
+      screen.getByRole('button', { name: 'Close notification' }),
+    );
+
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  test('hands the rejection to onUploadValidationError instead of showing it', async () => {
+    const onUploadValidationError = vi.fn();
+    renderUploadable({ onUploadValidationError });
+
+    dropFiles([sizedFile('huge.bin', 2048)]);
+
+    await waitFor(() =>
+      expect(onUploadValidationError).toHaveBeenCalledWith({
+        reason: FileUploadValidationErrorReason.OversizedFiles,
+        message: 'Max file size is 1 KB.',
+        fileNames: ['huge.bin'],
+      }),
+    );
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 });

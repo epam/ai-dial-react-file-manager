@@ -158,6 +158,7 @@ export interface FileManagerContextValue {
   handleDragOver: (e: DragEvent) => void;
   handleDrop: (e: DragEvent) => void;
   clearUploadError: () => void;
+  onUploadValidationError?: DialFileManagerProps['onUploadValidationError'];
 
   onUploadFiles?: DialFileManagerProps['onUploadFiles'];
   onValidateUpload?: DialFileManagerProps['onValidateUpload'];

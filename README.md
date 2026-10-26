@@ -83,6 +83,8 @@ Common integration callbacks include:
 
 - `onPathChange` and `onSelectedPathsChange`
 - `onUploadFiles`, `onUploadArchive`, and `onValidateUpload`
+- `onUploadValidationError`, to show upload rejections (oversized or
+  unsupported files) in the host's own UI instead of the built-in message
 - `onCopyFiles`, `onMoveToFiles`, and `onDeleteFiles`
 - `onDownloadFiles`, `onUnshareFiles`, and `onRemoveFilesAccess`
 - `onManagePermissions`, `onPreview`, and `onOpenInNewTab`

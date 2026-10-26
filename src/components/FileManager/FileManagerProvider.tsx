@@ -108,6 +108,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   onValidateUpload,
   uploadEnabled,
   uploadValidationMessages,
+  onUploadValidationError,
   maxFileSize,
   onUploadArchive,
   prepareUploadFileName,
@@ -475,6 +476,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     validationMessages: uploadValidationMessages,
     uploadEnabled,
     currentFolder,
+    onUploadValidationError,
   });
 
   const handleDrop = useCallback(
@@ -1017,6 +1019,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     handleDragOver,
     handleDrop,
     clearUploadError,
+    onUploadValidationError,
     onUploadFiles,
     onValidateUpload,
     maxFileSize,

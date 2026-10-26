@@ -84,3 +84,17 @@ export interface FileManagerSort {
   field: FileManagerSortField;
   direction: FileManagerSortDirection;
 }
+
+/** Why the file manager rejected an upload before handing files to `onUploadFiles`. */
+export enum FileUploadValidationErrorReason {
+  /** One or more files exceed `maxFileSize`; the rest of the selection still uploads. */
+  OversizedFiles = 'oversizedFiles',
+  /** None of the selected files match `allowedFileTypes`. */
+  UnsupportedFiles = 'unsupportedFiles',
+  /** Only folders were dropped, and folder upload is not supported. */
+  FoldersNotSupported = 'foldersNotSupported',
+  /** `onValidateUpload` returned `{ valid: false }`. */
+  ValidationFailed = 'validationFailed',
+  /** `onValidateUpload` threw, or the upload could not be started. */
+  ValidationError = 'validationError',
+}

@@ -41,6 +41,9 @@ import {
   mergeClasses,
   FilterChips,
   type FilterChipItem,
+  Notification,
+  NotificationType,
+  NotificationVariant,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import {
@@ -48,6 +51,7 @@ import {
   type ConflictResolutionPopupProps,
 } from '@/components/FileManager/components/ConflictResolutionPopup/ConflictResolutionPopup';
 import type {
+  FileUploadValidationError,
   FileUploadValidationMessages,
   FileUploadValidationResult,
 } from '@/components/FileManager/hooks/use-file-upload';
@@ -486,6 +490,7 @@ export interface DialFileManagerProps {
   ) => FileUploadValidationResult | Promise<FileUploadValidationResult>;
   maxFileSize?: number;
   uploadValidationMessages?: FileUploadValidationMessages;
+  onUploadValidationError?: (error: FileUploadValidationError) => void;
   onUploadArchive?: (
     file: File,
     name: string,
@@ -658,6 +663,7 @@ export interface DialFileManagerProps {
  * @param [onValidateUpload] - Callback to validate files before upload
  * @param [maxFileSize] - Maximum allowed file size for uploads in bytes
  * @param [uploadValidationMessages] - Custom validation messages for file uploads. Consumers can customize these strings for a11y and copy consistency.
+ * @param [onUploadValidationError] - Callback fired when an upload is rejected before `onUploadFiles` (oversized or unsupported files, folders, or a failed `onValidateUpload`). When provided, the host owns showing the error; when omitted, the file manager shows it as a dismissible error message above the grid.
  * @param [uploadEnabled=true] - Whether files uploads are enabled
  * @param [autoSelectUploadedItems=false] - When true, automatically selects newly uploaded or created items (files, archives, folders) after they appear in the current directory. Useful in attach flows where the user expects immediate selection feedback.
  *
@@ -778,6 +784,9 @@ export const DialFileManagerView: FC = () => {
     handleDragLeave,
     handleDragOver,
     handleDrop,
+    uploadError,
+    clearUploadError,
+    onUploadValidationError,
 
     onUploadFiles,
     onValidateUpload,
@@ -1953,6 +1962,21 @@ export const DialFileManagerView: FC = () => {
 
                 {renderToolbar()}
               </div>
+            )}
+
+            {/*
+             * A host that handles `onUploadValidationError` shows the rejection
+             * itself; otherwise it would be invisible, so it is shown here.
+             */}
+            {uploadError != null && onUploadValidationError == null && (
+              <Notification
+                className="flex-none"
+                variant={NotificationVariant.Error}
+                type={NotificationType.SectionMessage}
+                message={uploadError}
+                closable
+                onClose={clearUploadError}
+              />
             )}
 
             {/*
