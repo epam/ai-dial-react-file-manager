@@ -99,6 +99,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - **`bulkActionsToolbarOptions.moreActionsLabel`** — accessible name and
   tooltip of the compact selection bar's overflow menu trigger, defaulting to
   `"More actions"`.
+- **`onUploadValidationError`** — called with a `FileUploadValidationError`
+  (`reason`, the shown `message`, and the rejected `fileNames`) whenever an
+  upload is rejected before `onUploadFiles`: oversized or unsupported files,
+  dropped folders, or a failed `onValidateUpload`. A host that passes it shows
+  the message itself; the file manager then shows nothing. Exported with
+  `FileUploadValidationErrorReason`, `FileUploadValidationMessages` and
+  `FileUploadValidationResult`.
 
 ### Changed
 
@@ -369,6 +376,17 @@ and this project follows [Semantic Versioning](https://semver.org/).
   along with the `isCompactView` prop it belonged to.
 
 ### Fixed
+
+- **Upload rejections are shown instead of failing silently** — a file larger
+  than `maxFileSize`, an unsupported file, a dropped folder, or a failed
+  `onValidateUpload` set an `uploadError` that nothing rendered, so the upload
+  just did nothing. Unless the host passes `onUploadValidationError`, the
+  message now appears above the grid as a dismissible error notification
+  (`role="alert"`), using the `uploadValidationMessages` text.
+- **An oversized file no longer blocks the rest of the selection** — files
+  within `maxFileSize` picked or dropped together with an oversized one still
+  go through `onValidateUpload`, conflict resolution and `onUploadFiles`; only
+  the oversized files are rejected.
 
 - **Section chips are semibold in every state** — the All / My files / Shared /
   Organization chips came from the kit's selectable chip, which is regular until

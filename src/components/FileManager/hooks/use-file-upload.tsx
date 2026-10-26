@@ -16,6 +16,7 @@ import type {
   DialUploadFileItem,
 } from '@/models/file-manager';
 import { FILES_DATA_TRANSFER_TYPE } from '@/components/FileManager/constants';
+import { FileUploadValidationErrorReason } from '@/types/file-manager';
 import { useConflictResolution } from './use-conflict-resolution';
 import type { FileConflictDecision } from '@/components/FileManager/components/ConflictResolutionPopup/ConflictResolutionPopup';
 import { isFileAccepted } from '../utils';
@@ -46,6 +47,16 @@ export interface FileUploadValidationMessages {
   validationError?: string;
 }
 
+/** An upload rejection, reported through `onUploadValidationError`. */
+export interface FileUploadValidationError {
+  /** Which check rejected the upload. */
+  reason: FileUploadValidationErrorReason;
+  /** The message the file manager shows for it (a `validationMessages` entry or the built-in default). */
+  message: string;
+  /** Names of the rejected files; empty when the rejection is not about specific files. */
+  fileNames: string[];
+}
+
 export interface UseFileUploadOptions {
   uploadEnabled?: boolean;
   onUploadFiles?: (
@@ -67,6 +78,7 @@ export interface UseFileUploadOptions {
   ) => void;
   prepareUploadFileName?: (name: string) => string;
   currentFolder?: DialFile;
+  onUploadValidationError?: (error: FileUploadValidationError) => void;
 }
 
 const isDragEventWithFiles = (
@@ -85,6 +97,7 @@ export const useFileUpload = ({
   prepareUploadFileName,
   uploadEnabled = true,
   currentFolder,
+  onUploadValidationError,
 }: UseFileUploadOptions = {}) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isDraggingOverWindow, setIsDraggingOverWindow] = useState(false);
@@ -115,6 +128,18 @@ export const useFileUpload = ({
       );
     },
     [allowedFileTypes],
+  );
+
+  const reportUploadError = useCallback(
+    (
+      reason: FileUploadValidationErrorReason,
+      message: string,
+      fileNames: string[] = [],
+    ) => {
+      setUploadError(message);
+      onUploadValidationError?.({ reason, message, fileNames });
+    },
+    [onUploadValidationError],
   );
 
   const clearUploadState = useCallback(() => {
@@ -272,6 +297,10 @@ export const useFileUpload = ({
           }))
         : files;
 
+      /*
+       * An oversized file is rejected on its own: the rest of the selection
+       * still goes through validation, conflict resolution and upload.
+       */
       const oversizedFiles = checkFileSize(preparedFiles);
       if (oversizedFiles.length > 0) {
         const sizeMB = maxFileSize
@@ -280,35 +309,47 @@ export const useFileUpload = ({
         const message =
           validationMessages.oversizedFiles ||
           `Files exceed maximum size (${sizeMB}MB): ${oversizedFiles.join(', ')}`;
-        setUploadError(message);
-        return false;
+        reportUploadError(
+          FileUploadValidationErrorReason.OversizedFiles,
+          message,
+          oversizedFiles,
+        );
       }
+      const oversizedNames = new Set(oversizedFiles);
+      const sizedFiles = preparedFiles.filter(
+        (file) => !oversizedNames.has(file.name),
+      );
+      if (sizedFiles.length === 0) return false;
 
       if (onValidateUpload) {
         try {
           const validationResult = await onValidateUpload(
-            preparedFiles,
+            sizedFiles,
             existingFiles,
             destinationFolder,
           );
           if (!validationResult.valid) {
-            setUploadError(
+            reportUploadError(
+              FileUploadValidationErrorReason.ValidationFailed,
               validationResult.message ||
                 validationMessages.validationFailed ||
                 'Validation failed',
+              sizedFiles.map((file) => file.name),
             );
             return false;
           }
         } catch {
-          setUploadError(
+          reportUploadError(
+            FileUploadValidationErrorReason.ValidationError,
             validationMessages.validationError || 'Validation error occurred',
+            sizedFiles.map((file) => file.name),
           );
           return false;
         }
       }
 
       const dialFiles = convertUploadItemsToDialFiles(
-        preparedFiles,
+        sizedFiles,
         destinationFolder,
       );
 
@@ -320,7 +361,7 @@ export const useFileUpload = ({
        * names are free in the destination go out immediately; only the colliding
        * ones wait on the user's decision.
        */
-      const readyFiles = preparedFiles.filter(
+      const readyFiles = sizedFiles.filter(
         (file) => !conflictingNames.has(file.name),
       );
       if (readyFiles.length > 0) {
@@ -329,7 +370,7 @@ export const useFileUpload = ({
 
       if (conflictingNames.size === 0) {
         clearUploadState();
-        return true;
+        return oversizedFiles.length === 0;
       }
 
       /*
@@ -344,7 +385,7 @@ export const useFileUpload = ({
 
       setPendingUploadFiles(
         new Map(
-          preparedFiles
+          sizedFiles
             .filter((file) => conflictingNames.has(file.name))
             .map((file) => [file.name, file]),
         ),
@@ -367,6 +408,7 @@ export const useFileUpload = ({
       checkFileSize,
       maxFileSize,
       validationMessages,
+      reportUploadError,
       convertUploadItemsToDialFiles,
       checkForConflicts,
       startConflictResolution,
@@ -500,7 +542,8 @@ export const useFileUpload = ({
 
       if (files.length === 0) {
         if (foldersSkipped) {
-          setUploadError(
+          reportUploadError(
+            FileUploadValidationErrorReason.FoldersNotSupported,
             validationMessages.foldersNotSupported ||
               'Folder upload is not supported',
           );
@@ -516,9 +559,11 @@ export const useFileUpload = ({
       const acceptedItems = filterAcceptedFiles(uploadItems);
 
       if (acceptedItems.length === 0) {
-        setUploadError(
+        reportUploadError(
+          FileUploadValidationErrorReason.UnsupportedFiles,
           validationMessages.unsupportedFiles ||
             'Selected files are not supported',
+          uploadItems.map((item) => item.name),
         );
         return;
       }
@@ -530,6 +575,7 @@ export const useFileUpload = ({
       filterAcceptedFiles,
       handleUpload,
       validationMessages,
+      reportUploadError,
       hasWriteAccess,
     ],
   );
@@ -557,9 +603,11 @@ export const useFileUpload = ({
       const acceptedItems = filterAcceptedFiles(uploadItems);
 
       if (acceptedItems.length === 0) {
-        setUploadError(
+        reportUploadError(
+          FileUploadValidationErrorReason.UnsupportedFiles,
           validationMessages.unsupportedFiles ||
             'Selected files are not supported',
+          uploadItems.map((item) => item.name),
         );
         input.value = '';
         return;
@@ -572,7 +620,11 @@ export const useFileUpload = ({
           existingFilesRef.current,
         );
       } catch {
-        setUploadError(validationMessages.validationError || 'Upload failed');
+        reportUploadError(
+          FileUploadValidationErrorReason.ValidationError,
+          validationMessages.validationError || 'Upload failed',
+          acceptedItems.map((item) => item.name),
+        );
       } finally {
         input.value = '';
       }
@@ -583,6 +635,7 @@ export const useFileUpload = ({
     filterAcceptedFiles,
     handleUpload,
     validationMessages,
+    reportUploadError,
   ]);
 
   useEffect(() => {

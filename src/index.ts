@@ -22,6 +22,11 @@ export type { DialFoldersTreeProps } from './components/FileManager/components/F
 export { DialFileManagerSortDropdown } from './components/FileManager/components/FileManagerSortDropdown/FileManagerSortDropdown';
 export type { DialFileManagerSortDropdownProps } from './components/FileManager/components/FileManagerSortDropdown/FileManagerSortDropdown';
 export type {
+  FileUploadValidationError,
+  FileUploadValidationMessages,
+  FileUploadValidationResult,
+} from './components/FileManager/hooks/use-file-upload';
+export type {
   FileManagerContextValue,
   FileManagerGridRow,
 } from './components/FileManager/FileManagerContext';
@@ -58,6 +63,7 @@ export {
   FileManagerRenameTriggerView,
   FileManagerSortDirection,
   FileManagerSortField,
+  FileUploadValidationErrorReason,
   type FileManagerSort,
 } from './types/file-manager';
 
