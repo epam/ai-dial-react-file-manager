@@ -301,6 +301,55 @@ describe('Dial UI Kit :: DialDestinationFolderPopup', () => {
     expect(switchElement).toBeChecked();
   });
 
+  test('switches the toggle label to the hide label while hidden files are visible', () => {
+    render(
+      <DialDestinationFolderPopup
+        open={true}
+        onClose={vi.fn()}
+        hiddenFilesSwitcherLabel="Display hidden items"
+        hideHiddenFilesLabel="Conceal hidden items"
+        items={mockFiles}
+        rootItem={{
+          id: 'root',
+          name: 'Root',
+          path: '/',
+          folderId: 'root-folder',
+          nodeType: DialFileNodeType.FOLDER,
+          label: 'Root',
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Display hidden items')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('switch'));
+
+    expect(screen.getByText('Conceal hidden items')).toBeInTheDocument();
+    expect(screen.queryByText('Display hidden items')).not.toBeInTheDocument();
+  });
+
+  test('uses the default hide label while hidden files are visible', () => {
+    render(
+      <DialDestinationFolderPopup
+        open={true}
+        onClose={vi.fn()}
+        items={mockFiles}
+        rootItem={{
+          id: 'root',
+          name: 'Root',
+          path: '/',
+          folderId: 'root-folder',
+          nodeType: DialFileNodeType.FOLDER,
+          label: 'Root',
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('switch'));
+
+    expect(screen.getByText('Hide hidden files')).toBeInTheDocument();
+  });
+
   test('renders FileManager with provided items', () => {
     render(
       <DialDestinationFolderPopup
