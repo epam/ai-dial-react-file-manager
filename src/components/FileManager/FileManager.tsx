@@ -184,6 +184,7 @@ export type DialFileManagerDestinationFolderPopupOptions = Pick<
   | 'copyLabel'
   | 'moveLabel'
   | 'hiddenFilesSwitcherLabel'
+  | 'hideHiddenFilesLabel'
   | 'header'
   | 'onCreateFolder'
   | 'onCreateFolderValidate'

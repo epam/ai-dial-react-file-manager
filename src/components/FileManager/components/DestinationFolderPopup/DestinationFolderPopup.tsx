@@ -48,6 +48,7 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
   showHiddenFileSwitcher?: boolean;
   showCreateFolderButton?: boolean;
   hiddenFilesSwitcherLabel?: string;
+  hideHiddenFilesLabel?: string;
   mode?: 'copy' | 'move';
   header?: ReactNode;
   sourceFolder?: string;
@@ -94,7 +95,8 @@ export interface DestinationFolderPopupProps extends DialFileManagerProps {
  * @param [copyLabel="Copy"] - Label for the copy button
  * @param [moveLabel="Move"] - Label for the move button
  * @param [addFolderLabel="Add folder"] - Label for the add folder button
- * @param [hiddenFilesSwitcherLabel="Show hidden files"] - Label for the hidden files toggle
+ * @param [hiddenFilesSwitcherLabel="Show hidden files"] - Label of the hidden files toggle while hidden files are not visible
+ * @param [hideHiddenFilesLabel="Hide hidden files"] - Label of the hidden files toggle while hidden files are visible
  * @param [title] - Custom title for the popup header
  * @param items - Array of files to display in the File Manager
  * @param rootItem - Root folder item
@@ -129,6 +131,7 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
   addFolderLabel = 'Add folder',
   mode = DestinationFolderMode.Copy,
   hiddenFilesSwitcherLabel = 'Show hidden files',
+  hideHiddenFilesLabel = 'Hide hidden files',
   showHiddenFileSwitcher = true,
   showCreateFolderButton = true,
   onUploadFiles,
@@ -280,7 +283,11 @@ export const DialDestinationFolderPopup: FC<DestinationFolderPopupProps> = ({
               <>
                 <div className="inline-flex items-center cursor-pointer">
                   <Switch
-                    labelProps={{ label: hiddenFilesSwitcherLabel }}
+                    labelProps={{
+                      label: showHiddenFiles
+                        ? hideHiddenFilesLabel
+                        : hiddenFilesSwitcherLabel,
+                    }}
                     isOn={showHiddenFiles}
                     onChange={handleShowHiddenFilesChange}
                     id="hidden-files-switch-modal"
