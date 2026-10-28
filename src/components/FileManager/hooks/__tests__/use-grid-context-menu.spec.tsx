@@ -1103,3 +1103,62 @@ describe('Dial UI Kit :: useGridContextMenu', () => {
     expect(folderMenuItems[1].key).toBe(DialFileManagerActions.Delete);
   });
 });
+
+describe('Dial UI Kit :: useGridContextMenu :: action restrictions', () => {
+  const renderMenu = (
+    getItemActionRestriction?: (
+      file: DialFile,
+      action: DialFileManagerActions,
+    ) => string | undefined,
+  ) =>
+    renderHook(() =>
+      useGridContextMenu({
+        actionLabels: defaultActionLabels,
+        onDuplicate: vi.fn(),
+        onCopy: vi.fn(),
+        onMove: vi.fn(),
+        onDownload: vi.fn(),
+        onRename: vi.fn(),
+        onDelete: vi.fn(),
+        onInfo: vi.fn(),
+        onUnshare: vi.fn(),
+        getItemActionRestriction,
+        onGridCreateSiblingFolder: vi.fn(),
+        onGridCreateChildFolder: vi.fn(),
+      }),
+    ).result.current;
+
+  test('disables only the restricted actions and keeps the reason', () => {
+    const items = renderMenu((_file, action) =>
+      action === DialFileManagerActions.Copy ? undefined : 'Unit folder',
+    )(testFolder);
+
+    const byKey = Object.fromEntries(items.map((item) => [item.key, item]));
+    for (const key of [
+      DialFileManagerActions.Move,
+      DialFileManagerActions.Rename,
+      DialFileManagerActions.Delete,
+    ]) {
+      expect(byKey[key].disabled).toBe(true);
+      expect(byKey[key].interactiveTooltip?.content).toBe('Unit folder');
+    }
+    expect(byKey[DialFileManagerActions.Copy].disabled).toBeUndefined();
+  });
+
+  test('leaves every action enabled when nothing is restricted', () => {
+    const items = renderMenu(() => undefined)(testFolder);
+
+    expect(items.some((item) => item.disabled)).toBe(false);
+  });
+
+  test('asks about the file it builds the menu for', () => {
+    const restriction = vi.fn(() => undefined);
+
+    renderMenu(restriction)(testFolder);
+
+    expect(restriction).toHaveBeenCalledWith(
+      testFolder,
+      DialFileManagerActions.Move,
+    );
+  });
+});

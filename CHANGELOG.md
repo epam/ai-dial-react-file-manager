@@ -25,6 +25,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`DialFileManager` — custom item icons** — `gridOptions.getItemIcon(file)` replaces
+  a row's type icon in the grid and the compact list; `treeOptions.getItemIcon`
+  does the same in the navigation tree. Return `undefined` to keep the default.
+  `DialFileManagerItemSummaryCell` takes the same `icon` prop.
+- **`DialFileManager` — `getItemActionRestriction`** — `(file, action) => string | undefined`
+  blocks Move, Rename and Delete for individual items, for example a folder
+  that must keep its path. A returned reason disables the action in the grid
+  context menu, the tree menu and the bulk toolbar and is shown beside it;
+  `undefined` leaves it available. Without the prop nothing changes.
 - **`DialFoldersTree` — `getItemIcon`** — returns a custom icon for a row,
   replacing its type icon, for example to mark a special folder. Return
   `undefined` to keep the default; without the prop nothing changes. The

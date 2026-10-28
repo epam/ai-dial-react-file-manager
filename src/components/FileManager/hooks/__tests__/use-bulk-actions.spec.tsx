@@ -616,3 +616,54 @@ describe('Dial UI Kit :: useBulkActions', () => {
     expect(onClearSelection).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('Dial UI Kit :: useBulkActions :: action restrictions', () => {
+  const renderActions = (
+    getItemActionRestriction?: (
+      file: DialFile,
+      action: DialFileManagerActions,
+    ) => string | undefined,
+  ) =>
+    renderHook(() =>
+      useBulkActions({
+        selectedFiles: new Map<string, DialFile>([
+          [writableFile.path, writableFile],
+          [noPermissionsFile.path, noPermissionsFile],
+        ]),
+        actionLabels: defaultActionLabels,
+        onDuplicate: vi.fn(),
+        onCopy: vi.fn(),
+        onMove: vi.fn(),
+        onDownload: vi.fn(),
+        onRename: vi.fn(),
+        onDelete: vi.fn(),
+        getCurrentFolderPath: () => '/test',
+        onClearSelection: vi.fn(),
+        getItemActionRestriction,
+      }),
+    ).result.current;
+
+  test('disables Move and Delete with the reason when any selected item is restricted', () => {
+    const actions = renderActions((file, action) =>
+      file.path === noPermissionsFile.path &&
+      action !== DialFileManagerActions.Copy
+        ? 'Unit folder'
+        : undefined,
+    );
+
+    const move = actions.find((a) => a.key === DialFileManagerActions.Move);
+    const del = actions.find((a) => a.key === DialFileManagerActions.Delete);
+    expect(move?.disabled).toBe(true);
+    expect(move?.tooltip).toBe('Unit folder');
+    expect(del?.disabled).toBe(true);
+    expect(del?.tooltip).toBe('Unit folder');
+  });
+
+  test('keeps Move and Delete enabled when nothing is restricted', () => {
+    const actions = renderActions(() => undefined);
+
+    const move = actions.find((a) => a.key === DialFileManagerActions.Move);
+    expect(move?.disabled).toBe(false);
+    expect(move?.tooltip).toBeUndefined();
+  });
+});

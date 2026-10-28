@@ -33,6 +33,7 @@ import type {
   DialFileManagerActionsRef,
 } from '@/models/file-manager';
 import type { GridApi } from 'ag-grid-community';
+import type { GetItemActionRestriction } from './utils';
 
 export interface FileManagerGridRow {
   id: string;
@@ -231,6 +232,7 @@ export interface FileManagerContextValue {
   previewExtensions?: string[];
   isRenameFileAvailable?: boolean;
   isDuplicateFolderAvailable?: boolean;
+  getItemActionRestriction?: GetItemActionRestriction;
   customUploadFileAction?: (
     currentPath?: string,
     currentFolder?: DialFile,

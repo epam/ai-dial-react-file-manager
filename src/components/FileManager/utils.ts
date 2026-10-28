@@ -2,10 +2,12 @@ import { DialFileNodeType, type DialFile } from '@/models/file';
 import type { DialFileAcceptType } from '@/models/file-manager';
 import { extensions } from 'mime-types';
 import type { ReactNode } from 'react';
+import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import { DEFAULT_FOLDER_BASE_NAME } from './constants';
 import type { FileManagerGridRow } from './FileManagerContext';
 import { baseColumnComparator } from '@epam/ai-dial-ui-kit';
 import {
+  type DialFileManagerActions,
   type FileManagerSort,
   FileManagerSortDirection,
   FileManagerSortField,
@@ -463,3 +465,18 @@ export const sortGridRows = (
     return sign * baseColumnComparator(a.name, b.name);
   });
 };
+
+/**
+ * Asks the consumer whether `action` is blocked for `file`; the returned text is
+ * the reason shown beside the disabled action.
+ */
+export type GetItemActionRestriction = (
+  file: DialFile,
+  action: DialFileManagerActions,
+) => string | undefined;
+
+/** Props that turn a menu item into a disabled one that says why. */
+export const getRestrictedItemProps = (
+  reason: string | undefined,
+): Pick<DropdownItem, 'disabled' | 'interactiveTooltip'> =>
+  reason ? { disabled: true, interactiveTooltip: { content: reason } } : {};

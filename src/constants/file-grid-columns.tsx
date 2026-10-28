@@ -61,6 +61,9 @@ export const NAME_COLUMN =
         } = params.context;
 
         const isSharedByMe = sharedByMePaths?.has(params.data.path);
+        const icon = params.data
+          ? params.context.getItemIcon?.(params.data)
+          : undefined;
         const nameIconSize = isCompactView
           ? COMPACT_VIEW_FILE_ICON_SIZE
           : BASE_FILE_MANAGER_ICON_SIZE;
@@ -151,6 +154,7 @@ export const NAME_COLUMN =
               sharedIndicatorClassName={sharedIndicatorClassName}
               updatedAt={params.data.updatedAt}
               iconSize={COMPACT_VIEW_FILE_ICON_SIZE}
+              icon={icon}
               dateLocale={dateLocale}
               dateOptions={dateOptions}
               hideTooltip={isDisabled}
@@ -175,6 +179,7 @@ export const NAME_COLUMN =
             shared={isSharedByMe}
             sharedIndicatorClassName={sharedIndicatorClassName}
             iconSize={BASE_FILE_MANAGER_ICON_SIZE}
+            icon={icon}
             hideTooltip={isDisabled}
             isInvalidName={!!tooltipContent}
             tooltipContent={tooltipContent}

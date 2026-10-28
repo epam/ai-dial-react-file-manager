@@ -94,3 +94,17 @@ describe('Dial UI Kit :: FileManagerItemSummaryCell', () => {
     expect(container.querySelector('svg')).toHaveAttribute('width', '24');
   });
 });
+
+describe('Dial UI Kit :: FileManagerItemSummaryCell :: custom icon', () => {
+  test('draws a custom icon in place of the type icon', () => {
+    const { container } = render(
+      <DialFileManagerItemSummaryCell
+        {...baseProps}
+        nodeType={DialFileNodeType.FOLDER}
+        icon={<span data-icon="custom" />}
+      />,
+    );
+
+    expect(container.querySelector('[data-icon="custom"]')).not.toBeNull();
+  });
+});

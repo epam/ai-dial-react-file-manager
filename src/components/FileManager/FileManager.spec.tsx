@@ -2976,3 +2976,77 @@ describe('DialFileManager — upload rejection', () => {
     expect(screen.queryByRole('alert')).toBeNull();
   });
 });
+
+describe('DialFileManager — custom item icons', () => {
+  const marker = (text: string) => <span data-icon={text} />;
+
+  test('draws the tree icon returned through treeOptions', async () => {
+    renderWithinSizedShell(
+      <DialFileManager
+        items={itemsMock}
+        defaultPath="All files/Design"
+        treeOptions={{
+          getItemIcon: (item) =>
+            item.name === 'All files' ? marker('design-folder') : undefined,
+        }}
+      />,
+    );
+
+    const tree = await screen.findByRole('tree');
+
+    await waitFor(() =>
+      expect(tree.querySelector('[data-icon="design-folder"]')).not.toBeNull(),
+    );
+  });
+
+  describe('name column cell renderer', () => {
+    type NameRenderer = (params: {
+      data: Partial<FileManagerGridRow>;
+      context: Partial<FileManagerGridContext>;
+    }) => React.ReactElement<{ icon?: React.ReactNode }>;
+
+    let nameCellRenderer: NameRenderer;
+
+    beforeEach(() => {
+      let captured: NameRenderer;
+      function HookHarness() {
+        const { columnDefs } = useFileManagerColumns({
+          effectiveVisibleColumns: [FileManagerColumnKey.Name],
+        } as UseFileManagerColumnsArgs);
+        const nameCol = columnDefs.find(
+          (c) => c.colId === FileManagerColumnKey.Name,
+        )!;
+        captured = nameCol.cellRenderer as NameRenderer;
+        return null;
+      }
+      render(<HookHarness />);
+      nameCellRenderer = captured!;
+    });
+
+    const folderRow = {
+      id: 'icons-svg',
+      name: 'SVG',
+      path: 'All files/Design/Icons/SVG',
+      nodeType: DialFileNodeType.FOLDER,
+    };
+
+    test('passes the icon the context returns for the row', () => {
+      const icon = marker('unit');
+      const getItemIcon = vi.fn(() => icon);
+
+      const result = nameCellRenderer({
+        data: folderRow,
+        context: { getItemIcon },
+      });
+
+      expect(getItemIcon).toHaveBeenCalledWith(folderRow);
+      expect(result.props.icon).toBe(icon);
+    });
+
+    test('leaves the icon unset when the context has no callback', () => {
+      const result = nameCellRenderer({ data: folderRow, context: {} });
+
+      expect(result.props.icon).toBeUndefined();
+    });
+  });
+});
