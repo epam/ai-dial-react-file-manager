@@ -19,6 +19,8 @@ export interface DialFileManagerItemNameProps extends DialFileManagerItemNameInp
   loading?: boolean;
   creating?: boolean;
   shared?: boolean;
+  /** Replaces the type icon in the read-only name; the editing input keeps its own. */
+  icon?: ReactNode;
   details?: ReactNode;
   sharedIndicatorTooltip?: ReactNode;
   fileExtension?: string;
@@ -72,6 +74,7 @@ export const DialFileManagerItemName: FC<DialFileManagerItemNameProps> = ({
   loading = false,
   creating = false,
   shared = false,
+  icon,
   iconSize = BASE_ICON_SIZE,
   validate,
   onSave,
@@ -120,6 +123,7 @@ export const DialFileManagerItemName: FC<DialFileManagerItemNameProps> = ({
         details={details}
         loading={loading}
         shared={shared}
+        icon={icon}
         iconSize={iconSize}
         sharedIndicatorClassName={sharedIndicatorClassName}
         sharedIndicatorTooltip={sharedIndicatorTooltip}

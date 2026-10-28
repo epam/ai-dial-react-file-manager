@@ -284,6 +284,40 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
     expect(onDelete).toHaveBeenCalledTimes(1);
   });
 
+  test('draws the icon from getItemIcon instead of the type icon, only for the rows that return one', () => {
+    render(
+      <DialFoldersTree
+        items={mockItems}
+        expandedPaths={new Set(['/root', '/root/Subfolder'])}
+        getItemIcon={(item) =>
+          item.path === '/root/Subfolder' ? (
+            <svg data-testid="unit-icon" />
+          ) : undefined
+        }
+      />,
+    );
+
+    const icons = screen.getAllByTestId('unit-icon');
+    expect(icons).toHaveLength(1);
+    expect(
+      screen.getByRole('treeitem', { name: 'Subfolder' }),
+    ).toContainElement(icons[0]);
+    expect(screen.getByRole('treeitem', { name: 'Root' })).not.toContainElement(
+      icons[0],
+    );
+  });
+
+  test('keeps default icons when getItemIcon is not set', () => {
+    render(
+      <DialFoldersTree items={mockItems} expandedPaths={new Set(['/root'])} />,
+    );
+
+    expect(screen.queryByTestId('unit-icon')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('treeitem', { name: 'Subfolder' }).querySelector('svg'),
+    ).toBeInTheDocument();
+  });
+
   describe('tree semantics and keyboard', () => {
     const allExpanded = new Set(['/root', '/root/Subfolder']);
 

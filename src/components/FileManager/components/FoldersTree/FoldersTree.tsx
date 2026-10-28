@@ -58,6 +58,12 @@ export interface DialFoldersTreeProps {
   getContextMenuItems?: (item: DialFile) => DropdownItem[];
   /** Inline row actions shown on hover, before the context-menu trigger. */
   renderItemActions?: (item: DialFile) => ReactNode;
+  /**
+   * Icon drawn instead of a row's type icon, e.g. to mark a special folder.
+   * Return `undefined` to keep the default icon; the shared badge is not drawn
+   * on a custom icon, and a row being renamed keeps its default icon.
+   */
+  getItemIcon?: (item: DialFile) => ReactNode | undefined;
   areHiddenFilesVisible?: boolean;
   onExpandedPathsChange?: (expandedPaths: Set<string>) => void;
   forbiddenSymbolsRegExp?: RegExp;
@@ -191,6 +197,7 @@ const collectVisibleRows = (
  * @param [onRenameValidate] - Function to validate the new name during editing. Should return an error string or `null` if valid.
  * @param [getContextMenuItems] - Function returning context menu items for a given node.
  * @param [renderItemActions] - Function returning inline actions shown on row hover (e.g. a delete button).
+ * @param [getItemIcon] - Function returning a custom icon for a given node, replacing its type icon; return `undefined` to keep the default.
  * @param [areHiddenFilesVisible=false] - Whether hidden files (dotfiles) should be visible in the tree.
  * @param [rootItemPath] - Path of the folder to treat as the custom root node (no context menu, special label).
  * @param [rootItemLabel] - Label to display for the root node instead of its actual name.
@@ -235,6 +242,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   onItemClick,
   getContextMenuItems,
   renderItemActions,
+  getItemIcon,
   onRenameSave,
   onRenameCancel,
   onRenameValidate,
@@ -509,6 +517,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                       type={isFolder ? DialItemType.Folder : DialItemType.File}
                       loading={isLoading}
                       shared={isSharedByMe}
+                      icon={getItemIcon?.(node)}
                       sharedIndicatorClassName={mergeClasses(
                         'group-hover/item:bg-control-accent-alpha-hover-subtle',
                         isSelected && 'bg-control-accent-alpha-active-subtle',
