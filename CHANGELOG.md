@@ -25,6 +25,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`DialFoldersTree` — `getItemIcon`** — returns a custom icon for a row,
+  replacing its type icon, for example to mark a special folder. Return
+  `undefined` to keep the default; without the prop nothing changes. The
+  shared badge is not drawn on a custom icon, and a row being renamed keeps
+  its default icon. `DialFileManagerItemName` takes the same `icon` prop.
+  Requires `@epam/ai-dial-ui-kit` 0.16.0-dev.51 or later, whose `FileName`
+  accepts `icon`.
+
 - **`treeOptions.header` in the compact view** — the folders panel's header is
   now drawn as a heading above the compact navigation card. Until now the compact view dropped the folders panel, and the
   heading with it, so a host's title showed in the panel but vanished once the

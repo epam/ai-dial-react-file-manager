@@ -5,6 +5,7 @@ import { DialFoldersTree } from './FoldersTree';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import {
   IconClipboardCopy,
+  IconBuilding,
   IconCopy,
   IconCut,
   IconDownload,
@@ -359,6 +360,26 @@ export const EmptyState: Story = {
     expandedPaths: new Set(),
     showFiles: false,
     emptyStateTitle: 'No folders available',
+  },
+};
+
+export const WithCustomIcons: Story = {
+  args: {
+    items: mockFolders,
+    expandedPaths: new Set(['/root']),
+    showFiles: false,
+    getItemIcon: (item) =>
+      item.path === '/root' ? (
+        <IconBuilding {...FILE_MANAGER_ICON_PROPS} />
+      ) : undefined,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A row whose `getItemIcon` returns a node shows it instead of the folder icon; other rows keep theirs.',
+      },
+    },
   },
 };
 
