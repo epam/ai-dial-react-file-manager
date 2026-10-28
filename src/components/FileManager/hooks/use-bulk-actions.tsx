@@ -12,7 +12,10 @@ import CopyToIcon from '@/assets/icons/copy-to.svg?react';
 import MoveToIcon from '@/assets/icons/move-to.svg?react';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 
-import { cleanForbiddenSymbolsRegExp } from '@/components/FileManager/utils';
+import {
+  cleanForbiddenSymbolsRegExp,
+  type GetItemActionRestriction,
+} from '@/components/FileManager/utils';
 
 export interface UseBulkActionsProps {
   selectedFiles: Map<string, DialFile>;
@@ -39,6 +42,7 @@ export interface UseBulkActionsProps {
   sharedByMePaths?: Set<string>;
   onClearSelection: () => void;
   forbiddenSymbolsRegExp?: RegExp;
+  getItemActionRestriction?: GetItemActionRestriction;
 }
 
 export const useBulkActions = ({
@@ -56,6 +60,7 @@ export const useBulkActions = ({
   sharedByMePaths,
   onClearSelection,
   forbiddenSymbolsRegExp,
+  getItemActionRestriction,
 }: UseBulkActionsProps): DialActionDropdownItem[] => {
   return useMemo(() => {
     const actions: DialActionDropdownItem[] = [];
@@ -64,6 +69,11 @@ export const useBulkActions = ({
     if (!selectedFilesArray.length || !actionLabels) {
       return actions;
     }
+
+    const getRestriction = (action: DialFileManagerActions) =>
+      selectedFilesArray
+        .map((file) => getItemActionRestriction?.(file, action))
+        .find(Boolean);
 
     const regexp = cleanForbiddenSymbolsRegExp(forbiddenSymbolsRegExp);
     const hasAnyRestrictedSymbols = regexp
@@ -84,6 +94,7 @@ export const useBulkActions = ({
     }
 
     if (actionLabels[DialFileManagerActions.Move] && !hasAnyRestrictedSymbols) {
+      const moveRestriction = getRestriction(DialFileManagerActions.Move);
       actions.push({
         key: DialFileManagerActions.Move,
         label: actionLabels[DialFileManagerActions.Move],
@@ -94,6 +105,8 @@ export const useBulkActions = ({
             height={FILE_MANAGER_ICON_PROPS.size}
           />
         ),
+        disabled: !!moveRestriction,
+        tooltip: moveRestriction,
         onClick: () => onMove(selectedFilesArray),
       });
     }
@@ -170,11 +183,14 @@ export const useBulkActions = ({
      * rest: it is the one action here that cannot be undone.
      */
     if (actionLabels[DialFileManagerActions.Delete]) {
-      const isDisabled = selectedFilesArray.some(
-        (file) =>
-          file.permissions &&
-          !file.permissions.includes(DialFilePermission.WRITE),
-      );
+      const deleteRestriction = getRestriction(DialFileManagerActions.Delete);
+      const isDisabled =
+        !!deleteRestriction ||
+        selectedFilesArray.some(
+          (file) =>
+            file.permissions &&
+            !file.permissions.includes(DialFilePermission.WRITE),
+        );
 
       actions.push({
         key: DialFileManagerActions.Delete,
@@ -184,7 +200,8 @@ export const useBulkActions = ({
         danger: true,
         disabled: isDisabled,
         tooltip: isDisabled
-          ? 'Selected items contain item which can not be deleted'
+          ? (deleteRestriction ??
+            'Selected items contain item which can not be deleted')
           : undefined,
         onClick: () => {
           const currentFolderPath = getCurrentFolderPath();
@@ -209,5 +226,6 @@ export const useBulkActions = ({
     onClearSelection,
     sharedByMePaths,
     forbiddenSymbolsRegExp,
+    getItemActionRestriction,
   ]);
 };

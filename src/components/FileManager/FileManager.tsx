@@ -154,7 +154,13 @@ import {
 } from './hooks/use-file-manager-columns';
 import { useFileManagerContext } from './hooks/use-file-manager-context';
 import { useGridContextMenu } from './hooks/use-grid-context-menu';
-import { findNodeByPath, getRowTooltip, sortGridRows } from './utils';
+import {
+  findNodeByPath,
+  getRestrictedItemProps,
+  getRowTooltip,
+  sortGridRows,
+  type GetItemActionRestriction,
+} from './utils';
 import { useTriggerViewCreateFolder } from './hooks/use-trigger-view-create-folder';
 
 type GridRow = FileManagerGridRow;
@@ -348,6 +354,12 @@ export interface GridOptions extends Omit<
   selectionMode?: GridSelectionMode;
   wrapCustomCellRenderers?: boolean;
   allowDisabledContextMenu?: boolean;
+  /**
+   * Custom icon for a row's name cell, replacing its type icon (grid and compact
+   * list). Return `undefined` to keep the default. The tree has its own
+   * `treeOptions.getItemIcon`.
+   */
+  getItemIcon?: (item: DialFile) => ReactNode | undefined;
   actionLabels?: {
     [DialFileManagerActions.AddSibling]?: string;
     [DialFileManagerActions.AddChild]?: string;
@@ -524,6 +536,12 @@ export interface DialFileManagerProps {
   previewExtensions?: string[];
   isRenameFileAvailable?: boolean;
   isDuplicateFolderAvailable?: boolean;
+  /**
+   * Blocks Move, Rename and Delete per item: return the reason to disable the
+   * action for `file` (context menus, tree menu and bulk toolbar), or
+   * `undefined` to leave it available.
+   */
+  getItemActionRestriction?: GetItemActionRestriction;
   customUploadFileAction?: (
     currentPath?: string,
     currentFolder?: DialFile,
@@ -842,6 +860,7 @@ export const DialFileManagerView: FC = () => {
     previewExtensions,
     isRenameFileAvailable,
     isDuplicateFolderAvailable,
+    getItemActionRestriction,
     getDisabledTooltip,
     fileTooLargeTooltip,
     unsupportedFileTypeTooltip,
@@ -952,8 +971,17 @@ export const DialFileManagerView: FC = () => {
     allowDisabledContextMenu = false,
     containerClassName: gridContainerClassName,
     className: gridOptionsClassName,
+    getItemIcon: getGridItemIcon,
     ...forwardedGridOptions
   } = gridOptions ?? {};
+
+  const getRowIcon = useCallback(
+    (row: GridRow) => {
+      const file = findNodeByPath(items, row.path);
+      return file ? getGridItemIcon?.(file) : undefined;
+    },
+    [items, getGridItemIcon],
+  );
 
   const { containerRef, isBelowBreakpoint: isCompactView } = useWidthBreakpoint(
     compactViewWidthBreakpoint,
@@ -1147,6 +1175,9 @@ export const DialFileManagerView: FC = () => {
                 className="text-secondary"
               />
             ),
+            ...getRestrictedItemProps(
+              getItemActionRestriction?.(file, DialFileManagerActions.Move),
+            ),
             onClick: () => {
               handleSetMovedFiles([file]);
               handleOpenDestinationFolderPopup(DestinationFolderMode.Move);
@@ -1205,6 +1236,9 @@ export const DialFileManagerView: FC = () => {
                 className="text-secondary"
               />
             ),
+            ...getRestrictedItemProps(
+              getItemActionRestriction?.(file, DialFileManagerActions.Rename),
+            ),
             onClick: () => onTreeRename(file.path),
           });
         }
@@ -1253,6 +1287,9 @@ export const DialFileManagerView: FC = () => {
             label: treeOptions.actionLabels[DialFileManagerActions.Delete],
             icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
             danger: true,
+            ...getRestrictedItemProps(
+              getItemActionRestriction?.(file, DialFileManagerActions.Delete),
+            ),
             onClick: () =>
               openDeleteConfirmation([file], file.parentPath ?? ''),
           });
@@ -1289,6 +1326,7 @@ export const DialFileManagerView: FC = () => {
       openDeleteConfirmation,
       onTreeCreateChildFolder,
       onTreeCreateSiblingFolder,
+      getItemActionRestriction,
     ],
   );
 
@@ -1328,6 +1366,7 @@ export const DialFileManagerView: FC = () => {
     sharedByMePaths,
     onClearSelection: clearSelection,
     forbiddenSymbolsRegExp,
+    getItemActionRestriction,
   });
 
   const handleTabChange = useCallback(
@@ -1688,6 +1727,7 @@ export const DialFileManagerView: FC = () => {
     previewExtensions,
     isRenameFileAvailable,
     isDuplicateFolderAvailable,
+    getItemActionRestriction,
     forbiddenSymbolsRegExp,
     skipForbiddenSymbolsCheckForActions,
     onGridCreateSiblingFolder,
@@ -1845,6 +1885,7 @@ export const DialFileManagerView: FC = () => {
         hideSearchPathItemName,
         newFolderDefaultName,
         filesLoading,
+        getItemIcon: getGridItemIcon ? getRowIcon : undefined,
       } as FileManagerGridContext,
     }),
     [
@@ -1867,6 +1908,8 @@ export const DialFileManagerView: FC = () => {
       sharedByMePaths,
       selectedPaths,
       disabledGridRowIds,
+      getGridItemIcon,
+      getRowIcon,
       forbiddenSymbolsRegExp,
       forbiddenSymbolsTooltip,
       hideSearchPathItemName,

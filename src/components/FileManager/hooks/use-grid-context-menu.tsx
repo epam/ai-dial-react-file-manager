@@ -19,7 +19,11 @@ import AddSibling from '@/assets/icons/add-sibling.svg?react';
 import { DropdownItemType } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import { DialFileNodeType } from '@/models/file';
-import { cleanForbiddenSymbolsRegExp } from '../utils';
+import {
+  cleanForbiddenSymbolsRegExp,
+  getRestrictedItemProps,
+  type GetItemActionRestriction,
+} from '../utils';
 
 export interface UseGridContextMenuProps {
   actionLabels?: {
@@ -56,6 +60,7 @@ export interface UseGridContextMenuProps {
   previewExtensions?: string[];
   isRenameFileAvailable?: boolean;
   isDuplicateFolderAvailable?: boolean;
+  getItemActionRestriction?: GetItemActionRestriction;
   forbiddenSymbolsRegExp?: RegExp;
   skipForbiddenSymbolsCheckForActions?: boolean;
   onGridCreateSiblingFolder: (files: DialFile[]) => void;
@@ -81,6 +86,7 @@ export const useGridContextMenu = ({
   previewExtensions,
   isRenameFileAvailable = true,
   isDuplicateFolderAvailable = true,
+  getItemActionRestriction,
   forbiddenSymbolsRegExp,
   skipForbiddenSymbolsCheckForActions,
   onGridCreateSiblingFolder,
@@ -212,6 +218,9 @@ export const useGridContextMenu = ({
               className="text-secondary"
             />
           ),
+          ...getRestrictedItemProps(
+            getItemActionRestriction?.(file, DialFileManagerActions.Move),
+          ),
           onClick: () => onMove(file),
         });
       }
@@ -295,6 +304,9 @@ export const useGridContextMenu = ({
               className="text-secondary"
             />
           ),
+          ...getRestrictedItemProps(
+            getItemActionRestriction?.(file, DialFileManagerActions.Rename),
+          ),
           onClick: () => onRename(file.path),
         });
       }
@@ -361,6 +373,9 @@ export const useGridContextMenu = ({
           label: actionLabels[DialFileManagerActions.Delete],
           icon: <IconTrashX {...FILE_MANAGER_ICON_PROPS} />,
           danger: true,
+          ...getRestrictedItemProps(
+            getItemActionRestriction?.(file, DialFileManagerActions.Delete),
+          ),
           onClick: () => onDelete(file, file.parentPath ?? ''),
         });
       }
@@ -386,6 +401,7 @@ export const useGridContextMenu = ({
     previewExtensions,
     isRenameFileAvailable,
     isDuplicateFolderAvailable,
+    getItemActionRestriction,
     forbiddenSymbolsRegExp,
     skipForbiddenSymbolsCheckForActions,
     onGridCreateChildFolder,

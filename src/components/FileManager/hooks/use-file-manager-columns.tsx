@@ -38,6 +38,7 @@ export interface FileManagerGridContext {
   getDisplayName: (item: DialFile) => string;
   hideSearchPathItemName?: boolean;
   filesLoading?: boolean;
+  getItemIcon?: (row: GridRow) => ReactNode | undefined;
 }
 
 export interface UseFileManagerColumnsArgs {
