@@ -312,6 +312,45 @@ describe('Dial UI Kit :: useFolderCreation', () => {
         'warning__A dot at the start of the name will make the item hidden',
       );
     });
+
+    test("returns the custom validator's error for a leading-dot name instead of the hidden warning", () => {
+      const onValidateFolderName = vi.fn((name: string) =>
+        name === '.dial_folder' ? 'Reserved name' : null,
+      );
+      const { result } = renderHook(() =>
+        useFolderCreation({
+          currentFolder: mockCurrentFolder,
+          onValidateFolderName,
+        }),
+      );
+
+      expect(result.current.validateFolderName('.dial_folder')).toBe(
+        'Reserved name',
+      );
+    });
+
+    test('returns the duplicate error for a leading-dot name that already exists', () => {
+      const folderWithHidden: DialFile = {
+        ...mockCurrentFolder,
+        items: [
+          {
+            id: '/test-folder/.config',
+            name: '.config',
+            path: '/test-folder/.config',
+            parentPath: '/test-folder',
+            nodeType: DialFileNodeType.FOLDER,
+            folderId: '/test-folder/.config',
+          },
+        ],
+      };
+      const { result } = renderHook(() =>
+        useFolderCreation({ currentFolder: folderWithHidden }),
+      );
+
+      expect(result.current.validateFolderName('.config')).toBe(
+        'A folder with this name already exists',
+      );
+    });
   });
 
   describe('saveFolderCreation', () => {
