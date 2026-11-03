@@ -535,3 +535,19 @@ describe('Dial UI Kit :: DialFoldersTree — context menu button name', () => {
     ).toBeInTheDocument();
   });
 });
+
+describe('Dial UI Kit :: DialFoldersTree — rows without a menu', () => {
+  test('gives a menu-less row no popup attributes', () => {
+    render(
+      <DialFoldersTree
+        items={mockItems}
+        expandedPaths={new Set(['/root', '/root/Subfolder'])}
+        showFiles
+      />,
+    );
+
+    const file = screen.getByRole('treeitem', { name: 'File.txt' });
+    expect(file).not.toHaveAttribute('aria-haspopup');
+    expect(file).not.toHaveAttribute('aria-expanded');
+  });
+});
