@@ -126,12 +126,26 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Row "more" menu buttons have an accessible name** — the grid's actions
+  column button and the `DialFoldersTree` hover button were icon-only buttons
+  with no name (axe `button-name`). `gridOptions.rowActionsLabel` and
+  `DialFoldersTree`'s `contextMenuButtonLabel` (also through `treeOptions`)
+  name them; both default to `'More actions'`.
+- **`DialFoldersTree` — no popup attributes on a row without a menu** — a row
+  with no `getContextMenuItems` entries was still wrapped in a `Dropdown`,
+  which (from `@epam/ai-dial-ui-kit` 0.16.0-dev.72) gives its child
+  `aria-haspopup="menu"` and `aria-expanded`, marking a file row expandable.
+  Such a row is no longer wrapped.
 - **`DialFoldersTree` — hover circle on a hidden caret** — an empty, loaded
   folder hides its caret, but hovering where it was still drew the round hover
   tint. The tint is now drawn only while the caret is visible.
 
 ### Changed
 
+- **`@epam/ai-dial-ui-kit` peer is `^0.16.0-dev.72`** (was `^0.16.0-dev.51`)
+  — the release whose `Dropdown` drops its `aria-hidden` focus guards and the
+  invalid `aria-expanded` / nested `menuitem` role on its trigger wrapper,
+  which the grid and tree row menus render.
 - **`shadow-sm` and `shadow-md` are the design's two-layer Shadow SM and
   Shadow MD** — each was one blue layer. `shadow-sm` is now `4px 9px 16px 1px`
   at 6% accent (`--shadow-sm-2`) plus a `0 -2px 4px 2px` halo at 4% accent

@@ -65,3 +65,31 @@ describe('useGridActionsColumn', () => {
     expect(isRowDisabled).toHaveBeenCalledWith(row, ['text/plain'], 100);
   });
 });
+
+describe('useGridActionsColumn — accessible name', () => {
+  const renderButton = (buttonLabel?: string) => {
+    const { result } = renderHook(() =>
+      useGridActionsColumn({
+        buttonLabel,
+        getContextMenuItems: () => [{ key: 'download', label: 'Download' }],
+        isRowDisabled: () => false,
+      }),
+    );
+    const renderCell = result.current.actionsColumnDef
+      .cellRenderer as CellRenderer;
+    const dropdown = renderCell({ data: row } as never) as ReactElement<{
+      children: ReactElement<{ 'aria-label'?: string }>;
+    }>;
+    return dropdown.props.children;
+  };
+
+  it('names the row menu button "More actions" by default', () => {
+    expect(renderButton().props['aria-label']).toBe('More actions');
+  });
+
+  it('names the row menu button with the given label', () => {
+    expect(renderButton('Weitere Aktionen').props['aria-label']).toBe(
+      'Weitere Aktionen',
+    );
+  });
+});

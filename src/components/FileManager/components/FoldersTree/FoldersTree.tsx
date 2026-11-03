@@ -80,6 +80,8 @@ export interface DialFoldersTreeProps {
   selectOnCaretClick?: boolean;
   /** Whether rows show the hover "more" button that opens the `getContextMenuItems` menu. Defaults to `true`; the right-click menu and `renderItemActions` stay either way. */
   showContextMenuButton?: boolean;
+  /** Accessible name of the hover "more" button. Defaults to `'More actions'`. */
+  contextMenuButtonLabel?: string;
 }
 
 interface VisibleRow {
@@ -213,6 +215,7 @@ const collectVisibleRows = (
  * @param [onEscape] - Callback fired when Escape is pressed on a row.
  * @param [selectOnCaretClick=false] - Whether clicking a folder's caret also selects it; by default the caret only expands or collapses the folder.
  * @param [showContextMenuButton=true] - Whether rows show the hover "more" button that opens the `getContextMenuItems` menu; the right-click menu and `renderItemActions` stay either way.
+ * @param [contextMenuButtonLabel='More actions'] - Accessible name of the hover "more" button.
  * @remarks
  * - Folder and file data must follow the `DialFile` model.
  * - The `expandedPaths`, `loadingPaths`, `selectedPath`, and `renamedPath` props are externally controlled.
@@ -258,6 +261,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   onEscape,
   selectOnCaretClick = false,
   showContextMenuButton = true,
+  contextMenuButtonLabel = 'More actions',
 }) => {
   const { expandedPaths, togglePath } = useExpandedPaths({
     expandedPaths: externalExpandedPaths ?? new Set(),
@@ -444,135 +448,141 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
         />
       );
 
+      const row = (
+        <div
+          ref={(element) => {
+            if (element) rowRefs.current.set(path, element);
+            else rowRefs.current.delete(path);
+          }}
+          role="treeitem"
+          aria-label={isRootFolder ? rootItemLabel : name}
+          aria-level={level + 1}
+          aria-posinset={index + 1}
+          aria-setsize={visibleNodes.length}
+          aria-expanded={isFolder ? isExpanded : undefined}
+          aria-selected={isSelected}
+          tabIndex={path === tabbablePath ? 0 : -1}
+          onFocus={(event) => {
+            if (event.target === event.currentTarget) setFocusedPath(path);
+          }}
+          style={{ paddingLeft: `${level * FOLDER_LEVEL_PADDING}px` }}
+          className={mergeClasses(
+            'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover-subtle rounded-full group/item w-full relative',
+            'outline-hidden focus-visible:outline focus-visible:outline-focus focus-visible:-outline-offset-1',
+            selectedClass,
+          )}
+        >
+          {!isRenaming && (
+            <div
+              className="absolute size-full left-0 top-0 z-0"
+              onClick={() => handleFolderClick(node)}
+            />
+          )}
+          <div
+            className="relative flex flex-row truncate items-center w-fit h-6 gap-x-1 pl-[5px]"
+            onClick={() => !isRenaming && handleFolderClick(node)}
+          >
+            <>
+              {isFolder &&
+                (selectOnCaretClick ? (
+                  caretIcon
+                ) : (
+                  <span
+                    className={
+                      isCaretHidden
+                        ? hiddenCaretClassName
+                        : caretHitAreaClassName
+                    }
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      togglePath(node.path);
+                    }}
+                  >
+                    {caretIcon}
+                  </span>
+                ))}
+              {/* A file has no caret; keep its slot so file and folder
+                        icons on the same level line up. */}
+              {!isFolder && (
+                <span
+                  aria-hidden
+                  className="shrink-0"
+                  style={{ width: CARET_ICON_PROPS.size }}
+                />
+              )}
+              <DialFileManagerItemName
+                elementId={`${path}-tree-item`}
+                name={isRootFolder ? rootItemLabel : name}
+                type={isFolder ? DialItemType.Folder : DialItemType.File}
+                loading={isLoading}
+                shared={isSharedByMe}
+                icon={getItemIcon?.(node)}
+                sharedIndicatorClassName={mergeClasses(
+                  'group-hover/item:bg-control-accent-alpha-hover-subtle',
+                  isSelected && 'bg-control-accent-alpha-active-subtle',
+                )}
+                iconSize={BASE_FILE_MANAGER_ICON_SIZE}
+                forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
+                forbiddenSymbolsTooltip={tooltipContent}
+                {...(!isRootFolder && {
+                  editing: isRenaming,
+                  creating:
+                    path === `${createdFolderPath}/${NEW_FOLDER_TEMP_NAME}`,
+                  onSave: onRenameSave,
+                  onCancel: onRenameCancel,
+                  validate: validateHandler,
+                  onCreateFolderSave: onCreateFolderSave,
+                  onCreateFolderCancel: onCreateFolderCancel,
+                })}
+              />
+            </>
+          </div>
+
+          {(itemActions || isContextMenuButtonShown) && (
+            <div className="flex-1 flex justify-end items-center gap-1">
+              {itemActions && (
+                <div className="relative flex items-center invisible group-hover/item:visible group-focus-within/item:visible">
+                  {itemActions}
+                </div>
+              )}
+              {isContextMenuButtonShown && (
+                <Dropdown
+                  placement="bottom-start"
+                  allowedPlacements={['top-start', 'top-end']}
+                  items={menuItems}
+                  className="sticky right-0"
+                >
+                  <GhostIconButton
+                    size={ElementSize.Small}
+                    className="invisible group-hover/item:visible"
+                    aria-label={contextMenuButtonLabel}
+                    icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
+                  />
+                </Dropdown>
+              )}
+            </div>
+          )}
+        </div>
+      );
+
       return (
         <div key={`${path}-children`} className="cursor-pointer">
           <div className="flex flex-col w-full gap-1">
-            <Dropdown
-              trigger={
-                menuItems.length > 0 ? [DropdownTrigger.ContextMenu] : []
-              }
-              className="w-full h-[32px]"
-              anchorToMouse
-              items={menuItems}
-            >
-              <div
-                ref={(element) => {
-                  if (element) rowRefs.current.set(path, element);
-                  else rowRefs.current.delete(path);
-                }}
-                role="treeitem"
-                aria-label={isRootFolder ? rootItemLabel : name}
-                aria-level={level + 1}
-                aria-posinset={index + 1}
-                aria-setsize={visibleNodes.length}
-                aria-expanded={isFolder ? isExpanded : undefined}
-                aria-selected={isSelected}
-                tabIndex={path === tabbablePath ? 0 : -1}
-                onFocus={(event) => {
-                  if (event.target === event.currentTarget)
-                    setFocusedPath(path);
-                }}
-                style={{ paddingLeft: `${level * FOLDER_LEVEL_PADDING}px` }}
-                className={mergeClasses(
-                  'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover-subtle rounded-full group/item w-full relative',
-                  'outline-hidden focus-visible:outline focus-visible:outline-focus focus-visible:-outline-offset-1',
-                  selectedClass,
-                )}
+            {/* A row without menu items skips the Dropdown: with no trigger it
+                would hand its popup attributes (`aria-haspopup`,
+                `aria-expanded`) to the treeitem, marking a file expandable. */}
+            {menuItems.length > 0 ? (
+              <Dropdown
+                trigger={[DropdownTrigger.ContextMenu]}
+                className="w-full h-[32px]"
+                anchorToMouse
+                items={menuItems}
               >
-                {!isRenaming && (
-                  <div
-                    className="absolute size-full left-0 top-0 z-0"
-                    onClick={() => handleFolderClick(node)}
-                  />
-                )}
-                <div
-                  className="relative flex flex-row truncate items-center w-fit h-6 gap-x-1 pl-[5px]"
-                  onClick={() => !isRenaming && handleFolderClick(node)}
-                >
-                  <>
-                    {isFolder &&
-                      (selectOnCaretClick ? (
-                        caretIcon
-                      ) : (
-                        <span
-                          className={
-                            isCaretHidden
-                              ? hiddenCaretClassName
-                              : caretHitAreaClassName
-                          }
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            togglePath(node.path);
-                          }}
-                        >
-                          {caretIcon}
-                        </span>
-                      ))}
-                    {/* A file has no caret; keep its slot so file and folder
-                        icons on the same level line up. */}
-                    {!isFolder && (
-                      <span
-                        aria-hidden
-                        className="shrink-0"
-                        style={{ width: CARET_ICON_PROPS.size }}
-                      />
-                    )}
-                    <DialFileManagerItemName
-                      elementId={`${path}-tree-item`}
-                      name={isRootFolder ? rootItemLabel : name}
-                      type={isFolder ? DialItemType.Folder : DialItemType.File}
-                      loading={isLoading}
-                      shared={isSharedByMe}
-                      icon={getItemIcon?.(node)}
-                      sharedIndicatorClassName={mergeClasses(
-                        'group-hover/item:bg-control-accent-alpha-hover-subtle',
-                        isSelected && 'bg-control-accent-alpha-active-subtle',
-                      )}
-                      iconSize={BASE_FILE_MANAGER_ICON_SIZE}
-                      forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
-                      forbiddenSymbolsTooltip={tooltipContent}
-                      {...(!isRootFolder && {
-                        editing: isRenaming,
-                        creating:
-                          path ===
-                          `${createdFolderPath}/${NEW_FOLDER_TEMP_NAME}`,
-                        onSave: onRenameSave,
-                        onCancel: onRenameCancel,
-                        validate: validateHandler,
-                        onCreateFolderSave: onCreateFolderSave,
-                        onCreateFolderCancel: onCreateFolderCancel,
-                      })}
-                    />
-                  </>
-                </div>
-
-                {(itemActions || isContextMenuButtonShown) && (
-                  <div className="flex-1 flex justify-end items-center gap-1">
-                    {itemActions && (
-                      <div className="relative flex items-center invisible group-hover/item:visible group-focus-within/item:visible">
-                        {itemActions}
-                      </div>
-                    )}
-                    {isContextMenuButtonShown && (
-                      <Dropdown
-                        placement="bottom-start"
-                        allowedPlacements={['top-start', 'top-end']}
-                        items={menuItems}
-                        className="sticky right-0"
-                      >
-                        <GhostIconButton
-                          size={ElementSize.Small}
-                          className="invisible group-hover/item:visible"
-                          icon={
-                            <IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />
-                          }
-                        />
-                      </Dropdown>
-                    )}
-                  </div>
-                )}
-              </div>
-            </Dropdown>
+                {row}
+              </Dropdown>
+            ) : (
+              <div className="flex w-full h-[32px] items-center">{row}</div>
+            )}
 
             {isExpanded &&
               (items || node?.path === createdFolderPath) &&

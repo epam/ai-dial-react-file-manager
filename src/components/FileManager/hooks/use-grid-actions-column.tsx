@@ -17,6 +17,8 @@ interface UseGridActionsColumnProps {
   allowedFileTypes?: DialFileAcceptType[];
   maxSelectableFileSize?: number;
   buttonClassName?: string;
+  /** Accessible name of each row's menu button. Defaults to `'More actions'`. */
+  buttonLabel?: string;
 }
 
 export const useGridActionsColumn = ({
@@ -25,6 +27,7 @@ export const useGridActionsColumn = ({
   allowedFileTypes,
   maxSelectableFileSize,
   buttonClassName,
+  buttonLabel = 'More actions',
 }: UseGridActionsColumnProps) => {
   const getContextMenuItemsRef = useRef(getContextMenuItems);
 
@@ -58,12 +61,19 @@ export const useGridActionsColumn = ({
           className={mergeClasses('sticky right-0', buttonClassName)}
         >
           <GhostIconButton
+            aria-label={buttonLabel}
             icon={<IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />}
           />
         </Dropdown>
       );
     },
-    [allowedFileTypes, maxSelectableFileSize, buttonClassName, isRowDisabled],
+    [
+      allowedFileTypes,
+      maxSelectableFileSize,
+      buttonClassName,
+      buttonLabel,
+      isRowDisabled,
+    ],
   );
 
   const actionsColumnDef: ColDef<FileManagerGridRow> = useMemo(
