@@ -30,7 +30,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   does the same in the navigation tree. Return `undefined` to keep the default.
   `DialFileManagerItemSummaryCell` takes the same `icon` prop.
 - **`DialFileManager` — `getItemActionRestriction`** — `(file, action) => string | undefined`
-  blocks Move, Rename and Delete for individual items, for example a folder
+  blocks Move, Download, Rename and Delete for individual items, for example a folder
   that must keep its path. A returned reason disables the action in the grid
   context menu, the tree menu and the bulk toolbar and is shown beside it;
   `undefined` leaves it available. Without the prop nothing changes.
@@ -123,6 +123,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
   the message itself; the file manager then shows nothing. Exported with
   `FileUploadValidationErrorReason`, `FileUploadValidationMessages` and
   `FileUploadValidationResult`.
+
+### Fixed
+
+- **`DialFoldersTree` — hover circle on a hidden caret** — an empty, loaded
+  folder hides its caret, but hovering where it was still drew the round hover
+  tint. The tint is now drawn only while the caret is visible.
 
 ### Changed
 

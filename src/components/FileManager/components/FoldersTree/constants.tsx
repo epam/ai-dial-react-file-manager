@@ -11,5 +11,8 @@ export const CARET_ICON_PROPS = {
 export const caretHitAreaClassName =
   "relative flex shrink-0 before:absolute before:-inset-[5px] before:rounded-full before:content-[''] hover:before:bg-control-accent-alpha-hover [&>svg]:relative";
 
+/* Same box without the hover tint, for a caret that is invisible (an empty, loaded folder). */
+export const hiddenCaretClassName = 'relative flex shrink-0 [&>svg]:relative';
+
 export const FOLDER_LEVEL_PADDING = 14;
 export const NEW_FOLDER_TEMP_NAME = '__new_folder';

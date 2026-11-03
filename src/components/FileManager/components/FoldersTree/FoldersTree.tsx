@@ -22,6 +22,7 @@ import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import {
   caretHitAreaClassName,
+  hiddenCaretClassName,
   CARET_ICON_PROPS,
   FOLDER_LEVEL_PADDING,
   NEW_FOLDER_TEMP_NAME,
@@ -431,13 +432,14 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
           )
         : undefined;
 
+      const isCaretHidden = isLoaded && !hasValidItems;
       const caretIcon = (
         <IconCaretRightFilled
           {...CARET_ICON_PROPS}
           className={mergeClasses(
             'shrink-0 text-secondary',
             isExpanded && 'rotate-90 transition-all',
-            isLoaded && !hasValidItems && 'text-transparent',
+            isCaretHidden && 'text-transparent',
           )}
         />
       );
@@ -493,7 +495,11 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                         caretIcon
                       ) : (
                         <span
-                          className={caretHitAreaClassName}
+                          className={
+                            isCaretHidden
+                              ? hiddenCaretClassName
+                              : caretHitAreaClassName
+                          }
                           onClick={(event) => {
                             event.stopPropagation();
                             togglePath(node.path);

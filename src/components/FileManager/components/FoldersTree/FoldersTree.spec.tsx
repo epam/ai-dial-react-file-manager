@@ -79,6 +79,28 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
     );
   });
 
+  test('draws the hover tint on a caret only while the caret is visible', () => {
+    const emptyFolder = [
+      {
+        name: 'Empty',
+        path: '/empty',
+        nodeType: DialFileNodeType.FOLDER,
+        folderId: '9',
+        items: [],
+      },
+    ];
+    const caretBox = () =>
+      screen.getByRole('treeitem', { name: 'Empty' }).querySelector('svg')!
+        .parentElement!;
+    const { rerender } = render(<DialFoldersTree items={emptyFolder} />);
+    expect(caretBox().className).toContain('hover:before:bg-');
+
+    rerender(
+      <DialFoldersTree items={emptyFolder} loadedPaths={new Set(['/empty'])} />,
+    );
+    expect(caretBox().className).not.toContain('hover:before:bg-');
+  });
+
   test('by default the caret only toggles a folder, open or closed, and never selects it', () => {
     const onItemClick = vi.fn();
     render(<DialFoldersTree items={mockItems} onItemClick={onItemClick} />);
