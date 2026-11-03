@@ -80,6 +80,8 @@ export interface DialFoldersTreeProps {
   selectOnCaretClick?: boolean;
   /** Whether rows show the hover "more" button that opens the `getContextMenuItems` menu. Defaults to `true`; the right-click menu and `renderItemActions` stay either way. */
   showContextMenuButton?: boolean;
+  /** Accessible name of the hover "more" button. Defaults to `'More actions'`. */
+  contextMenuButtonLabel?: string;
 }
 
 interface VisibleRow {
@@ -213,6 +215,7 @@ const collectVisibleRows = (
  * @param [onEscape] - Callback fired when Escape is pressed on a row.
  * @param [selectOnCaretClick=false] - Whether clicking a folder's caret also selects it; by default the caret only expands or collapses the folder.
  * @param [showContextMenuButton=true] - Whether rows show the hover "more" button that opens the `getContextMenuItems` menu; the right-click menu and `renderItemActions` stay either way.
+ * @param [contextMenuButtonLabel='More actions'] - Accessible name of the hover "more" button.
  * @remarks
  * - Folder and file data must follow the `DialFile` model.
  * - The `expandedPaths`, `loadingPaths`, `selectedPath`, and `renamedPath` props are externally controlled.
@@ -258,6 +261,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   onEscape,
   selectOnCaretClick = false,
   showContextMenuButton = true,
+  contextMenuButtonLabel = 'More actions',
 }) => {
   const { expandedPaths, togglePath } = useExpandedPaths({
     expandedPaths: externalExpandedPaths ?? new Set(),
@@ -563,6 +567,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                         <GhostIconButton
                           size={ElementSize.Small}
                           className="invisible group-hover/item:visible"
+                          aria-label={contextMenuButtonLabel}
                           icon={
                             <IconDotsVertical {...FILE_MANAGER_ICON_PROPS} />
                           }

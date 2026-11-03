@@ -354,6 +354,8 @@ export interface GridOptions extends Omit<
   selectionMode?: GridSelectionMode;
   wrapCustomCellRenderers?: boolean;
   allowDisabledContextMenu?: boolean;
+  /** Accessible name of each row's "more" menu button. Defaults to `'More actions'`. */
+  rowActionsLabel?: string;
   /**
    * Custom icon for a row's name cell, replacing its type icon (grid and compact
    * list). Return `undefined` to keep the default. The tree has its own
@@ -969,6 +971,7 @@ export const DialFileManagerView: FC = () => {
     wrapCustomCellRenderers,
     visibleColumns = DEFAULT_VISIBLE_COLUMN,
     allowDisabledContextMenu = false,
+    rowActionsLabel = 'More actions',
     containerClassName: gridContainerClassName,
     className: gridOptionsClassName,
     getItemIcon: getGridItemIcon,
@@ -1764,6 +1767,7 @@ export const DialFileManagerView: FC = () => {
     isRowDisabled: isRowContextMenuDisabled,
     allowedFileTypes: allowedFileTypes,
     buttonClassName: isCompactView ? '' : actionsColumnButtonClassName,
+    buttonLabel: rowActionsLabel,
   });
 
   const { columnDefs } = useFileManagerColumns({

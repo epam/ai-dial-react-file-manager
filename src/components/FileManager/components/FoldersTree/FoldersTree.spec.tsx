@@ -511,3 +511,27 @@ describe('Dial UI Kit :: DialFoldersTree', () => {
     });
   });
 });
+
+describe('Dial UI Kit :: DialFoldersTree — context menu button name', () => {
+  test('names the row "more" button "More actions" by default', () => {
+    render(<DialFoldersTree items={mockItems} getContextMenuItems={getMenu} />);
+
+    expect(
+      screen.getByRole('button', { name: 'More actions' }),
+    ).toBeInTheDocument();
+  });
+
+  test('names the row "more" button with contextMenuButtonLabel', () => {
+    render(
+      <DialFoldersTree
+        items={mockItems}
+        getContextMenuItems={getMenu}
+        contextMenuButtonLabel="Weitere Aktionen"
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'Weitere Aktionen' }),
+    ).toBeInTheDocument();
+  });
+});
