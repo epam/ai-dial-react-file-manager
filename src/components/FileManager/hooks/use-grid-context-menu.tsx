@@ -238,6 +238,9 @@ export const useGridContextMenu = ({
               className="text-secondary"
             />
           ),
+          ...getRestrictedItemProps(
+            getItemActionRestriction?.(file, DialFileManagerActions.Download),
+          ),
           onClick: () => onDownload(file),
         });
       }

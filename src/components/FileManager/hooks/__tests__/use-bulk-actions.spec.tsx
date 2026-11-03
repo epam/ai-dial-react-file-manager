@@ -659,6 +659,21 @@ describe('Dial UI Kit :: useBulkActions :: action restrictions', () => {
     expect(del?.tooltip).toBe('Unit folder');
   });
 
+  test('disables Download with the reason when any selected item is restricted', () => {
+    const actions = renderActions((file, action) =>
+      file.path === noPermissionsFile.path &&
+      action === DialFileManagerActions.Download
+        ? 'Unit folder'
+        : undefined,
+    );
+
+    const download = actions.find(
+      (a) => a.key === DialFileManagerActions.Download,
+    );
+    expect(download?.disabled).toBe(true);
+    expect(download?.tooltip).toBe('Unit folder');
+  });
+
   test('keeps Move and Delete enabled when nothing is restricted', () => {
     const actions = renderActions(() => undefined);
 

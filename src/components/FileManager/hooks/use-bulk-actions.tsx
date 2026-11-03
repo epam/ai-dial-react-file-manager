@@ -84,11 +84,16 @@ export const useBulkActions = ({
       actionLabels[DialFileManagerActions.Download] &&
       !hasAnyRestrictedSymbols
     ) {
+      const downloadRestriction = getRestriction(
+        DialFileManagerActions.Download,
+      );
       actions.push({
         key: DialFileManagerActions.Download,
         label: actionLabels[DialFileManagerActions.Download],
         title: actionLabels[DialFileManagerActions.Download],
         icon: <IconDownload {...FILE_MANAGER_ICON_PROPS} />,
+        disabled: !!downloadRestriction,
+        tooltip: downloadRestriction,
         onClick: () => onDownload(selectedFilesArray),
       });
     }

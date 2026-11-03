@@ -537,7 +537,7 @@ export interface DialFileManagerProps {
   isRenameFileAvailable?: boolean;
   isDuplicateFolderAvailable?: boolean;
   /**
-   * Blocks Move, Rename and Delete per item: return the reason to disable the
+   * Blocks Move, Download, Rename and Delete per item: return the reason to disable the
    * action for `file` (context menus, tree menu and bulk toolbar), or
    * `undefined` to leave it available.
    */
@@ -1197,6 +1197,9 @@ export const DialFileManagerView: FC = () => {
                 {...FILE_MANAGER_ICON_PROPS}
                 className="text-secondary"
               />
+            ),
+            ...getRestrictedItemProps(
+              getItemActionRestriction?.(file, DialFileManagerActions.Download),
             ),
             onClick: () => handleDownloadFiles([file]),
           });

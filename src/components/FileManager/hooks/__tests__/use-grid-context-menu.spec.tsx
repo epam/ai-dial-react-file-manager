@@ -1136,6 +1136,7 @@ describe('Dial UI Kit :: useGridContextMenu :: action restrictions', () => {
     const byKey = Object.fromEntries(items.map((item) => [item.key, item]));
     for (const key of [
       DialFileManagerActions.Move,
+      DialFileManagerActions.Download,
       DialFileManagerActions.Rename,
       DialFileManagerActions.Delete,
     ]) {
