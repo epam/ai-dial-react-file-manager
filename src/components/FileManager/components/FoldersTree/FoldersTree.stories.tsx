@@ -334,6 +334,16 @@ export const WithExpandedFolders: Story = {
   },
 };
 
+export const WithSearchHighlight: Story = {
+  args: {
+    items: mockFolders,
+    expandedPaths: new Set(['/root', '/root/Documents', '/root/Videos']),
+    showFiles: false,
+    sharedByMePaths,
+    searchQuery: 'doc',
+  },
+};
+
 export const WithFilesVisible: Story = {
   args: {
     items: mockFolders,

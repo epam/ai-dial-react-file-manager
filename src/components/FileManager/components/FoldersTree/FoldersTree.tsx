@@ -82,6 +82,8 @@ export interface DialFoldersTreeProps {
   showContextMenuButton?: boolean;
   /** Accessible name of the hover "more" button. Defaults to `'More actions'`. */
   contextMenuButtonLabel?: string;
+  /** Search query whose first case-insensitive match is highlighted in each row's name; the root row is left as is. The tree does not filter by it. */
+  searchQuery?: string;
 }
 
 interface VisibleRow {
@@ -216,6 +218,7 @@ const collectVisibleRows = (
  * @param [selectOnCaretClick=false] - Whether clicking a folder's caret also selects it; by default the caret only expands or collapses the folder.
  * @param [showContextMenuButton=true] - Whether rows show the hover "more" button that opens the `getContextMenuItems` menu; the right-click menu and `renderItemActions` stay either way.
  * @param [contextMenuButtonLabel='More actions'] - Accessible name of the hover "more" button.
+ * @param [searchQuery] - Query highlighted in row names (not the root row); the tree does not filter by it.
  * @remarks
  * - Folder and file data must follow the `DialFile` model.
  * - The `expandedPaths`, `loadingPaths`, `selectedPath`, and `renamedPath` props are externally controlled.
@@ -262,6 +265,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   selectOnCaretClick = false,
   showContextMenuButton = true,
   contextMenuButtonLabel = 'More actions',
+  searchQuery,
 }) => {
   const { expandedPaths, togglePath } = useExpandedPaths({
     expandedPaths: externalExpandedPaths ?? new Set(),
@@ -525,6 +529,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                 forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
                 forbiddenSymbolsTooltip={tooltipContent}
                 {...(!isRootFolder && {
+                  searchQuery,
                   editing: isRenaming,
                   creating:
                     path === `${createdFolderPath}/${NEW_FOLDER_TEMP_NAME}`,
