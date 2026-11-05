@@ -6,7 +6,9 @@ import {
 import {
   useEditableItem,
   DialItemType,
+  FileIcon,
   FileName,
+  Highlight,
   BASE_ICON_SIZE,
 } from '@epam/ai-dial-ui-kit';
 import { getForbiddenSymbolsTooltip } from '../../utils';
@@ -32,6 +34,10 @@ export interface DialFileManagerItemNameProps extends DialFileManagerItemNameInp
   hideTooltip?: boolean;
   forbiddenSymbolsRegExp?: RegExp;
   forbiddenSymbolsTooltip?: ReactNode;
+  /** Search query whose first case-insensitive match is highlighted in the read-only name. */
+  searchQuery?: string;
+  /** Screen-reader text announcing the shared state while `searchQuery` is set. Defaults to `'Shared'`. */
+  sharedLabel?: string;
 }
 
 /**
@@ -89,6 +95,8 @@ export const DialFileManagerItemName: FC<DialFileManagerItemNameProps> = ({
   forbiddenSymbolsRegExp,
   forbiddenSymbolsTooltip,
   details,
+  searchQuery,
+  sharedLabel = 'Shared',
 }) => {
   const { value, invalid, invalidMessage, onChange, inputRef } =
     useEditableItem({
@@ -113,6 +121,47 @@ export const DialFileManagerItemName: FC<DialFileManagerItemNameProps> = ({
       forbiddenSymbolsTooltip,
     );
     const hasRestrictedSymbolsInName = !!tooltipContent;
+
+    /*
+     * `FileName` takes no query, so a search result keeps its icon and swaps
+     * the name for `Highlight`, which truncates with a tooltip the same way.
+     * A name with forbidden symbols keeps `FileName` for its warning tooltip.
+     */
+    if (searchQuery?.trim() && !details && !hasRestrictedSymbolsInName) {
+      return (
+        <div className="flex w-full min-w-0 max-w-[428px] items-center gap-2">
+          {icon != null && !loading ? (
+            <span
+              aria-hidden
+              className="flex shrink-0 items-center justify-center"
+            >
+              {icon}
+            </span>
+          ) : (
+            <FileIcon
+              name={name}
+              type={type}
+              fileExtension={fileExtension}
+              shared={shared}
+              loading={loading}
+              size={iconSize}
+              sharedIndicatorClassName={sharedIndicatorClassName}
+              sharedIndicatorTooltip={sharedIndicatorTooltip}
+              decorative={!loading}
+            />
+          )}
+          <div className="flex min-w-0 flex-1">
+            <Highlight
+              text={name}
+              query={searchQuery}
+              maxLines={1}
+              className="dial-small-paragraph-text text-primary"
+            />
+            {shared && <span className="sr-only">{sharedLabel}</span>}
+          </div>
+        </div>
+      );
+    }
 
     return (
       <FileName

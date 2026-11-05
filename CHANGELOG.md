@@ -25,6 +25,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`DialFoldersTree` — search highlight** — `searchQuery` marks the first
+  case-insensitive match in each row's name with the kit's `Highlight`; the
+  root row is left as is, and the tree still renders the items it is given
+  (filtering stays with the host). `DialFileManagerItemName` takes the same
+  `searchQuery`, plus `sharedLabel` for the shared state it then announces.
 - **`DialFileManager` — custom item icons** — `gridOptions.getItemIcon(file)` replaces
   a row's type icon in the grid and the compact list; `treeOptions.getItemIcon`
   does the same in the navigation tree. Return `undefined` to keep the default.
