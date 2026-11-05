@@ -551,3 +551,40 @@ describe('Dial UI Kit :: DialFoldersTree — rows without a menu', () => {
     expect(file).not.toHaveAttribute('aria-expanded');
   });
 });
+
+describe('Dial UI Kit :: DialFoldersTree — search highlight', () => {
+  test('marks the matching part of each row name', () => {
+    const { container } = render(
+      <DialFoldersTree
+        items={mockItems}
+        expandedPaths={new Set(['/root'])}
+        searchQuery="sub"
+      />,
+    );
+    const marks = [...container.querySelectorAll('mark')];
+    expect(marks.map((mark) => mark.textContent)).toEqual(['Sub']);
+    expect(
+      screen.getByRole('treeitem', { name: 'Subfolder' }).textContent,
+    ).toContain('Subfolder');
+  });
+
+  test('renders plain names without a query', () => {
+    const { container } = render(
+      <DialFoldersTree items={mockItems} expandedPaths={new Set(['/root'])} />,
+    );
+    expect(container.querySelector('mark')).toBeNull();
+  });
+
+  test('leaves the root row unmarked', () => {
+    const { container } = render(
+      <DialFoldersTree
+        items={mockItems}
+        rootItemPath="/root"
+        rootItemLabel="Root"
+        expandedPaths={new Set(['/root'])}
+        searchQuery="root"
+      />,
+    );
+    expect(container.querySelector('mark')).toBeNull();
+  });
+});
