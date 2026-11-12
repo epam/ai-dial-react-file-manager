@@ -3050,3 +3050,110 @@ describe('DialFileManager — custom item icons', () => {
     });
   });
 });
+
+describe('DialFileManager onDestinationRequest', () => {
+  const renderWithRequestHandler = (
+    props: Partial<React.ComponentProps<typeof DialFileManager>> = {},
+  ) =>
+    renderWithinSizedShell(
+      <DialFileManager
+        items={itemsMock}
+        path="All files"
+        selectedPaths={new Set(['All files/Design'])}
+        bulkActionsToolbarOptions={{
+          getSelectionLabel: () => 'selected',
+          actionLabels: { copy: 'Copy to', move: 'Move to' },
+        }}
+        {...props}
+      />,
+    );
+
+  const clickBulkAction = async (name: string) => {
+    await waitForGridTable();
+    const toolbar = screen.getByRole('toolbar', { name: 'File bulk actions' });
+    const buttons = within(toolbar).getAllByRole('button');
+    await userEvent.click(
+      buttons.find(
+        (button) => button.getAttribute('aria-haspopup') === 'menu',
+      )!,
+    );
+    await userEvent.click(await screen.findByRole('menuitem', { name }));
+  };
+
+  test('raises a copy request with the selected items and their folder', async () => {
+    const onDestinationRequest = vi.fn();
+    renderWithRequestHandler({ onDestinationRequest });
+
+    await clickBulkAction('Copy to');
+
+    expect(onDestinationRequest).toHaveBeenCalledTimes(1);
+    const request = onDestinationRequest.mock.calls[0][0];
+    expect(request.mode).toBe('copy');
+    expect(request.sourceFolder).toBe('All files');
+    expect(request.items.map((item: DialFile) => item.path)).toEqual([
+      'All files/Design',
+    ]);
+  });
+
+  test('raises a move request', async () => {
+    const onDestinationRequest = vi.fn();
+    renderWithRequestHandler({ onDestinationRequest });
+
+    await clickBulkAction('Move to');
+
+    expect(onDestinationRequest.mock.calls[0][0].mode).toBe('move');
+  });
+
+  test('confirm runs the copy and reports it to onCopyFiles', async () => {
+    const onDestinationRequest = vi.fn();
+    const onCopyFiles = vi.fn();
+    renderWithRequestHandler({ onDestinationRequest, onCopyFiles });
+
+    await clickBulkAction('Copy to');
+    act(() =>
+      onDestinationRequest.mock.calls[0][0].confirm('All files/Design/Icons'),
+    );
+
+    await waitFor(() => expect(onCopyFiles).toHaveBeenCalled());
+  });
+
+  test('confirm runs the move and reports it to onMoveToFiles', async () => {
+    const onDestinationRequest = vi.fn();
+    const onMoveToFiles = vi.fn();
+    renderWithRequestHandler({ onDestinationRequest, onMoveToFiles });
+
+    await clickBulkAction('Move to');
+    act(() =>
+      onDestinationRequest.mock.calls[0][0].confirm('All files/Design/Icons'),
+    );
+
+    await waitFor(() => expect(onMoveToFiles).toHaveBeenCalled());
+    expect(onMoveToFiles.mock.calls[0][1]).toBe('All files');
+  });
+
+  test('cancel does not copy or move anything', async () => {
+    const onDestinationRequest = vi.fn();
+    const onCopyFiles = vi.fn();
+    const onMoveToFiles = vi.fn();
+    renderWithRequestHandler({
+      onDestinationRequest,
+      onCopyFiles,
+      onMoveToFiles,
+    });
+
+    await clickBulkAction('Copy to');
+    act(() => onDestinationRequest.mock.calls[0][0].cancel());
+
+    expect(onCopyFiles).not.toHaveBeenCalled();
+    expect(onMoveToFiles).not.toHaveBeenCalled();
+  });
+
+  test('does nothing when no handler is provided', async () => {
+    const onCopyFiles = vi.fn();
+    renderWithRequestHandler({ onCopyFiles });
+
+    await clickBulkAction('Copy to');
+
+    expect(onCopyFiles).not.toHaveBeenCalled();
+  });
+});

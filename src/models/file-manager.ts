@@ -1,4 +1,4 @@
-import type { DestinationFolderMode } from '../types/file-manager';
+import type { DestinationFolderMode } from '@/types/file-manager';
 import type { DialFile, DialFileNodeType } from './file';
 
 export interface DialCopiedItem {

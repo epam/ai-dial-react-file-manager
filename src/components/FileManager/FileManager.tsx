@@ -623,7 +623,7 @@ export interface DialFileManagerProps {
  * @param [bulkActionsToolbarOptions] - Options for the bulk actions toolbar shown when items are selected
  * @param [deleteConfirmationOptions] - Options for the delete confirmation popup
  * @param [unshareConfirmationOptions] - Options for the unshare confirmation popup; when omitted, unshare runs without a confirmation
- * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view. The Copy/Move picker follows the viewport instead and turns into a bottom sheet below 640px.
+ * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view.
  *
  * @param [onPathChange] - Callback fired when user navigates via tree or breadcrumb
  * @param [onSelectedPathsChange] - Callback fired when the selected paths change
