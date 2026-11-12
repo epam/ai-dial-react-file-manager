@@ -4,7 +4,6 @@ export type {
   CreateFolderValidationMessages,
   DeleteConfirmationOptions,
   DialFileManagerConflictResolutionPopupOptions,
-  DialFileManagerDestinationFolderPopupOptions,
   DialFileManagerProps,
   FileMetadataPopupOptions,
   FileTreeOptions,
@@ -15,8 +14,6 @@ export type {
   ToolbarOptions,
   UnshareConfirmationOptions,
 } from './components/FileManager/FileManager';
-export { DialDestinationFolderPopup } from './components/FileManager/components/DestinationFolderPopup/DestinationFolderPopup';
-export type { DestinationFolderPopupProps } from './components/FileManager/components/DestinationFolderPopup/DestinationFolderPopup';
 export { DialFoldersTree } from './components/FileManager/components/FoldersTree/FoldersTree';
 export type { DialFoldersTreeProps } from './components/FileManager/components/FoldersTree/FoldersTree';
 export { DialFileManagerSortDropdown } from './components/FileManager/components/FileManagerSortDropdown/FileManagerSortDropdown';
@@ -44,6 +41,7 @@ export {
 export type { DialRootFolder } from './models/file';
 export {
   type DialCopiedItem,
+  type DialDestinationRequest,
   type DialDeletedItem,
   type DialFileAcceptType,
   type DialFileManagerActionsRef,

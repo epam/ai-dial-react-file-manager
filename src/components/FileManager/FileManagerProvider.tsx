@@ -1,7 +1,6 @@
 import {
   type FC,
   type ReactNode,
-  useState,
   useEffect,
   useMemo,
   useCallback,
@@ -89,7 +88,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   gridOptions: rawGridOptions,
   toolbarOptions,
   bulkActionsToolbarOptions,
-  destinationFolderPopupOptions,
   conflictResolutionPopupOptions,
   onPathChange,
   onTableFileClick,
@@ -137,7 +135,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   searchEmptyStateTitle,
 
   sharedWithMeIds,
-  onFolderPopupPathChange,
+  onDestinationRequest,
   onManagePermissions,
   onPreview,
   onOpenInNewTab,
@@ -156,8 +154,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   contentHeaderClassName,
   nonClickableTableColumns,
   hideSearchPathItemName,
-  showHiddenFileSwitcherInDestinationPopup,
-  showCreateFolderButtonInDestinationPopup,
   autoSelectUploadedItems = false,
   maxNewFolderDepth,
   onNewFolderDepthExceeded,
@@ -295,24 +291,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   const showFiles = memoizedGridOptions.showFiles;
   const showFolders = memoizedGridOptions.showFolders;
 
-  const [internalDestinationPath, setInternalDestinationPath] =
-    useState<string>();
-
-  const destinationFolderPath =
-    destinationFolderPopupOptions?.destinationFolderPath ??
-    internalDestinationPath;
-
-  const setDestinationFolderPath = useCallback(
-    (path?: string) => {
-      if (destinationFolderPopupOptions?.setDestinationFolderPath) {
-        destinationFolderPopupOptions.setDestinationFolderPath(path);
-      } else {
-        setInternalDestinationPath(path);
-      }
-    },
-    [destinationFolderPopupOptions],
-  );
-
   const { areHiddenFilesVisible, toggleHiddenFilesVisibility } =
     useShowHiddenFiles({
       showHiddenFiles,
@@ -382,13 +360,9 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     handleCopyTo,
     handleMoveTo,
     handleDuplicate,
-    handleOpenDestinationFolderPopup,
-    handleCloseDestinationFolderPopup,
-    openDestinationFolderPopup,
+    handleRequestDestination,
     handleSetCopiedFiles,
     handleSetMovedFiles,
-    destinationFolderMode,
-    destinationFolderTitle,
     conflictingFiles,
     conflictResolutionOpen,
     closeConflictResolution,
@@ -396,8 +370,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     handleConflictDuplicate,
     handleConflictCancel,
     handleConflictDecideForEach,
-    sourceFolder,
-    sourceItems,
   } = useFileClipboard({
     getDestinationFiles: (path: string) => {
       const folder = findFolderForPath(items, path);
@@ -409,15 +381,8 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     onCopySuccess: clearSelection,
     onMoveSuccess: clearSelection,
     onDuplicateSuccess: clearSelection,
-    getCopyHeader: destinationFolderPopupOptions?.getCopyHeader,
-    getMoveHeader: destinationFolderPopupOptions?.getMoveHeader,
+    onDestinationRequest,
   });
-
-  useEffect(() => {
-    if (!openDestinationFolderPopup) {
-      setDestinationFolderPath(undefined);
-    }
-  }, [openDestinationFolderPopup, setDestinationFolderPath]);
 
   const {
     deleteConfirmationOpen,
@@ -930,17 +895,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     bulkActionsToolbarOptions,
     deleteConfirmationOptions,
     unshareConfirmationOptions,
-    destinationFolderPopupOptions: {
-      ...destinationFolderPopupOptions,
-      destinationFolderPath,
-      setDestinationFolderPath,
-      header: destinationFolderTitle,
-      sourceItems,
-      onCreateFolder,
-      onCreateFolderValidate,
-      folderCreationValidationMessages,
-      sourceFolder,
-    },
 
     currentPath,
     setCurrentPath,
@@ -971,10 +925,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
       : handleDuplicate,
     handleSetCopiedFiles,
     handleSetMovedFiles,
-    openDestinationFolderPopup,
-    handleCloseDestinationFolderPopup,
-    handleOpenDestinationFolderPopup,
-    destinationFolderMode,
+    handleRequestDestination,
     handleGridAddSibling,
     handleGridAddChild,
     handleTreeAddSibling,
@@ -1088,7 +1039,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
 
     sharedWithMeIds,
 
-    onFolderPopupPathChange,
     onManagePermissions,
     onPreview,
     onOpenInNewTab,
@@ -1103,8 +1053,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     getDisabledTooltip,
     fileTooLargeTooltip,
     unsupportedFileTypeTooltip,
-    showHiddenFileSwitcherInDestinationPopup,
-    showCreateFolderButtonInDestinationPopup,
     maxNewFolderDepth,
     onNewFolderDepthExceeded,
   };

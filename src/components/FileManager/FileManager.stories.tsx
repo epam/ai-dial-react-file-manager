@@ -6,6 +6,7 @@ import {
 } from '@/models/file';
 import type {
   DialCopiedItem,
+  DialDestinationRequest,
   DialDeletedItem,
   DialFileAcceptType,
   DialUploadFileItem,
@@ -30,7 +31,7 @@ import {
   PrimaryButton,
 } from '@epam/ai-dial-ui-kit';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, waitFor, within } from 'storybook/test';
 import {
   IconBuildingCommunity,
   IconFileDescription,
@@ -291,107 +292,17 @@ export const HandleTableFileClick: Story = {
   },
 };
 
-const destinationPopupCaretItems: DialFile[] = [
-  {
-    id: 'destination-root',
-    name: 'All files',
-    path: 'All files',
-    parentPath: '',
-    nodeType: DialFileNodeType.FOLDER,
-    folderId: 'destination-root',
-    items: [
-      {
-        id: 'source-file',
-        name: 'source.txt',
-        path: 'All files/source.txt',
-        parentPath: 'All files',
-        nodeType: DialFileNodeType.ITEM,
-        resourceType: DialFileResourceType.FILE,
-        folderId: 'destination-root',
-      },
-      {
-        id: 'loaded-empty-folder',
-        name: 'Loaded empty folder',
-        path: 'All files/Loaded empty folder',
-        parentPath: 'All files',
-        nodeType: DialFileNodeType.FOLDER,
-        folderId: 'destination-root',
-        items: [],
-      },
-      {
-        id: 'not-loaded-folder',
-        name: 'Not loaded folder',
-        path: 'All files/Not loaded folder',
-        parentPath: 'All files',
-        nodeType: DialFileNodeType.FOLDER,
-        folderId: 'destination-root',
-        items: [],
-      },
-    ],
-  },
-];
-
-const destinationPopupCaretRootItem: DialRootFolder = {
-  ...destinationPopupCaretItems[0],
-  label: 'All files',
-};
-
-const DestinationPopupLoadedEmptyFolderComponent = (
-  args: DialFileManagerProps,
-) => {
-  const [destinationPath, setDestinationPath] = useState('All files');
-
-  return (
-    <div className="h-[720px] min-h-[480px]">
-      <DialFileManager
-        {...args}
-        items={destinationPopupCaretItems}
-        rootItem={destinationPopupCaretRootItem}
-        defaultPath="All files"
-        defaultSelectedPaths={new Set(['All files/source.txt'])}
-        gridOptions={{
-          ...args.gridOptions,
-          selectionMode: GridSelectionMode.MULTIPLE,
-        }}
-        treeOptions={{
-          ...args.treeOptions,
-          expandedPaths: new Set(['All files']),
-          loadedPaths: new Set(['All files', 'All files/Loaded empty folder']),
-          header: 'Folder tree',
-        }}
-        bulkActionsToolbarOptions={{
-          getSelectionLabel: (selectedCount) =>
-            `item${selectedCount === 1 ? '' : 's'} selected`,
-          actionLabels: {
-            [DialFileManagerActions.Copy]: 'Copy to',
-          },
-        }}
-        destinationFolderPopupOptions={{
-          destinationFolderPath: destinationPath,
-          setDestinationFolderPath: setDestinationPath,
-          getCopyHeader: () => 'Copy source.txt',
-        }}
-        onCopyFiles={() => undefined}
-      />
-    </div>
+/* A demo destination UI: a real host renders its own panel and calls `confirm` or `cancel`. */
+const demoDestinationRequest = (request: DialDestinationRequest) => {
+  const destination = window.prompt(
+    `${request.mode === 'copy' ? 'Copy' : 'Move'} to folder`,
+    request.sourceFolder,
   );
-};
-
-export const DestinationPopupLoadedEmptyFolder: Story = {
-  render: DestinationPopupLoadedEmptyFolderComponent,
-  play: async ({ canvasElement }) => {
-    await userEvent.click(
-      await within(canvasElement).findByRole('button', { name: 'Copy to' }),
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Click "Copy to" to open the destination popup. "Loaded empty folder" must not show a caret, while "Not loaded folder" keeps its caret until its contents are loaded. Resize the canvas to verify the same state in the mobile layout.',
-      },
-    },
-  },
+  if (destination) {
+    request.confirm(destination);
+  } else {
+    request.cancel();
+  }
 };
 
 const PopupComponent = (args: DialFileManagerProps) => {
@@ -409,7 +320,6 @@ const PopupComponent = (args: DialFileManagerProps) => {
   const popupTabs = tabs?.filter(
     ({ value }) => value !== DialFileManagerTabs.Review,
   );
-  const [destinationPath, setDestinationPath] = useState<string | undefined>();
   const [loadedPaths, setLoadedPaths] = useState<Set<string>>(new Set());
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>();
 
@@ -553,18 +463,7 @@ const PopupComponent = (args: DialFileManagerProps) => {
             }
             selectedPaths={selectedPaths}
             onSelectedPathsChange={setSelectedPaths}
-            destinationFolderPopupOptions={{
-              destinationFolderPath: destinationPath,
-              setDestinationFolderPath: setDestinationPath,
-              getCopyHeader: (itemsCount, itemName) =>
-                itemsCount === 1 && itemName
-                  ? `Copy "${itemName}"`
-                  : `Copy ${itemsCount} item(s)`,
-              getMoveHeader: (itemsCount, itemName) =>
-                itemsCount === 1 && itemName
-                  ? `Move "${itemName}"`
-                  : `Move ${itemsCount} item(s)`,
-            }}
+            onDestinationRequest={demoDestinationRequest}
             gridOptions={{
               ...(args.gridOptions ?? {}),
               selectionMode: GridSelectionMode.MULTIPLE,
@@ -861,7 +760,6 @@ export const LoadingWithData: Story = {
 
 const WithConflictResolutionComponent = (args: DialFileManagerProps) => {
   const [items] = useState<DialFile[]>(itemsMock);
-  const [destinationPath, setDestinationPath] = useState<string | undefined>();
 
   const itemsWithDuplicates = useMemo(() => {
     const clonedItems = JSON.parse(JSON.stringify(items)) as DialFile[];
@@ -891,10 +789,7 @@ const WithConflictResolutionComponent = (args: DialFileManagerProps) => {
       <DialFileManager
         {...args}
         items={itemsWithDuplicates}
-        destinationFolderPopupOptions={{
-          destinationFolderPath: destinationPath,
-          setDestinationFolderPath: setDestinationPath,
-        }}
+        onDestinationRequest={demoDestinationRequest}
         conflictResolutionPopupOptions={{
           actionLabels: {
             [DialFileManagerConflictActions.Replace]: 'Replace',
@@ -998,8 +893,6 @@ export const WithConflictResolution: Story = {
 };
 
 const WithMultipleConflictsComponent = (args: DialFileManagerProps) => {
-  const [destinationPath, setDestinationPath] = useState<string | undefined>();
-
   const itemsWithMultipleDuplicates = useMemo(() => {
     const clonedItems = JSON.parse(JSON.stringify(itemsMock)) as DialFile[];
     const designFolder = clonedItems[0]?.items?.find(
@@ -1057,10 +950,7 @@ const WithMultipleConflictsComponent = (args: DialFileManagerProps) => {
         {...args}
         items={itemsWithMultipleDuplicates}
         path="All files/Design/Icons/SVG/24px"
-        destinationFolderPopupOptions={{
-          destinationFolderPath: destinationPath,
-          setDestinationFolderPath: setDestinationPath,
-        }}
+        onDestinationRequest={demoDestinationRequest}
         conflictResolutionPopupOptions={{
           actionLabels: {
             [DialFileManagerConflictActions.Replace]: 'Replace',
@@ -2212,7 +2102,6 @@ const InteractiveDemoComponent = (args: DialFileManagerProps) => {
   const [items, setItems] = useState<DialFile[]>(() =>
     JSON.parse(JSON.stringify(itemsMock)),
   );
-  const [destinationPath, setDestinationPath] = useState<string | undefined>();
 
   const onCopyFiles = useCallback(
     (copiedItems: DialCopiedItem[], destinationFolder: string) => {
@@ -2368,11 +2257,7 @@ const InteractiveDemoComponent = (args: DialFileManagerProps) => {
         onCopyFiles={onCopyFiles}
         onDeleteFiles={onDeleteFiles}
         onCreateFolder={onCreateFolder}
-        destinationFolderPopupOptions={{
-          ...args.destinationFolderPopupOptions,
-          destinationFolderPath: destinationPath,
-          setDestinationFolderPath: setDestinationPath,
-        }}
+        onDestinationRequest={demoDestinationRequest}
         navigationPanelOptions={{ searchable: true }}
         gridOptions={{
           ...(args.gridOptions ?? {}),

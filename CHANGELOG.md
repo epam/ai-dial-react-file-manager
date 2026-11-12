@@ -9,6 +9,19 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Breaking Changes
 
+- **`DialFileManager` — Copy/Move destination UI is the host's** — the built-in
+  destination-folder popup and phone sheet are removed, together with
+  `DialDestinationFolderPopup`, `DestinationFolderPopupProps`,
+  `DialFileManagerDestinationFolderPopupOptions` and the props that only
+  configured them: `destinationFolderPopupOptions`, `onFolderPopupPathChange`,
+  `showHiddenFileSwitcherInDestinationPopup` and
+  `showCreateFolderButtonInDestinationPopup`. Copy and Move now call the new
+  `onDestinationRequest(request)` with a `DialDestinationRequest`
+  (`mode`, `items`, `sourceFolder`, `confirm(destinationFolder)`, `cancel()`);
+  the host shows its own destination UI and calls `confirm`, which runs the
+  same conflict resolution and `onCopyFiles` / `onMoveToFiles` flow as before.
+  Without `onDestinationRequest` the actions do nothing.
+
 - **`styles.css` — built with Tailwind CSS v4 inside the kit's `ui` layer** —
   the stylesheet used to be entirely unlayered, preflight included. Its
   preflight now sits in `@layer ui.base` and its utilities in

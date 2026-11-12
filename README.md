@@ -88,13 +88,18 @@ Common integration callbacks include:
 - `onCopyFiles`, `onMoveToFiles`, and `onDeleteFiles`
 - `onDownloadFiles`, `onUnshareFiles`, and `onRemoveFilesAccess`
 - `onManagePermissions`, `onPreview`, and `onOpenInNewTab`
+- `onDestinationRequest`, called when the user starts Copy or Move so the host can show its own destination UI (see below)
+
+### Copy and Move destination
+
+The file manager no longer ships a destination-folder popup. When the user chooses Copy or Move, it calls `onDestinationRequest` with a `DialDestinationRequest` (`mode`, `items`, `sourceFolder`, `confirm`, `cancel`). Show your own destination UI, then call `request.confirm(destinationFolder)` to run the operation — name conflicts are resolved first, and the result reaches `onCopyFiles` / `onMoveToFiles` — or `request.cancel()` if the user dismisses it. The folders of the destination must be present in `items` for conflict detection. Without `onDestinationRequest`, Copy and Move do nothing.
 
 ## Public API
 
 The primary export is `DialFileManager`. The package also exports:
 
 - `FileManagerProvider` and `useFileManagerContext`
-- `DialDestinationFolderPopup` and `DialFoldersTree`
+- `DialFoldersTree`
 - File models, permissions, resource types, and selection modes
 - File-manager actions, tabs, trigger views, and column definitions
 - Public option and prop types used by the exported components

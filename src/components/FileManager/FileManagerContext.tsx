@@ -17,7 +17,6 @@ import type {
   DialFileManagerProps,
   DeleteConfirmationOptions,
   UnshareConfirmationOptions,
-  DialFileManagerDestinationFolderPopupOptions,
   DialFileManagerConflictResolutionPopupOptions,
   FileMetadataPopupOptions,
 } from './FileManager';
@@ -71,10 +70,6 @@ export interface FileManagerContextValue {
   bulkActionsToolbarOptions?: BulkActionsToolbarOptions;
   deleteConfirmationOptions?: DeleteConfirmationOptions;
   unshareConfirmationOptions?: UnshareConfirmationOptions;
-  destinationFolderPopupOptions?: DialFileManagerDestinationFolderPopupOptions & {
-    sourceFolder?: string;
-    sourceItems?: DialFile[];
-  };
   conflictResolutionPopupOptions?: DialFileManagerConflictResolutionPopupOptions;
   fileMetadataPopupOptions?: FileMetadataPopupOptions;
 
@@ -103,13 +98,14 @@ export interface FileManagerContextValue {
   currentFolder?: DialFile;
   gridRows: FileManagerGridRow[];
 
-  handleCopyTo: (destinationFolder: string) => void;
-  handleMoveTo: (destinationFolder: string, sourceFolder?: string) => void;
+  handleCopyTo: (destinationFolder: string, files?: DialFile[]) => void;
+  handleMoveTo: (
+    destinationFolder: string,
+    sourceFolder?: string,
+    files?: DialFile[],
+  ) => void;
   handleDuplicate: (files: DialFile[]) => void;
-  handleOpenDestinationFolderPopup: (mode: DestinationFolderMode) => void;
-  handleCloseDestinationFolderPopup: () => void;
-  openDestinationFolderPopup: boolean;
-  destinationFolderMode: DestinationFolderMode;
+  handleRequestDestination: (mode: DestinationFolderMode) => void;
   handleSetCopiedFiles: (files: DialFile[]) => void;
   handleSetMovedFiles: (files: DialFile[]) => void;
   handleGridAddSibling?: (files: DialFile[]) => void;
@@ -225,7 +221,6 @@ export interface FileManagerContextValue {
   searchEmptyStateTitle?: string;
 
   sharedWithMeIds?: string[];
-  onFolderPopupPathChange?: (newPath?: string) => void;
   onManagePermissions?: (path?: string) => void;
   onPreview?: (path?: string) => void;
   onOpenInNewTab?: (file: DialFile) => void;
@@ -252,8 +247,6 @@ export interface FileManagerContextValue {
   fileTooLargeTooltip?: string;
   unsupportedFileTypeTooltip?: string;
   hideSearchPathItemName?: boolean;
-  showHiddenFileSwitcherInDestinationPopup?: boolean;
-  showCreateFolderButtonInDestinationPopup?: boolean;
   maxNewFolderDepth?: number;
   onNewFolderDepthExceeded?: () => void;
 }
