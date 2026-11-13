@@ -63,6 +63,7 @@ import type { DialFile, DialRootFolder } from '@/models/file';
 import { DialFileNodeType, DialFilePermission } from '@/models/file';
 import {
   type DialCopiedItem,
+  type DialDestinationRequest,
   type DialDeletedItem,
   type DialFileAcceptType,
   type DialFileManagerActionsRef,
@@ -83,10 +84,6 @@ import {
 import type { FileManagerGridRow } from './FileManagerContext';
 import { FileManagerProvider } from './FileManagerProvider';
 import { FileManagerTooltip } from './FileManagerTooltip';
-import {
-  DialDestinationFolderPopup,
-  type DestinationFolderPopupProps,
-} from './components/DestinationFolderPopup/DestinationFolderPopup';
 import {
   DialFileManagerBulkActionsToolbar,
   type DialFileManagerBulkActionsToolbarProps,
@@ -181,35 +178,6 @@ export type DialFileManagerConflictResolutionPopupOptions = Omit<
   ConflictResolutionPopupProps,
   'open' | 'onClose' | 'onReplace' | 'onDuplicate' | 'conflictingFiles'
 >;
-
-export type DialFileManagerDestinationFolderPopupOptions = Pick<
-  DestinationFolderPopupProps,
-  | 'setDestinationFolderPath'
-  | 'destinationFolderPath'
-  | 'addFolderLabel'
-  | 'copyLabel'
-  | 'moveLabel'
-  | 'hiddenFilesSwitcherLabel'
-  | 'hideHiddenFilesLabel'
-  | 'header'
-  | 'onCreateFolder'
-  | 'onCreateFolderValidate'
-  | 'folderCreationValidationMessages'
-  | 'disabledPathTooltip'
-  | 'movedIntoItselfTooltip'
-  | 'emptyStateTitle'
-  | 'emptyStateDescription'
-  | 'excludedPaths'
-  | 'filesLoading'
-  | 'getSourceItemsLabel'
-  | 'destinationLabel'
-  | 'searchFoldersPlaceholder'
-  | 'searchEmptyStateTitle'
-> & {
-  getCopyHeader?: (itemsCount: number, itemName?: string) => string;
-  getMoveHeader?: (itemsCount: number, itemName?: string) => string;
-  processDestinationFolderPath?: (path: string) => string;
-};
 
 export interface FileMetadataPopupOptions {
   fileMetadata?: DialFile;
@@ -453,7 +421,6 @@ export interface DialFileManagerProps {
   bulkActionsToolbarOptions?: BulkActionsToolbarOptions;
   deleteConfirmationOptions?: DeleteConfirmationOptions;
   unshareConfirmationOptions?: UnshareConfirmationOptions;
-  destinationFolderPopupOptions?: DialFileManagerDestinationFolderPopupOptions;
   conflictResolutionPopupOptions?: DialFileManagerConflictResolutionPopupOptions;
 
   compactViewWidthBreakpoint?: number;
@@ -531,7 +498,11 @@ export interface DialFileManagerProps {
   searchEmptyStateTitle?: string;
 
   sharedWithMeIds?: string[];
-  onFolderPopupPathChange?: (newPath?: string) => void;
+  /**
+   * Called when the user starts Copy or Move. The host shows its own destination UI and
+   * calls `request.confirm(destinationFolder)` to run the operation, or `request.cancel()`.
+   */
+  onDestinationRequest?: (request: DialDestinationRequest) => void;
   onManagePermissions?: (path?: string) => void;
   onPreview?: (path?: string) => void;
   onOpenInNewTab?: (file: DialFile) => void;
@@ -560,8 +531,6 @@ export interface DialFileManagerProps {
   customDownloadItemsAction?: (items?: DialFile[]) => void;
   nonClickableTableColumns?: FileManagerColumnKey[];
   hideSearchPathItemName?: boolean;
-  showHiddenFileSwitcherInDestinationPopup?: boolean;
-  showCreateFolderButtonInDestinationPopup?: boolean;
   autoSelectUploadedItems?: boolean;
   maxNewFolderDepth?: number;
   onNewFolderDepthExceeded?: () => void;
@@ -654,14 +623,7 @@ export interface DialFileManagerProps {
  * @param [bulkActionsToolbarOptions] - Options for the bulk actions toolbar shown when items are selected
  * @param [deleteConfirmationOptions] - Options for the delete confirmation popup
  * @param [unshareConfirmationOptions] - Options for the unshare confirmation popup; when omitted, unshare runs without a confirmation
- * @param [destinationFolderPopupOptions.movedIntoItselfTooltip] - Tooltip on the disabled Move button when the destination is a moved folder or lies inside one; defaults to "A folder can't be moved into itself or its subfolders"
- * @param [destinationFolderPopupOptions.excludedPaths] - Paths to hide from the Copy/Move destination popup only (e.g. a root folder that shouldn't be a valid destination); the main tree/grid are unaffected
- * @param [destinationFolderPopupOptions.getSourceItemsLabel] - Text naming several items being copied or moved in the phone sheet; defaults to "N items"
- * @param [destinationFolderPopupOptions.destinationLabel] - Heading above the folders tree in the phone sheet; defaults to "Copy to folder" or "Move to folder"
- * @param [destinationFolderPopupOptions.searchFoldersPlaceholder] - Placeholder of the phone sheet's folder search; defaults to "Search folders"
- * @param [destinationFolderPopupOptions.searchEmptyStateTitle] - Title shown when a search in the Copy/Move picker finds nothing; defaults to "No data"
- * @param [destinationFolderPopupOptions.filesLoading] - When true, the Copy/Move destination grid shows its loading state (e.g. while the destination folder's contents load); falls back to the main `filesLoading`
- * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view. The Copy/Move picker follows the viewport instead and turns into a bottom sheet below 640px.
+ * @param [compactViewWidthBreakpoint=DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT] - Width (px) below which the component switches to compact view.
  *
  * @param [onPathChange] - Callback fired when user navigates via tree or breadcrumb
  * @param [onSelectedPathsChange] - Callback fired when the selected paths change
@@ -735,7 +697,6 @@ export const DialFileManagerView: FC = () => {
     bulkActionsToolbarOptions,
     deleteConfirmationOptions,
     unshareConfirmationOptions,
-    destinationFolderPopupOptions,
     conflictResolutionPopupOptions,
     compactViewWidthBreakpoint = DEFAULT_COMPACT_VIEW_WIDTH_BREAKPOINT,
     customBreakpointRef,
@@ -763,15 +724,10 @@ export const DialFileManagerView: FC = () => {
     handleSelectionClick,
     onGridApiChange,
 
-    handleOpenDestinationFolderPopup,
-    handleCloseDestinationFolderPopup,
-    openDestinationFolderPopup,
-    destinationFolderMode,
+    handleRequestDestination,
     handleSetCopiedFiles,
     handleSetMovedFiles,
     handleDuplicate,
-    handleCopyTo,
-    handleMoveTo,
     handleGridAddSibling,
     handleGridAddChild,
     handleTreeAddSibling,
@@ -809,9 +765,6 @@ export const DialFileManagerView: FC = () => {
     clearUploadError,
     onUploadValidationError,
 
-    onUploadFiles,
-    onValidateUpload,
-    maxFileSize,
     newActions,
     isNewButtonVisible,
     isNewButtonDisabled,
@@ -855,7 +808,6 @@ export const DialFileManagerView: FC = () => {
 
     sharedWithMeIds,
 
-    onFolderPopupPathChange,
     onManagePermissions,
     onPreview,
     onOpenInNewTab,
@@ -871,8 +823,6 @@ export const DialFileManagerView: FC = () => {
     contentHeaderClassName: customContentHeaderClassName,
     nonClickableTableColumns,
     hideSearchPathItemName,
-    showHiddenFileSwitcherInDestinationPopup,
-    showCreateFolderButtonInDestinationPopup,
     newFolderDefaultName,
   } = useFileManagerContext();
 
@@ -1159,7 +1109,7 @@ export const DialFileManagerView: FC = () => {
             ),
             onClick: () => {
               handleSetCopiedFiles([file]);
-              handleOpenDestinationFolderPopup(DestinationFolderMode.Copy);
+              handleRequestDestination(DestinationFolderMode.Copy);
             },
           });
         }
@@ -1183,7 +1133,7 @@ export const DialFileManagerView: FC = () => {
             ),
             onClick: () => {
               handleSetMovedFiles([file]);
-              handleOpenDestinationFolderPopup(DestinationFolderMode.Move);
+              handleRequestDestination(DestinationFolderMode.Move);
             },
           });
         }
@@ -1321,7 +1271,7 @@ export const DialFileManagerView: FC = () => {
       onManagePermissions,
       handleDuplicate,
       handleSetCopiedFiles,
-      handleOpenDestinationFolderPopup,
+      handleRequestDestination,
       handleSetMovedFiles,
       handleDownloadFiles,
       onTreeRename,
@@ -1356,11 +1306,11 @@ export const DialFileManagerView: FC = () => {
     onDuplicate: handleDuplicate,
     onCopy: (files) => {
       handleSetCopiedFiles(files);
-      handleOpenDestinationFolderPopup(DestinationFolderMode.Copy);
+      handleRequestDestination(DestinationFolderMode.Copy);
     },
     onMove: (files) => {
       handleSetMovedFiles(files);
-      handleOpenDestinationFolderPopup(DestinationFolderMode.Move);
+      handleRequestDestination(DestinationFolderMode.Move);
     },
     onDownload: handleDownloadFiles,
     onRename: onGridRename,
@@ -1712,11 +1662,11 @@ export const DialFileManagerView: FC = () => {
     onDuplicate: (file) => handleDuplicate([file]),
     onCopy: (file) => {
       handleSetCopiedFiles([file]);
-      handleOpenDestinationFolderPopup(DestinationFolderMode.Copy);
+      handleRequestDestination(DestinationFolderMode.Copy);
     },
     onMove: (file) => {
       handleSetMovedFiles([file]);
-      handleOpenDestinationFolderPopup(DestinationFolderMode.Move);
+      handleRequestDestination(DestinationFolderMode.Move);
     },
     onDownload: (file) => handleDownloadFiles([file]),
     onRename: onGridRename,
@@ -2100,54 +2050,6 @@ export const DialFileManagerView: FC = () => {
           itemsToUnshare={itemsToUnshare}
           onClose={closeUnshareConfirmation}
           onConfirm={confirmUnshare}
-        />
-        <DialDestinationFolderPopup
-          {...destinationFolderPopupOptions}
-          open={openDestinationFolderPopup}
-          onClose={handleCloseDestinationFolderPopup}
-          onConfirm={() => {
-            const destinationPath =
-              destinationFolderPopupOptions?.destinationFolderPath ?? '/';
-            if (destinationFolderMode === DestinationFolderMode.Copy) {
-              handleCopyTo(destinationPath);
-            } else {
-              handleMoveTo(destinationPath);
-            }
-            handleCloseDestinationFolderPopup();
-          }}
-          mode={destinationFolderMode}
-          items={items}
-          rootItem={rootItem}
-          gridOptions={{
-            columnDefs: columnDefs.filter(
-              (col) => col.colId !== FileManagerColumnKey.Actions,
-            ),
-            loading:
-              destinationFolderPopupOptions?.filesLoading ?? filesLoading,
-          }}
-          onUploadFiles={onUploadFiles}
-          onValidateUpload={onValidateUpload}
-          maxFileSize={maxFileSize}
-          path={
-            destinationFolderPopupOptions?.destinationFolderPath ??
-            destinationFolderPopupOptions?.sourceFolder ??
-            currentPath
-          }
-          onPathChange={(newPath) => {
-            destinationFolderPopupOptions?.setDestinationFolderPath?.(newPath);
-          }}
-          sourceFolder={
-            destinationFolderPopupOptions?.sourceFolder ?? currentPath
-          }
-          treeOptions={{
-            header: treeOptions?.header,
-            loadedPaths: treeOptions?.loadedPaths,
-            loadingPaths: treeOptions?.loadingPaths,
-          }}
-          onFolderPopupPathChange={onFolderPopupPathChange}
-          showHiddenFileSwitcher={showHiddenFileSwitcherInDestinationPopup}
-          showCreateFolderButton={showCreateFolderButtonInDestinationPopup}
-          hideSearchPathItemName={hideSearchPathItemName}
         />
         <ConflictResolutionPopup
           {...conflictResolutionPopupOptions}

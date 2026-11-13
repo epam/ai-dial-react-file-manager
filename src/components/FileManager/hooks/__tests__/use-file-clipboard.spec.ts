@@ -19,181 +19,6 @@ describe('Dial UI Kit :: FileManager :: useFileClipboard', () => {
     sourceFiles = [];
   });
 
-  it('initial state: popup closed, no mode set', () => {
-    const { result } = renderHook(() =>
-      useFileClipboard({ getDestinationFiles, getSourceFiles }),
-    );
-
-    expect(result.current.openDestinationFolderPopup).toBe(false);
-    expect(result.current.destinationFolderMode).toBe(
-      DestinationFolderMode.Copy,
-    );
-    expect(result.current.conflictResolutionOpen).toBe(false);
-    expect(result.current.conflictingFiles).toEqual([]);
-    expect(result.current.sourceFolder).toBeUndefined();
-  });
-
-  it('handleOpenDestinationFolderPopup with copy mode', () => {
-    const { result } = renderHook(() =>
-      useFileClipboard({ getDestinationFiles, getSourceFiles }),
-    );
-
-    act(() => {
-      result.current.handleOpenDestinationFolderPopup(
-        DestinationFolderMode.Copy,
-      );
-    });
-
-    expect(result.current.openDestinationFolderPopup).toBe(true);
-    expect(result.current.destinationFolderMode).toBe('copy');
-  });
-
-  it('handleOpenDestinationFolderPopup with move mode', () => {
-    const { result } = renderHook(() =>
-      useFileClipboard({ getDestinationFiles, getSourceFiles }),
-    );
-
-    act(() => {
-      result.current.handleOpenDestinationFolderPopup(
-        DestinationFolderMode.Move,
-      );
-    });
-
-    expect(result.current.openDestinationFolderPopup).toBe(true);
-    expect(result.current.destinationFolderMode).toBe(
-      DestinationFolderMode.Move,
-    );
-  });
-
-  it('handleCloseDestinationFolderPopup closes popup and clears state', () => {
-    const { result } = renderHook(() =>
-      useFileClipboard({ getDestinationFiles, getSourceFiles }),
-    );
-
-    act(() => {
-      result.current.handleSetCopiedFiles([
-        {
-          id: '1',
-          name: 'file.txt',
-          path: '/folder/file.txt',
-          parentPath: '/folder',
-          nodeType: DialFileNodeType.ITEM,
-        } as DialFile,
-      ]);
-      result.current.handleOpenDestinationFolderPopup(
-        DestinationFolderMode.Copy,
-      );
-    });
-
-    expect(result.current.openDestinationFolderPopup).toBe(true);
-    expect(result.current.sourceFolder).toBe('/folder');
-
-    act(() => {
-      result.current.handleCloseDestinationFolderPopup();
-    });
-
-    expect(result.current.openDestinationFolderPopup).toBe(false);
-    expect(result.current.sourceFolder).toBeUndefined();
-  });
-
-  it('handleSetCopiedFiles sets sourceFolder from parentPath', () => {
-    const { result } = renderHook(() =>
-      useFileClipboard({ getDestinationFiles, getSourceFiles }),
-    );
-
-    const copiedFiles: DialFile[] = [
-      {
-        id: '1',
-        name: 'a.txt',
-        path: '/source/folder/a.txt',
-        parentPath: '/source/folder',
-        nodeType: DialFileNodeType.ITEM,
-      } as DialFile,
-      {
-        id: '2',
-        name: 'b.txt',
-        path: '/source/folder/b.txt',
-        parentPath: '/source/folder',
-        nodeType: DialFileNodeType.ITEM,
-      } as DialFile,
-    ];
-
-    act(() => {
-      result.current.handleSetCopiedFiles(copiedFiles);
-    });
-
-    expect(result.current.sourceFolder).toBe('/source/folder');
-  });
-
-  it('handleSetCopiedFiles falls back to folderId if parentPath is missing', () => {
-    const { result } = renderHook(() =>
-      useFileClipboard({ getDestinationFiles, getSourceFiles }),
-    );
-
-    const copiedFiles: DialFile[] = [
-      {
-        id: '1',
-        name: 'a.txt',
-        path: '/a.txt',
-        folderId: '/root',
-        nodeType: DialFileNodeType.ITEM,
-      } as DialFile,
-    ];
-
-    act(() => {
-      result.current.handleSetCopiedFiles(copiedFiles);
-    });
-
-    expect(result.current.sourceFolder).toBe('/root');
-  });
-
-  it('handleSetMovedFiles sets sourceFolder from parentPath', () => {
-    const { result } = renderHook(() =>
-      useFileClipboard({ getDestinationFiles, getSourceFiles }),
-    );
-
-    const movedFiles: DialFile[] = [
-      {
-        id: '1',
-        name: 'm1',
-        path: '/source/m1',
-        parentPath: '/source',
-        nodeType: DialFileNodeType.FOLDER,
-      } as DialFile,
-    ];
-
-    act(() => {
-      result.current.handleSetMovedFiles(movedFiles);
-    });
-
-    expect(result.current.sourceFolder).toBe('/source');
-  });
-
-  it('exposes the files of the open mode as sourceItems', () => {
-    const { result } = renderHook(() =>
-      useFileClipboard({ getDestinationFiles, getSourceFiles }),
-    );
-
-    const copied = [{ id: 'c', path: '/c' } as DialFile];
-    const moved = [{ id: 'm', path: '/m' } as DialFile];
-
-    act(() => {
-      result.current.handleSetCopiedFiles(copied);
-      result.current.handleSetMovedFiles(moved);
-      result.current.handleOpenDestinationFolderPopup(
-        DestinationFolderMode.Move,
-      );
-    });
-    expect(result.current.sourceItems).toBe(moved);
-
-    act(() => {
-      result.current.handleOpenDestinationFolderPopup(
-        DestinationFolderMode.Copy,
-      );
-    });
-    expect(result.current.sourceItems).toBe(copied);
-  });
-
   it('handleCopyTo without conflicts calls onCopyFiles and onCopySuccess', () => {
     const onCopyFiles = vi.fn();
     const onCopySuccess = vi.fn();
@@ -618,234 +443,209 @@ describe('Dial UI Kit :: FileManager :: useFileClipboard', () => {
     expect(onDuplicateSuccess).toHaveBeenCalledTimes(1);
   });
 
-  it('clearState resets sourceFolder', () => {
+  const file = (name: string, parentPath = '/src'): DialFile =>
+    ({
+      id: name,
+      name,
+      path: `${parentPath}/${name}`,
+      parentPath,
+      nodeType: DialFileNodeType.ITEM,
+    }) as DialFile;
+
+  it('hands a copy request with the files and source folder to the host', () => {
+    const onDestinationRequest = vi.fn();
     const { result } = renderHook(() =>
-      useFileClipboard({ getDestinationFiles, getSourceFiles }),
+      useFileClipboard({
+        getDestinationFiles,
+        getSourceFiles,
+        onDestinationRequest,
+      }),
+    );
+    const files = [file('a.txt'), file('b.txt')];
+
+    act(() => {
+      result.current.handleSetCopiedFiles(files);
+      result.current.handleRequestDestination(DestinationFolderMode.Copy);
+    });
+
+    expect(onDestinationRequest).toHaveBeenCalledOnce();
+    expect(onDestinationRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: DestinationFolderMode.Copy,
+        items: files,
+        sourceFolder: '/src',
+      }),
+    );
+  });
+
+  it('falls back to folderId for the source folder when parentPath is missing', () => {
+    const onDestinationRequest = vi.fn();
+    const { result } = renderHook(() =>
+      useFileClipboard({
+        getDestinationFiles,
+        getSourceFiles,
+        onDestinationRequest,
+      }),
     );
 
     act(() => {
-      result.current.handleSetCopiedFiles([
-        {
-          id: '1',
-          name: 'test.txt',
-          path: '/folder/test.txt',
-          parentPath: '/folder',
-          nodeType: DialFileNodeType.ITEM,
-        } as DialFile,
+      result.current.handleSetMovedFiles([
+        { ...file('a.txt'), parentPath: undefined, folderId: '/root' },
       ]);
+      result.current.handleRequestDestination(DestinationFolderMode.Move);
     });
 
-    expect(result.current.sourceFolder).toBe('/folder');
-
-    act(() => {
-      result.current.clearState();
-    });
-
-    expect(result.current.sourceFolder).toBeUndefined();
+    expect(onDestinationRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: DestinationFolderMode.Move,
+        sourceFolder: '/root',
+      }),
+    );
   });
 
-  it('clearState is called after handleCloseDestinationFolderPopup', () => {
+  it('copies the requested files when the host confirms a destination', () => {
+    const onCopyFiles = vi.fn();
+    const onCopySuccess = vi.fn();
+    const onDestinationRequest = vi.fn();
+    const { result } = renderHook(() =>
+      useFileClipboard({
+        getDestinationFiles,
+        getSourceFiles,
+        onCopyFiles,
+        onCopySuccess,
+        onDestinationRequest,
+      }),
+    );
+
+    act(() => {
+      result.current.handleSetCopiedFiles([file('a.txt')]);
+      result.current.handleRequestDestination(DestinationFolderMode.Copy);
+    });
+    act(() => {
+      onDestinationRequest.mock.calls[0][0].confirm('/dest');
+    });
+
+    expect(onCopyFiles).toHaveBeenCalledWith(
+      [expect.objectContaining({ sourceUrl: '/src/a.txt' })],
+      '/dest',
+    );
+    expect(onCopySuccess).toHaveBeenCalledOnce();
+  });
+
+  it('moves the requested files from their source folder when the host confirms', () => {
+    const onMoveToFiles = vi.fn();
+    const onDestinationRequest = vi.fn();
+    const { result } = renderHook(() =>
+      useFileClipboard({
+        getDestinationFiles,
+        getSourceFiles,
+        onMoveToFiles,
+        onDestinationRequest,
+      }),
+    );
+
+    act(() => {
+      result.current.handleSetMovedFiles([file('a.txt')]);
+      result.current.handleRequestDestination(DestinationFolderMode.Move);
+    });
+    act(() => {
+      onDestinationRequest.mock.calls[0][0].confirm('/dest');
+    });
+
+    expect(onMoveToFiles).toHaveBeenCalledWith(
+      [expect.objectContaining({ sourceUrl: '/src/a.txt' })],
+      '/src',
+      '/dest',
+    );
+  });
+
+  it('opens conflict resolution instead of copying when the destination has a same-named file', () => {
+    const onCopyFiles = vi.fn();
+    const onDestinationRequest = vi.fn();
+    destinationFiles = [file('a.txt', '/dest')];
+    const { result } = renderHook(() =>
+      useFileClipboard({
+        getDestinationFiles,
+        getSourceFiles,
+        onCopyFiles,
+        onDestinationRequest,
+      }),
+    );
+
+    act(() => {
+      result.current.handleSetCopiedFiles([file('a.txt')]);
+      result.current.handleRequestDestination(DestinationFolderMode.Copy);
+    });
+    act(() => {
+      onDestinationRequest.mock.calls[0][0].confirm('/dest');
+    });
+
+    expect(result.current.conflictResolutionOpen).toBe(true);
+    expect(onCopyFiles).not.toHaveBeenCalled();
+  });
+
+  it('checks conflicts against the destination files of the latest render when the host confirms later', () => {
+    const onCopyFiles = vi.fn();
+    const onDestinationRequest = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ destination }: { destination: DialFile[] }) =>
+        useFileClipboard({
+          getDestinationFiles: () => destination,
+          getSourceFiles,
+          onCopyFiles,
+          onDestinationRequest,
+        }),
+      { initialProps: { destination: [] as DialFile[] } },
+    );
+
+    act(() => {
+      result.current.handleSetCopiedFiles([file('a.txt')]);
+      result.current.handleRequestDestination(DestinationFolderMode.Copy);
+    });
+    rerender({ destination: [file('a.txt', '/dest')] });
+    act(() => {
+      onDestinationRequest.mock.calls[0][0].confirm('/dest');
+    });
+
+    expect(result.current.conflictResolutionOpen).toBe(true);
+    expect(onCopyFiles).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when no host handles destination requests', () => {
     const onCopyFiles = vi.fn();
     const { result } = renderHook(() =>
       useFileClipboard({ getDestinationFiles, getSourceFiles, onCopyFiles }),
     );
 
     act(() => {
-      result.current.handleSetCopiedFiles([
-        {
-          id: '1',
-          name: 'test.txt',
-          path: '/test.txt',
-          parentPath: '/',
-          nodeType: DialFileNodeType.ITEM,
-        } as DialFile,
-      ]);
-      result.current.handleOpenDestinationFolderPopup(
-        DestinationFolderMode.Copy,
-      );
-      result.current.handleCloseDestinationFolderPopup();
+      result.current.handleSetCopiedFiles([file('a.txt')]);
+      result.current.handleRequestDestination(DestinationFolderMode.Copy);
     });
 
-    act(() => {
-      result.current.handleCopyTo('/dest');
-    });
-
-    expect(onCopyFiles).toHaveBeenCalledWith([], '/dest');
+    expect(onCopyFiles).not.toHaveBeenCalled();
   });
 
-  it('sets destinationFolderTitle using getCopyHeader when copying files', () => {
-    const getCopyHeader = vi.fn(
-      (count: number, name?: string) =>
-        `Copying ${count} file(s)${name ? `: ${name}` : ''}`,
-    );
+  it('cancel abandons the request without copying', () => {
+    const onCopyFiles = vi.fn();
+    const onDestinationRequest = vi.fn();
     const { result } = renderHook(() =>
       useFileClipboard({
         getDestinationFiles,
         getSourceFiles,
-        getCopyHeader,
-      }),
-    );
-
-    const files: DialFile[] = [
-      {
-        id: '1',
-        name: 'document.txt',
-        path: '/src/document.txt',
-        parentPath: '/src',
-        nodeType: DialFileNodeType.ITEM,
-      } as DialFile,
-      {
-        id: '2',
-        name: 'image.png',
-        path: '/src/image.png',
-        parentPath: '/src',
-        nodeType: DialFileNodeType.ITEM,
-      } as DialFile,
-    ];
-
-    act(() => {
-      result.current.handleSetCopiedFiles(files);
-    });
-
-    expect(getCopyHeader).toHaveBeenCalledWith(2, 'document.txt');
-    expect(result.current.destinationFolderTitle).toBe(
-      'Copying 2 file(s): document.txt',
-    );
-  });
-
-  it('sets destinationFolderTitle using getMoveHeader when moving files', () => {
-    const getMoveHeader = vi.fn(
-      (count: number, name?: string) =>
-        `Moving ${count} file(s)${name ? `: ${name}` : ''}`,
-    );
-    const { result } = renderHook(() =>
-      useFileClipboard({
-        getDestinationFiles,
-        getSourceFiles,
-        getMoveHeader,
-      }),
-    );
-
-    const files: DialFile[] = [
-      {
-        id: '1',
-        name: 'folder',
-        path: '/src/folder',
-        parentPath: '/src',
-        nodeType: DialFileNodeType.FOLDER,
-      } as DialFile,
-    ];
-
-    act(() => {
-      result.current.handleSetMovedFiles(files);
-    });
-
-    expect(getMoveHeader).toHaveBeenCalledWith(1, 'folder');
-    expect(result.current.destinationFolderTitle).toBe(
-      'Moving 1 file(s): folder',
-    );
-  });
-
-  it('does not set destinationFolderTitle when getCopyHeader is not provided', () => {
-    const { result } = renderHook(() =>
-      useFileClipboard({
-        getDestinationFiles,
-        getSourceFiles,
-      }),
-    );
-
-    const files: DialFile[] = [
-      {
-        id: '1',
-        name: 'file.txt',
-        path: '/file.txt',
-        parentPath: '/',
-        nodeType: DialFileNodeType.ITEM,
-      } as DialFile,
-    ];
-
-    act(() => {
-      result.current.handleSetCopiedFiles(files);
-    });
-
-    expect(result.current.destinationFolderTitle).toBeUndefined();
-  });
-
-  it('does not set destinationFolderTitle when getMoveHeader is not provided', () => {
-    const { result } = renderHook(() =>
-      useFileClipboard({
-        getDestinationFiles,
-        getSourceFiles,
-      }),
-    );
-
-    const files: DialFile[] = [
-      {
-        id: '1',
-        name: 'folder',
-        path: '/folder',
-        parentPath: '/',
-        nodeType: DialFileNodeType.FOLDER,
-      } as DialFile,
-    ];
-
-    act(() => {
-      result.current.handleSetMovedFiles(files);
-    });
-
-    expect(result.current.destinationFolderTitle).toBeUndefined();
-  });
-
-  it('does not set destinationFolderTitle when files array is empty', () => {
-    const getCopyHeader = vi.fn(() => 'Copy files');
-    const { result } = renderHook(() =>
-      useFileClipboard({
-        getDestinationFiles,
-        getSourceFiles,
-        getCopyHeader,
+        onCopyFiles,
+        onDestinationRequest,
       }),
     );
 
     act(() => {
-      result.current.handleSetCopiedFiles([]);
+      result.current.handleSetCopiedFiles([file('a.txt')]);
+      result.current.handleRequestDestination(DestinationFolderMode.Copy);
     });
-
-    expect(getCopyHeader).not.toHaveBeenCalled();
-    expect(result.current.destinationFolderTitle).toBeUndefined();
-  });
-
-  it('clears destinationFolderTitle after clearState', () => {
-    const getCopyHeader = vi.fn(() => 'Copy 1 file');
-    const { result } = renderHook(() =>
-      useFileClipboard({
-        getDestinationFiles,
-        getSourceFiles,
-        getCopyHeader,
-      }),
-    );
-
     act(() => {
-      result.current.handleSetCopiedFiles([
-        {
-          id: '1',
-          name: 'file.txt',
-          path: '/folder/file.txt',
-          parentPath: '/folder',
-          nodeType: DialFileNodeType.ITEM,
-        } as DialFile,
-      ]);
+      onDestinationRequest.mock.calls[0][0].cancel();
     });
 
-    expect(result.current.destinationFolderTitle).toBe('Copy 1 file');
-
-    act(() => {
-      result.current.clearState();
-    });
-
-    act(() => {
-      result.current.handleSetCopiedFiles([]);
-    });
-
-    expect(result.current.destinationFolderTitle).toBeUndefined();
+    expect(onCopyFiles).not.toHaveBeenCalled();
+    expect(result.current.conflictResolutionOpen).toBe(false);
   });
 });

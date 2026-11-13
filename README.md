@@ -88,13 +88,60 @@ Common integration callbacks include:
 - `onCopyFiles`, `onMoveToFiles`, and `onDeleteFiles`
 - `onDownloadFiles`, `onUnshareFiles`, and `onRemoveFilesAccess`
 - `onManagePermissions`, `onPreview`, and `onOpenInNewTab`
+- `onDestinationRequest`, called when the user starts Copy or Move so the host can show its own destination UI (see below)
+
+### Copy and Move destination
+
+Copy and Move need `onDestinationRequest`; without it they do nothing. When the user chooses Copy or Move, the file manager calls it with a `DialDestinationRequest` (`mode`, `items`, `sourceFolder`, `confirm`, `cancel`). It does not render a destination picker itself: show `FolderDestinationPanel` (see below) or your own UI, then call `request.confirm(destinationFolder)` to run the operation — name conflicts are resolved first, and the result reaches `onCopyFiles` / `onMoveToFiles` — or `request.cancel()` if the user dismisses it. The folders of the destination must be present in `items` for conflict detection.
+
+Upgrading from 0.4.x? See the Breaking Changes in the [CHANGELOG](CHANGELOG.md).
+
+### Folder destination panel
+
+`FolderDestinationPanel` is an end-edge side panel that shows the item being acted on and a folder hierarchy to choose a destination from. `FolderDestinationTree` is the hierarchy on its own, in a single-root form (`items`, `selectedPath`) or a multi-root form (`roots`, `destination`). The panel renders its primary button from a host-supplied `action`, takes its text through `labels`, `panelLabels` and its colors through CSS variables (`colors`, `panelStyles`), and has two layouts: `FolderDestinationLayout.Steps` (a main view and a Change-folder view) and `FolderDestinationLayout.Inline` (search and hierarchy in one view, no Change or Select step).
+
+```tsx
+import {
+  FolderDestinationLayout,
+  FolderDestinationPanel,
+  type FolderDestination,
+  type FolderDestinationRoot,
+} from '@epam/ai-dial-react-file-manager';
+
+// `request` comes from `onDestinationRequest`; `destination`, `setDestination`, `createFolder` and `showToast` are the host's own.
+const roots: FolderDestinationRoot[] = [
+  {
+    key: 'files',
+    label: 'Files',
+    items: [{ path: ['Reports'], name: 'Reports' }],
+  },
+];
+
+<FolderDestinationPanel
+  isOpen
+  onClose={request.cancel}
+  layout={FolderDestinationLayout.Inline}
+  item={{ title: 'report.pdf' }}
+  roots={roots}
+  destination={destination}
+  onDestinationChange={setDestination}
+  onCreateFolder={async (rootKey, parentPath, name) =>
+    createFolder(rootKey, parentPath, name)
+  }
+  onCreateFolderError={(error) => showToast(String(error))}
+  action={{ label: 'Copy', onClick: () => request.confirm('files/Reports') }}
+/>;
+```
+
+The panel knows nothing about the host: `item.summary` replaces the title-only summary row with a node the host renders (for example an entity header). If `onCreateFolder` rejects, the new folder is not selected and `onCreateFolderError` is called; the panel shows no message of its own, so the host reports the failure. Folder helpers (`validateFolderName`, `toFolderPathKey`, `fromFolderPathKey`) are exported alongside.
 
 ## Public API
 
 The primary export is `DialFileManager`. The package also exports:
 
 - `FileManagerProvider` and `useFileManagerContext`
-- `DialDestinationFolderPopup` and `DialFoldersTree`
+- `DialFoldersTree`
+- `FolderDestinationPanel`, `FolderDestinationTree`, their prop, label and color types, `FolderDestinationLayout` and the `toFolderPathKey`, `fromFolderPathKey` and `validateFolderName` helpers
 - File models, permissions, resource types, and selection modes
 - File-manager actions, tabs, trigger views, and column definitions
 - Public option and prop types used by the exported components
