@@ -9,18 +9,21 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Breaking Changes
 
-- **`DialFileManager` — Copy/Move destination UI is the host's** — the built-in
-  destination-folder popup and phone sheet are removed, together with
-  `DialDestinationFolderPopup`, `DestinationFolderPopupProps`,
+- **`DialFileManager` — Copy/Move destination picker replaced by
+  `onDestinationRequest`** — the destination-folder popup and phone sheet built
+  into `DialFileManager` are replaced by `FolderDestinationPanel`, which the
+  host now renders itself (see Added). Removed: `DialDestinationFolderPopup`,
+  `DestinationFolderPopupProps`,
   `DialFileManagerDestinationFolderPopupOptions` and the props that only
-  configured them: `destinationFolderPopupOptions`, `onFolderPopupPathChange`,
-  `showHiddenFileSwitcherInDestinationPopup` and
+  configured the old popup: `destinationFolderPopupOptions`,
+  `onFolderPopupPathChange`, `showHiddenFileSwitcherInDestinationPopup` and
   `showCreateFolderButtonInDestinationPopup`. Copy and Move now call the new
   `onDestinationRequest(request)` with a `DialDestinationRequest`
   (`mode`, `items`, `sourceFolder`, `confirm(destinationFolder)`, `cancel()`);
-  the host shows its own destination UI and calls `confirm`, which runs the
-  same conflict resolution and `onCopyFiles` / `onMoveToFiles` flow as before.
-  Without `onDestinationRequest` the actions do nothing.
+  the host shows `FolderDestinationPanel` (or its own destination UI) and calls
+  `confirm`, which runs the same conflict resolution and `onCopyFiles` /
+  `onMoveToFiles` flow as before. Without `onDestinationRequest` the actions do
+  nothing.
 
 - **`styles.css` — built with Tailwind CSS v4 inside the kit's `ui` layer** —
   the stylesheet used to be entirely unlayered, preflight included. Its
@@ -38,6 +41,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`FolderDestinationPanel` and `FolderDestinationTree`** — the destination UI
+  for Copy and Move, for a host that handles `onDestinationRequest`: an end-edge
+  panel (Steps or Inline layout) with the item summary, a folder search, the
+  hierarchy, folder creation and a host-supplied primary `action`, and the tree
+  alone in single-root and multi-root forms. The prop, label and color types,
+  `FolderDestinationLayout`, `FolderDestinationItemIcon` and the
+  `validateFolderName`, `toFolderPathKey` and `fromFolderPathKey` helpers are
+  exported too.
+  `FolderDestinationItem.summary` lets the host render the summary row, and a
+  `tablet` variant (768px up to 1280px) is added to the stylesheet theme.
 - **`DialFoldersTree` — search highlight** — `searchQuery` marks the first
   case-insensitive match in each row's name with the kit's `Highlight`; the
   root row is left as is, and the tree still renders the items it is given

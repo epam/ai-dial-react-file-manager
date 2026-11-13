@@ -49,6 +49,39 @@ export {
 } from './models/file-manager';
 export { GridSelectionMode } from './models/selection-mode';
 
+export type { FolderNode } from './models/folder-tree';
+export type {
+  FolderDestination,
+  FolderDestinationRoot,
+} from './models/folder-destination';
+export type {
+  FolderDestinationTreeColors,
+  FolderDestinationTreeProps,
+  FolderDestinationTreeStyles,
+} from './models/folder-destination-tree';
+export type {
+  FolderDestinationAction,
+  FolderDestinationItem,
+  FolderDestinationPanelContentColors,
+  FolderDestinationPanelContentLabels,
+  FolderDestinationPanelContentStyles,
+  FolderDestinationPanelColors,
+  FolderDestinationPanelLabels,
+  FolderDestinationPanelProps,
+} from './models/folder-destination-panel';
+export {
+  FolderDestinationItemIcon,
+  FolderDestinationLayout,
+} from './types/folder-destination-panel';
+export {
+  fromFolderPathKey,
+  toFolderPathKey,
+  validateFolderName,
+} from './utils/folder-tree';
+export type { FolderNameValidationMessages } from './utils/folder-tree';
+export { FolderDestinationTree } from './components/FolderDestinationTree/FolderDestinationTree';
+export { FolderDestinationPanel } from './components/FolderDestinationPanel/FolderDestinationPanel';
+
 export {
   DestinationFolderMode,
   DialFileManagerActions,
