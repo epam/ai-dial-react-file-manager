@@ -383,6 +383,82 @@ describe('Dial UI Kit :: FileManager :: useFileUpload', () => {
 
       expect(onUploadFiles).not.toHaveBeenCalled();
     });
+
+    describe('dropped folders', () => {
+      const createFileItem = (file: File) => ({
+        kind: 'file',
+        getAsFile: () => file,
+        webkitGetAsEntry: () => ({ isDirectory: false, isFile: true }),
+      });
+
+      // Browsers also list a dropped folder in `files` as a zero-byte pseudo-file.
+      const createFolderDrop = (
+        folderName: string,
+        extraFiles: File[] = [],
+      ) => {
+        const folderPseudoFile = createMockFile(folderName, 0);
+
+        return {
+          preventDefault: vi.fn(),
+          stopPropagation: vi.fn(),
+          dataTransfer: {
+            types: ['Files'],
+            items: [
+              {
+                kind: 'file',
+                getAsFile: () => folderPseudoFile,
+                webkitGetAsEntry: () => ({ isDirectory: true, isFile: false }),
+              },
+              ...extraFiles.map(createFileItem),
+            ],
+            files: [folderPseudoFile, ...extraFiles],
+          },
+        } as unknown as DragEvent;
+      };
+
+      it('reports folders as unsupported instead of uploading the folder pseudo-file', async () => {
+        const onUploadFiles = vi.fn();
+        const onUploadValidationError = vi.fn();
+        const { result } = renderUseFileUpload({
+          onUploadFiles,
+          onUploadValidationError,
+        });
+
+        await act(async () => {
+          await result.current.handleDrop(
+            createFolderDrop('untitled folder'),
+            '/folder',
+            [],
+          );
+        });
+
+        expect(onUploadFiles).not.toHaveBeenCalled();
+        expect(onUploadValidationError).toHaveBeenCalledWith(
+          expect.objectContaining({
+            reason: FileUploadValidationErrorReason.FoldersNotSupported,
+          }),
+        );
+      });
+
+      it('uploads only the files when a folder is dropped together with files', async () => {
+        const onUploadFiles = vi.fn();
+        const { result } = renderUseFileUpload({ onUploadFiles });
+        const file = createMockFile('file1.txt', 1024);
+
+        await act(async () => {
+          await result.current.handleDrop(
+            createFolderDrop('untitled folder', [file]),
+            '/folder',
+            [],
+          );
+        });
+
+        expect(onUploadFiles).toHaveBeenCalledWith(
+          [{ fileContent: file, name: 'file1.txt' }],
+          '/folder',
+        );
+      });
+    });
   });
 
   describe('duplicate file validation', () => {
