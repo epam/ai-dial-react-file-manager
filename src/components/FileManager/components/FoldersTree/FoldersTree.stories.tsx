@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useCallback, useState } from 'react';
+import { type ComponentProps, useCallback, useState } from 'react';
 import { DialFileNodeType, type DialFile } from '@/models/file';
 import { DialFoldersTree } from './FoldersTree';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
@@ -408,6 +408,93 @@ export const CaretOnlyExpands: Story = {
       description: {
         story:
           'The tree as the compact view\'s navigation card shows it: a folder\'s caret only expands or collapses it, and rows drop the hover "more" button while the right-click menu stays.',
+      },
+    },
+  },
+};
+
+const disabledRowsItems: DialFile[] = [
+  {
+    id: 'ou-1',
+    name: 'Org unit without write access',
+    path: 'files/ou-1',
+    folderId: 'files',
+    nodeType: DialFileNodeType.FOLDER,
+    items: [
+      {
+        id: 'ou-1-open',
+        name: 'Shared drafts',
+        path: 'files/ou-1/drafts',
+        folderId: 'files/ou-1',
+        nodeType: DialFileNodeType.FOLDER,
+        items: [],
+      },
+    ],
+  },
+  {
+    id: 'ou-2',
+    name: 'Read-only leaf folder',
+    path: 'files/ou-2',
+    folderId: 'files',
+    nodeType: DialFileNodeType.FOLDER,
+    items: [],
+  },
+  {
+    id: 'ou-3',
+    name: 'Folder with a very long reason',
+    path: 'files/ou-3',
+    folderId: 'files',
+    nodeType: DialFileNodeType.FOLDER,
+    items: [],
+  },
+  {
+    id: 'ou-4',
+    name: 'My workspace',
+    path: 'files/ou-4',
+    folderId: 'files',
+    nodeType: DialFileNodeType.FOLDER,
+    items: [],
+  },
+];
+
+const disabledReasons: Record<string, string> = {
+  'files/ou-1': 'You have no access to save your QuickApp to this folder',
+  'files/ou-2': 'You have no access to save your QuickApp to this folder',
+  'files/ou-3':
+    'You have no access to save your QuickApp to this folder because the administrator of this organizational unit has restricted publishing to a small group of people. Ask them to add you to the group, or pick another folder.',
+};
+
+const DisabledRowsTree = (
+  args: Partial<ComponentProps<typeof DialFoldersTree>>,
+) => {
+  const [expanded, setExpanded] = useState(new Set<string>(['files/ou-1']));
+  const [selected, setSelected] = useState<string | undefined>();
+  return (
+    <div className="w-[360px]">
+      <DialFoldersTree
+        {...args}
+        items={disabledRowsItems}
+        expandedPaths={expanded}
+        onExpandedPathsChange={setExpanded}
+        selectedPath={selected}
+        onItemClick={(item) => setSelected(item.path)}
+        getDisabledTooltip={(item) => disabledReasons[item.path]}
+        getContextMenuItems={getMenuFunction({})}
+      />
+      <p className="dial-tiny-text text-secondary mt-4">
+        Selected: {selected ?? 'nothing'}
+      </p>
+    </div>
+  );
+};
+
+export const DisabledRows: Story = {
+  render: (args) => <DisabledRowsTree {...args} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A row whose `getDisabledTooltip` returns a reason is muted and marked `aria-disabled`, and the reason shows in a tooltip on hover or focus and is announced as its description. It is never selected (see "Selected" below the tree), and has no context menu or item actions, but it stays focusable and a folder still expands from a row click, its caret, Enter, Space and the arrow keys, so its enabled children stay reachable. Try it with the keyboard: Tab into the tree, move with the arrows, press Enter on a disabled row, and ArrowRight to open "Org unit without write access" and pick "Shared drafts". Known limitation: the kit tooltip may not appear on touch devices; the reason still reaches assistive technology through the row\'s description.',
       },
     },
   },
