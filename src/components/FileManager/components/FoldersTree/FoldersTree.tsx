@@ -3,6 +3,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -17,6 +18,10 @@ import {
   NoDataContent,
   DialItemType,
   ElementSize,
+  TooltipContainer,
+  TooltipContent,
+  TooltipPlacement,
+  TooltipTrigger,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
@@ -84,6 +89,20 @@ export interface DialFoldersTreeProps {
   contextMenuButtonLabel?: string;
   /** Search query whose first case-insensitive match is highlighted in each row's name; the root row is left as is. The tree does not filter by it. */
   searchQuery?: string;
+  /**
+   * Reason a row is unavailable. A non-empty string disables the row: it is
+   * muted, marked `aria-disabled`, and the reason is shown in a tooltip on hover
+   * or focus and announced as the row's description. A disabled row stays
+   * focusable and a folder still expands and collapses (its children may be
+   * usable), but it is never passed to `onItemClick`, and its context menu and
+   * `renderItemActions` are not shown. Return `undefined` to keep a row enabled.
+   * On touch devices the tooltip may not appear; the reason still reaches
+   * assistive technology.
+   * While `searchQuery` is set, the kit's `Highlight` draws the name and cannot
+   * hide its own truncation tooltip, so a truncated disabled name may show the
+   * full-name tooltip as well.
+   */
+  getDisabledTooltip?: (item: DialFile) => string | undefined;
 }
 
 interface VisibleRow {
@@ -219,6 +238,7 @@ const collectVisibleRows = (
  * @param [showContextMenuButton=true] - Whether rows show the hover "more" button that opens the `getContextMenuItems` menu; the right-click menu and `renderItemActions` stay either way.
  * @param [contextMenuButtonLabel='More actions'] - Accessible name of the hover "more" button.
  * @param [searchQuery] - Query highlighted in row names (not the root row); the tree does not filter by it.
+ * @param [getDisabledTooltip] - Function returning the reason a row is unavailable; a non-empty string disables the row (muted, `aria-disabled`, tooltip on the row, reason announced as its description). A disabled row is not passed to `onItemClick` and has no context menu or item actions, but stays focusable and a folder still expands and collapses.
  * @remarks
  * - Folder and file data must follow the `DialFile` model.
  * - The `expandedPaths`, `loadingPaths`, `selectedPath`, and `renamedPath` props are externally controlled.
@@ -266,7 +286,9 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   showContextMenuButton = true,
   contextMenuButtonLabel = 'More actions',
   searchQuery,
+  getDisabledTooltip,
 }) => {
+  const treeId = useId();
   const { expandedPaths, togglePath } = useExpandedPaths({
     expandedPaths: externalExpandedPaths ?? new Set(),
     onExpandedPathsChange,
@@ -284,6 +306,9 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   );
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
   const [focusedPath, setFocusedPath] = useState<string>();
+
+  const getDisabledReason = (node: DialFile) =>
+    getDisabledTooltip?.(node) || undefined;
 
   const hasRow = (path: string | undefined) =>
     path != null && rows.some((row) => row.node.path === path);
@@ -307,7 +332,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
    * one, but never collapses an expanded one — only the caret does that.
    */
   const handleFolderClick = (node: DialFile) => {
-    onItemClick?.(node);
+    if (!getDisabledReason(node)) onItemClick?.(node);
     if (!expandedPaths.has(node.path)) togglePath(node.path);
   };
 
@@ -361,7 +386,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       case ' ':
         if (isFolder) {
           handleFolderClick(node);
-        } else {
+        } else if (!getDisabledReason(node)) {
           onItemClick?.(node);
         }
         break;
@@ -416,6 +441,9 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
       const isSharedByMe = sharedByMePaths.has(path);
       const isRootFolder =
         rootItemPath && rootItemLabel && path === rootItemPath && isFolder;
+      const disabledReason = isRenaming ? undefined : getDisabledReason(node);
+      const isDisabled = !!disabledReason;
+      const reasonId = `${treeId}-${encodeURIComponent(path)}-reason`;
 
       const validateHandler =
         onRenameValidate && ((value: string) => onRenameValidate(value, node));
@@ -424,9 +452,12 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
         ? 'bg-control-accent-alpha-active-subtle'
         : '';
 
-      const menuItems = isRootFolder ? [] : (getContextMenuItems?.(node) ?? []);
+      const menuItems =
+        isRootFolder || isDisabled ? [] : (getContextMenuItems?.(node) ?? []);
       const itemActions =
-        isRootFolder || isRenaming ? null : renderItemActions?.(node);
+        isRootFolder || isRenaming || isDisabled
+          ? null
+          : renderItemActions?.(node);
       const isContextMenuButtonShown =
         showContextMenuButton &&
         menuItems.length > 0 &&
@@ -465,17 +496,25 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
           aria-setsize={visibleNodes.length}
           aria-expanded={isFolder ? isExpanded : undefined}
           aria-selected={isSelected}
+          aria-disabled={isDisabled || undefined}
+          aria-describedby={isDisabled ? reasonId : undefined}
           tabIndex={path === tabbablePath ? 0 : -1}
           onFocus={(event) => {
             if (event.target === event.currentTarget) setFocusedPath(path);
           }}
           style={{ paddingLeft: `${level * FOLDER_LEVEL_PADDING}px` }}
           className={mergeClasses(
-            'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between hover:bg-control-accent-alpha-hover-subtle rounded-full group/item w-full relative',
+            'py-1 pr-3 gap-2 dial-small-paragraph-text flex justify-between rounded-full group/item w-full relative',
+            !isDisabled && 'hover:bg-control-accent-alpha-hover-subtle',
             'outline-hidden focus-visible:outline focus-visible:outline-focus focus-visible:-outline-offset-1',
             selectedClass,
           )}
         >
+          {isDisabled && (
+            <span id={reasonId} className="sr-only">
+              {disabledReason}
+            </span>
+          )}
           {!isRenaming && (
             <div
               className="absolute size-full left-0 top-0 z-0"
@@ -483,7 +522,10 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
             />
           )}
           <div
-            className="relative flex flex-row truncate items-center w-fit h-6 gap-x-1 pl-[5px]"
+            className={mergeClasses(
+              'relative flex flex-row truncate items-center w-fit h-6 gap-x-1 pl-[5px]',
+              isDisabled && 'opacity-75',
+            )}
             onClick={() => !isRenaming && handleFolderClick(node)}
           >
             <>
@@ -519,6 +561,8 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                 name={isRootFolder ? rootItemLabel : name}
                 type={isFolder ? DialItemType.Folder : DialItemType.File}
                 loading={isLoading}
+                muted={isDisabled}
+                hideTooltip={isDisabled}
                 shared={isSharedByMe}
                 icon={getItemIcon?.(node)}
                 sharedIndicatorClassName={mergeClasses(
@@ -570,8 +614,13 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
         </div>
       );
 
+      const rowClassName = 'flex w-full h-[32px] items-center';
+
       return (
-        <div key={`${path}-children`} className="cursor-pointer">
+        <div
+          key={`${path}-children`}
+          className={isDisabled ? 'cursor-default' : 'cursor-pointer'}
+        >
           <div className="flex flex-col w-full gap-1">
             {/* A row without menu items skips the Dropdown: with no trigger it
                 would hand its popup attributes (`aria-haspopup`,
@@ -585,8 +634,15 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
               >
                 {row}
               </Dropdown>
+            ) : isDisabled ? (
+              <TooltipContainer placement={TooltipPlacement.Top}>
+                <TooltipTrigger className={rowClassName}>{row}</TooltipTrigger>
+                <TooltipContent className="text-center">
+                  {disabledReason}
+                </TooltipContent>
+              </TooltipContainer>
             ) : (
-              <div className="flex w-full h-[32px] items-center">{row}</div>
+              <div className={rowClassName}>{row}</div>
             )}
 
             {isExpanded &&
