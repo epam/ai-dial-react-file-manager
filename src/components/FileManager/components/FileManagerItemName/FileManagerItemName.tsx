@@ -10,6 +10,7 @@ import {
   FileName,
   Highlight,
   BASE_ICON_SIZE,
+  mergeClasses,
 } from '@epam/ai-dial-ui-kit';
 import { getForbiddenSymbolsTooltip } from '../../utils';
 
@@ -36,6 +37,8 @@ export interface DialFileManagerItemNameProps extends DialFileManagerItemNameInp
   forbiddenSymbolsTooltip?: ReactNode;
   /** Search query whose first case-insensitive match is highlighted in the read-only name. */
   searchQuery?: string;
+  /** Mutes the read-only name, e.g. for a row that is unavailable. */
+  muted?: boolean;
   /** Screen-reader text announcing the shared state while `searchQuery` is set. Defaults to `'Shared'`. */
   sharedLabel?: string;
 }
@@ -96,6 +99,7 @@ export const DialFileManagerItemName: FC<DialFileManagerItemNameProps> = ({
   forbiddenSymbolsTooltip,
   details,
   searchQuery,
+  muted = false,
   sharedLabel = 'Shared',
 }) => {
   const { value, invalid, invalidMessage, onChange, inputRef } =
@@ -155,7 +159,10 @@ export const DialFileManagerItemName: FC<DialFileManagerItemNameProps> = ({
               text={name}
               query={searchQuery}
               maxLines={1}
-              className="dial-small-paragraph-text text-primary"
+              className={mergeClasses(
+                'dial-small-paragraph-text',
+                muted ? 'text-secondary' : 'text-primary',
+              )}
             />
             {shared && <span className="sr-only">{sharedLabel}</span>}
           </div>
@@ -177,7 +184,7 @@ export const DialFileManagerItemName: FC<DialFileManagerItemNameProps> = ({
         sharedIndicatorClassName={sharedIndicatorClassName}
         sharedIndicatorTooltip={sharedIndicatorTooltip}
         hideTooltip={hideTooltip}
-        isInvalidName={hasRestrictedSymbolsInName}
+        isInvalidName={hasRestrictedSymbolsInName || muted}
         tooltipContent={tooltipContent}
       />
     );
