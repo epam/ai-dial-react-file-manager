@@ -25,6 +25,19 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`DialFoldersTree` — `getDisabledTooltip`** — a row whose
+  `getDisabledTooltip(item)` returns a non-empty string is disabled with that
+  reason: it is muted, marked `aria-disabled`, the reason shows in a tooltip on
+  hover or focus and is exposed as the row's accessible description. A disabled
+  row is not passed to `onItemClick` (click, Enter and Space), and its context
+  menu and `renderItemActions` are not shown, but it stays focusable and a
+  folder still expands and collapses (row click, caret, arrow keys), firing
+  `onExpandedPathsChange` as for an enabled row. Known limitation: the tooltip
+  may not appear on touch devices; the reason still reaches assistive
+  technology. While `searchQuery` is set, a truncated disabled name may also
+  show the kit's full-name tooltip, as `Highlight` cannot hide it.
+  `DialFileManagerItemName` gains a `muted` prop.
+
 - **`DialFoldersTree` — search highlight** — `searchQuery` marks the first
   case-insensitive match in each row's name with the kit's `Highlight`; the
   root row is left as is, and the tree still renders the items it is given

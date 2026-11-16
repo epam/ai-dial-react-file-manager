@@ -588,3 +588,183 @@ describe('Dial UI Kit :: DialFoldersTree — search highlight', () => {
     expect(container.querySelector('mark')).toBeNull();
   });
 });
+
+describe('Dial UI Kit :: DialFoldersTree — disabled rows', () => {
+  const REASON = 'You have no access to save here';
+  const getDisabledTooltip = (item: { path: string }) =>
+    item.path === '/root' ? REASON : undefined;
+
+  const renderTree = (props = {}) =>
+    render(
+      <DialFoldersTree
+        items={mockItems}
+        showFiles
+        expandedPaths={new Set(['/root', '/root/Subfolder'])}
+        getDisabledTooltip={getDisabledTooltip}
+        {...props}
+      />,
+    );
+
+  test('marks only the row with a reason as disabled and describes it', () => {
+    renderTree();
+
+    const disabled = screen.getByRole('treeitem', { name: 'Root' });
+    expect(disabled).toHaveAttribute('aria-disabled', 'true');
+    expect(disabled).toHaveAccessibleDescription(REASON);
+    const enabled = screen.getByRole('treeitem', { name: 'Subfolder' });
+    expect(enabled).not.toHaveAttribute('aria-disabled');
+    expect(enabled).not.toHaveAccessibleDescription();
+  });
+
+  test('treats an empty reason as enabled', () => {
+    renderTree({ getDisabledTooltip: () => '' });
+
+    expect(screen.getByRole('treeitem', { name: 'Root' })).not.toHaveAttribute(
+      'aria-disabled',
+    );
+  });
+
+  test('does not report a click, Enter or Space on a disabled row', () => {
+    const onItemClick = vi.fn();
+    renderTree({ onItemClick });
+
+    const row = screen.getByRole('treeitem', { name: 'Root' });
+    fireEvent.click(screen.getByText('Root'));
+    fireEvent.keyDown(row, { key: 'Enter' });
+    fireEvent.keyDown(row, { key: ' ' });
+
+    expect(onItemClick).not.toHaveBeenCalled();
+  });
+
+  test('still reports a click on an enabled row', () => {
+    const onItemClick = vi.fn();
+    renderTree({ onItemClick });
+
+    fireEvent.click(screen.getByText('Subfolder'));
+
+    expect(onItemClick).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/root/Subfolder' }),
+    );
+  });
+
+  test('expands a collapsed disabled folder from a row click without selecting it', () => {
+    const onItemClick = vi.fn();
+    const onExpandedPathsChange = vi.fn();
+    renderTree({
+      expandedPaths: new Set(),
+      onItemClick,
+      onExpandedPathsChange,
+    });
+
+    fireEvent.click(screen.getByText('Root'));
+
+    expect(onExpandedPathsChange).toHaveBeenCalledWith(new Set(['/root']));
+    expect(onItemClick).not.toHaveBeenCalled();
+  });
+
+  test('expands a disabled folder from Enter, Space and ArrowRight', () => {
+    const onExpandedPathsChange = vi.fn();
+    renderTree({ expandedPaths: new Set(), onExpandedPathsChange });
+    const row = screen.getByRole('treeitem', { name: 'Root' });
+
+    for (const key of ['Enter', ' ', 'ArrowRight']) {
+      onExpandedPathsChange.mockClear();
+      fireEvent.keyDown(row, { key });
+      expect(onExpandedPathsChange).toHaveBeenCalledWith(new Set(['/root']));
+    }
+  });
+
+  test('expands and collapses a disabled folder from its caret', () => {
+    const onExpandedPathsChange = vi.fn();
+    const { container, rerender } = renderTree({
+      expandedPaths: new Set(),
+      onExpandedPathsChange,
+    });
+    const caret = () =>
+      container.querySelector('[role="treeitem"] span.relative.flex svg')!;
+
+    fireEvent.click(caret());
+    expect(onExpandedPathsChange).toHaveBeenLastCalledWith(new Set(['/root']));
+
+    rerender(
+      <DialFoldersTree
+        items={mockItems}
+        expandedPaths={new Set(['/root'])}
+        onExpandedPathsChange={onExpandedPathsChange}
+        getDisabledTooltip={getDisabledTooltip}
+      />,
+    );
+    fireEvent.click(caret());
+    expect(onExpandedPathsChange).toHaveBeenLastCalledWith(new Set());
+  });
+
+  test('collapses a disabled folder with ArrowLeft', () => {
+    const onExpandedPathsChange = vi.fn();
+    renderTree({ onExpandedPathsChange });
+
+    fireEvent.keyDown(screen.getByRole('treeitem', { name: 'Root' }), {
+      key: 'ArrowLeft',
+    });
+
+    expect(onExpandedPathsChange).toHaveBeenLastCalledWith(
+      new Set(['/root/Subfolder']),
+    );
+  });
+
+  test('keeps a disabled row focusable and its children selectable', () => {
+    const onItemClick = vi.fn();
+    renderTree({ onItemClick });
+
+    screen.getByRole('treeitem', { name: 'Root' }).focus();
+    expect(screen.getByRole('treeitem', { name: 'Root' })).toHaveFocus();
+
+    fireEvent.click(screen.getByText('File.txt'));
+    expect(onItemClick).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/root/Subfolder/File.txt' }),
+    );
+  });
+
+  test('hides the context menu button and item actions on a disabled row', () => {
+    renderTree({
+      getContextMenuItems: getMenu,
+      renderItemActions: (item: { name: string }) => (
+        <button>{`Action ${item.name}`}</button>
+      ),
+    });
+
+    expect(
+      screen.queryByRole('button', { name: 'Action Root' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Action Subfolder' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole('button', { name: 'More actions' }),
+    ).toHaveLength(2);
+  });
+
+  test('shows the reason in a tooltip when the row is focused', async () => {
+    renderTree();
+
+    fireEvent.focus(screen.getByRole('treeitem', { name: 'Root' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(REASON);
+  });
+
+  test('lets a disabled row be the selected row', () => {
+    renderTree({ selectedPath: '/root' });
+
+    expect(screen.getByRole('treeitem', { name: 'Root' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+  });
+
+  test('keeps the search highlight on a disabled row', () => {
+    const { container } = renderTree({ searchQuery: 'roo' });
+
+    expect(
+      [...container.querySelectorAll('mark')].map((mark) => mark.textContent),
+    ).toEqual(['Roo']);
+  });
+});
