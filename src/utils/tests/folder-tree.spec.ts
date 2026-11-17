@@ -3,15 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { FolderNode } from '../../models/folder-tree';
 import {
   collectFolderKeys,
-  filterFolderTree,
+  fromDialFileTree,
   fromFolderPathKey,
   getSiblingFolderNames,
-  getUniqueFolderName,
   mergeFolderPaths,
   sortFolderTree,
   toDialFileTree,
   toFolderPathKey,
-  validateFolderName,
 } from '../folder-tree';
 
 const tree: FolderNode[] = [
@@ -37,41 +35,6 @@ const tree: FolderNode[] = [
     children: [{ path: ['My workspace', 'Drafts'], name: 'Drafts' }],
   },
 ];
-
-describe('filterFolderTree', () => {
-  it('returns all items unchanged for an empty query', () => {
-    expect(filterFolderTree(tree, '')).toEqual(tree);
-  });
-
-  it('returns all items unchanged for a whitespace-only query', () => {
-    expect(filterFolderTree(tree, '   ')).toEqual(tree);
-  });
-
-  it('keeps a branch when a descendant name matches', () => {
-    const result = filterFolderTree(tree, 'drafts');
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('My workspace');
-    expect(result[0].children).toHaveLength(1);
-    expect(result[0].children?.[0].name).toBe('Drafts');
-  });
-
-  it('drops branches with no matching name and no matching descendant', () => {
-    const result = filterFolderTree(tree, 'drafts');
-    expect(result.find((node) => node.name === 'Shared')).toBeUndefined();
-  });
-
-  it('keeps a node whose own name matches, along with all its descendants', () => {
-    const result = filterFolderTree(tree, 'data science');
-    expect(result[0].children?.[0].children).toHaveLength(1);
-  });
-
-  it('matches case-insensitively', () => {
-    const result = filterFolderTree(tree, 'PUBLISHED');
-    expect(result[0]?.children?.[0]?.children?.[0]?.name).toBe(
-      'Published models',
-    );
-  });
-});
 
 describe('collectFolderKeys', () => {
   it('returns every path in the tree, recursively', () => {
@@ -236,90 +199,15 @@ describe('getSiblingFolderNames', () => {
   });
 });
 
-describe('validateFolderName', () => {
-  const messages = {
-    empty: 'empty',
-    invalid: 'invalid',
-    duplicate: 'duplicate',
-    sameAsParent: 'same-as-parent',
-  };
-
-  it('returns null for a valid, non-duplicate name', () => {
-    expect(validateFolderName('New folder', ['Shared'], messages)).toBeNull();
+describe('fromDialFileTree', () => {
+  it('round-trips a tree through toDialFileTree', () => {
+    expect(fromDialFileTree(toDialFileTree(tree))).toEqual(tree);
   });
 
-  it('trims the value before validating', () => {
-    expect(validateFolderName('  New folder  ', [], messages)).toBeNull();
-  });
-
-  it('returns the empty message for a blank name', () => {
-    expect(validateFolderName('   ', [], messages)).toBe('empty');
-  });
-
-  it.each([
-    '../EscapeFolder',
-    '..',
-    'a/b',
-    'a\\b',
-    'a:b',
-    'a;b',
-    'a,b',
-    'a=b',
-    'a{b}',
-    'a&b',
-    'a"b',
-  ])('returns the invalid message for %s', (name) => {
-    expect(validateFolderName(name, [], messages)).toBe('invalid');
-  });
-
-  it('returns the duplicate message for a case-insensitive sibling match', () => {
-    expect(validateFolderName('shared', ['Shared'], messages)).toBe(
-      'duplicate',
+  it("keeps an unlisted folder's children undefined rather than empty", () => {
+    const [node] = fromDialFileTree(
+      toDialFileTree([{ path: ['Shared'], name: 'Shared' }]),
     );
-  });
-
-  it('returns the same-as-parent message for a case-insensitive parent name match', () => {
-    expect(validateFolderName(' TEST ', [], messages, 'test')).toBe(
-      'same-as-parent',
-    );
-  });
-
-  it('falls back to the duplicate message when no same-as-parent message is given', () => {
-    const { sameAsParent: _omitted, ...withoutSameAsParent } = messages;
-    expect(validateFolderName('test', [], withoutSameAsParent, 'test')).toBe(
-      'duplicate',
-    );
-  });
-
-  it('accepts the name when there is no parent', () => {
-    expect(validateFolderName('test', [], messages)).toBeNull();
-  });
-});
-
-describe('getUniqueFolderName', () => {
-  it('returns the base name unchanged when no sibling has it', () => {
-    expect(getUniqueFolderName('New folder', ['Shared'])).toBe('New folder');
-  });
-
-  it('appends " 2" when a sibling already has the base name', () => {
-    expect(getUniqueFolderName('New folder', ['New folder'])).toBe(
-      'New folder 2',
-    );
-  });
-
-  it('matches case-insensitively when checking for a taken name', () => {
-    expect(getUniqueFolderName('New folder', ['new folder'])).toBe(
-      'New folder 2',
-    );
-  });
-
-  it('skips every already-taken suffix to find the first free one', () => {
-    expect(
-      getUniqueFolderName('New folder', [
-        'New folder',
-        'New folder 2',
-        'New folder 3',
-      ]),
-    ).toBe('New folder 4');
+    expect(node.children).toBeUndefined();
   });
 });

@@ -55,17 +55,14 @@ export type {
   FolderDestinationRoot,
 } from './models/folder-destination';
 export type {
-  FolderDestinationTreeColors,
   FolderDestinationTreeProps,
   FolderDestinationTreeStyles,
 } from './models/folder-destination-tree';
 export type {
   FolderDestinationAction,
   FolderDestinationItem,
-  FolderDestinationPanelContentColors,
   FolderDestinationPanelContentLabels,
   FolderDestinationPanelContentStyles,
-  FolderDestinationPanelColors,
   FolderDestinationPanelLabels,
   FolderDestinationPanelBodyProps,
   FolderDestinationPanelProps,
@@ -77,18 +74,23 @@ export {
 } from './types/folder-destination-panel';
 export {
   collectFolderKeys,
-  filterFolderTree,
+  fromDialFileTree,
   fromFolderPathKey,
   getFolderDisplayName,
   getSiblingFolderNames,
-  getUniqueFolderName,
   mergeFolderPaths,
   sortFolderTree,
   toDialFileTree,
   toFolderPathKey,
-  validateFolderName,
 } from './utils/folder-tree';
-export type { FolderNameValidationMessages } from './utils/folder-tree';
+export {
+  getFolderNameError,
+  getNextFolderNameFromNames,
+} from './components/FileManager/utils';
+export type {
+  FolderNameValidationMessages,
+  FolderNameValidationOptions,
+} from './components/FileManager/utils';
 export { FolderDestinationTree } from './components/FolderDestinationTree/FolderDestinationTree';
 export { FolderDestinationPanel } from './components/FolderDestinationPanel/FolderDestinationPanel';
 export { FolderDestinationPanelBody } from './components/FolderDestinationPanel/FolderDestinationPanelBody';

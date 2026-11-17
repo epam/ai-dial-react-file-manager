@@ -1,36 +1,6 @@
 import { type DialFile, DialFileNodeType } from '@/models/file';
 import type { FolderNode } from '@/models/folder-tree';
 
-/**
- * Returns the subset of `items` whose name matches `query`, or that contain a
- * descendant whose name matches. Matched branches keep only their matching
- * descendants. Matching is case-insensitive substring matching.
- */
-export const filterFolderTree = (
-  items: FolderNode[],
-  query: string,
-): FolderNode[] => {
-  const trimmed = query.trim().toLowerCase();
-  if (!trimmed) {
-    return items;
-  }
-
-  return items.reduce<FolderNode[]>((acc, node) => {
-    const filteredChildren = node.children
-      ? filterFolderTree(node.children, query)
-      : undefined;
-    const selfMatches = node.name.toLowerCase().includes(trimmed);
-
-    if (selfMatches) {
-      acc.push(node);
-    } else if (filteredChildren?.length) {
-      acc.push({ ...node, children: filteredChildren });
-    }
-
-    return acc;
-  }, []);
-};
-
 /*
  * Case-insensitive, digit-aware name comparison so "Folder 2" precedes
  * "Folder 10" and casing never splits otherwise-adjacent names.
@@ -132,63 +102,16 @@ export const toDialFileTree = (items: FolderNode[]): DialFile[] =>
     };
   });
 
+/** Converts the `DialFile[]` shape `DialFoldersTree` uses back to `FolderNode[]`; the inverse of {@link toDialFileTree}. */
+export const fromDialFileTree = (files: DialFile[]): FolderNode[] =>
+  files.map((file) => ({
+    path: fromFolderPathKey(file.path),
+    name: file.name,
+    children: file.items ? fromDialFileTree(file.items) : undefined,
+  }));
+
 /** Characters forbidden in a destination folder name, mirroring the backend's path validation rules. */
-const FORBIDDEN_FOLDER_NAME_CHARS_RE = /[/\\:;,={}&"]/;
-
-/** Error messages returned by {@link validateFolderName} for each rejection reason. */
-export interface FolderNameValidationMessages {
-  /** Shown when the trimmed name is empty. */
-  empty: string;
-  /** Shown when the name contains `..` or a forbidden character. */
-  invalid: string;
-  /** Shown when a sibling folder already has this name (case-insensitive). */
-  duplicate: string;
-  /** Shown when the name equals the parent folder's name (case-insensitive). Falls back to `duplicate`. */
-  sameAsParent?: string;
-}
-
-/** Returns an error message from `messages`, or `null` when `rawValue` is a valid folder name for the destination tree: not a duplicate of a sibling and not the name of its parent folder (`parentName`, omitted for a root). */
-export const validateFolderName = (
-  rawValue: string,
-  siblingNames: string[],
-  messages: FolderNameValidationMessages,
-  parentName?: string,
-): string | null => {
-  const trimmed = rawValue.trim();
-  if (!trimmed) {
-    return messages.empty;
-  }
-  if (trimmed.includes('..') || FORBIDDEN_FOLDER_NAME_CHARS_RE.test(trimmed)) {
-    return messages.invalid;
-  }
-  if (
-    siblingNames.some((name) => name.toLowerCase() === trimmed.toLowerCase())
-  ) {
-    return messages.duplicate;
-  }
-  if (parentName?.toLowerCase() === trimmed.toLowerCase()) {
-    return messages.sameAsParent ?? messages.duplicate;
-  }
-  return null;
-};
-
-/** Returns `baseName` if no sibling already has that name, otherwise appends a number suffix (`2`, `3`, …) until the name is free. */
-export const getUniqueFolderName = (
-  baseName: string,
-  siblingNames: string[],
-): string => {
-  const lowerSiblingNames = new Set(
-    siblingNames.map((name) => name.toLowerCase()),
-  );
-  if (!lowerSiblingNames.has(baseName.toLowerCase())) {
-    return baseName;
-  }
-  let suffix = 2;
-  while (lowerSiblingNames.has(`${baseName} ${suffix}`.toLowerCase())) {
-    suffix += 1;
-  }
-  return `${baseName} ${suffix}`;
-};
+export const FORBIDDEN_FOLDER_NAME_CHARS_RE = /[/\\:;,={}&"]/;
 
 /** Returns the node at `path` anywhere in `items`, or `undefined` when there is none. */
 export const findFolderNode = (

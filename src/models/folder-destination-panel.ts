@@ -64,26 +64,14 @@ export interface FolderDestinationPanelContentLabels {
   createFolderDuplicateNameError?: string;
   /** Inline error for a new folder named like its parent folder. */
   createFolderSameAsParentNameError?: string;
+  /** Non-blocking notice for a new folder name starting with a dot, which hides the folder. */
+  createFolderHiddenNameWarning?: string;
   /** Label of the action that retries a failed folder listing. Defaults to `'Retry'`. */
   retryLabel?: string;
 }
 
-/** Color overrides for the body of the folder destination panel. */
-export interface FolderDestinationPanelContentColors {
-  /** Section heading text color. Defaults to `--text-primary`. */
-  headingText?: string;
-  /** Destination path text color. Defaults to `--text-secondary`. */
-  destinationText?: string;
-  /** Summary row border color. Defaults to `--stroke-tertiary`. */
-  summaryBorder?: string;
-  /** Summary row background color. Defaults to `--bg-layer-sunken`. */
-  summaryBackground?: string;
-}
-
 /** Style overrides for the body of the folder destination panel. */
 export interface FolderDestinationPanelContentStyles {
-  /** Color overrides. */
-  colors?: FolderDestinationPanelContentColors;
   /** Style overrides forwarded to the folder tree. */
   folderTree?: FolderDestinationTreeStyles;
   /** Additional CSS custom properties applied to the body root. */
@@ -110,6 +98,11 @@ export interface FolderDestinationPanelBaseProps {
   onCreateFolderError?: (error: unknown) => void;
   /** Reason a folder is unavailable as a destination, or `undefined` when it is usable; forwarded to the folder tree, see `FolderDestinationTreeProps.getDisabledReason`. The reason of the committed `destination` is also announced in the main view. */
   getDisabledReason?: (destination: FolderDestination) => string | undefined;
+  /** The host's own check of a new folder name, called with the trimmed name and the folder it would be created under; see `FolderDestinationTreeProps.onValidateFolderName`. */
+  onValidateFolderName?: (
+    name: string,
+    parent: FolderDestination,
+  ) => string | null;
   /** Lets the user collapse and expand the root nodes of the folder tree. Defaults to `false`. */
   collapsibleRoots?: boolean;
   /** How the folder picker is presented. Defaults to `FolderDestinationLayout.Steps`. */
@@ -170,22 +163,6 @@ export interface FolderDestinationPanelLabels {
   selectLabel?: string;
 }
 
-/** Color overrides for the drawer of the folder destination panel. */
-export interface FolderDestinationPanelColors {
-  /** Backdrop background color. Defaults to `--bg-backdrop`. */
-  backdropBackground?: string;
-  /** Panel background color. Defaults to `--bg-layer-raised`. */
-  panelBackground?: string;
-  /** Panel leading-edge border color. Defaults to `--stroke-secondary`. */
-  panelBorder?: string;
-  /** Divider color below the header and above the footer. Defaults to `--stroke-tertiary`. */
-  dividerBorder?: string;
-  /** Scrollbar thumb color of the scrollable body. Defaults to `--stroke-secondary`. */
-  scrollbarThumb?: string;
-  /** Header title text color. Defaults to `--text-primary`. */
-  titleText?: string;
-}
-
 /** Props of the folder destination drawer. */
 export interface FolderDestinationPanelProps extends FolderDestinationPanelBaseProps {
   /** Whether the panel is open. */
@@ -202,8 +179,6 @@ export interface FolderDestinationPanelProps extends FolderDestinationPanelBaseP
   ) => void;
   /** Text overrides for the drawer. */
   labels?: FolderDestinationPanelLabels;
-  /** Color overrides for the drawer. */
-  colors?: FolderDestinationPanelColors;
   /** Typography class of the header title. Defaults to `'dial-body-semi-text'`. */
   titleClassName?: string;
 }

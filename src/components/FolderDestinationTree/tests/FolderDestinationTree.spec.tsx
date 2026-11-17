@@ -190,12 +190,12 @@ describe('FolderDestinationTree', () => {
 
     it('falls back to the default name when the query is not a valid folder name', async () => {
       await startCreatingFromSearch('nested/name');
-      expect(capturedProps.current?.newFolderDefaultName).toBe('New folder');
+      expect(capturedProps.current?.newFolderDefaultName).toBe('New folder 1');
     });
 
     it('keeps the default name when the query did match a folder', async () => {
       await startCreatingFromSearch('Shared');
-      expect(capturedProps.current?.newFolderDefaultName).toBe('New folder');
+      expect(capturedProps.current?.newFolderDefaultName).toBe('New folder 1');
     });
 
     it('creates the folder under the selected parent and selects it', async () => {
@@ -324,7 +324,7 @@ describe('FolderDestinationTree', () => {
         capturedProps.current?.getContextMenuItems?.(sharedFile) ?? [],
         'add-child',
       );
-      expect(capturedProps.current?.newFolderDefaultName).toBe('Shared 2');
+      expect(capturedProps.current?.newFolderDefaultName).toBe('Shared 1');
     });
 
     it('lets a top-level folder take the root label as its name', () => {
@@ -367,7 +367,7 @@ describe('FolderDestinationTree', () => {
       screen.getByRole('button', { name: 'Create new folder' }),
     );
     expect(capturedProps.current?.createdFolderPath).toBe('');
-    expect(capturedProps.current?.newFolderDefaultName).toBe('New folder 2');
+    expect(capturedProps.current?.newFolderDefaultName).toBe('New folder 1');
     expect(
       capturedProps.current?.items[0]?.items?.map((file) => file.name),
     ).toEqual(['My workspace', 'New folder', 'Shared']);
@@ -414,23 +414,61 @@ describe('FolderDestinationTree', () => {
     expect(onSelectedPathChange).not.toHaveBeenCalled();
   });
 
-  it('rejects a create-folder confirm whose last live-validated name was invalid, even when the host passes a different value to onCreateFolderSave', async () => {
+  it("runs the host's onValidateFolderName with the trimmed name and the parent destination", async () => {
     const onCreateFolder = vi.fn();
-    const onSelectedPathChange = vi.fn();
-    renderTree({ onCreateFolder, onSelectedPathChange });
+    const onValidateFolderName = vi.fn(() => 'Not allowed here.');
+    renderTree({
+      selectedPath: ['Shared'],
+      onCreateFolder,
+      onValidateFolderName,
+    });
     await userEvent.click(
       screen.getByRole('button', { name: 'Create new folder' }),
     );
-    act(() => {
-      // Simulates the host component showing the inline error live while the
-      // user types, then confirming with a different (host-sanitized) value
-      // — the host does not reliably gate its own confirm on the
-      // validation result it displayed.
-      capturedProps.current?.onRenameValidate?.('/New folder', {} as never);
-      capturedProps.current?.onCreateFolderSave?.('New folder');
+    expect(
+      capturedProps.current?.onRenameValidate?.(' Reports ', {} as never),
+    ).toBe('Not allowed here.');
+    expect(onValidateFolderName).toHaveBeenCalledWith('Reports', {
+      rootKey: '',
+      path: ['Shared'],
     });
+    act(() => capturedProps.current?.onCreateFolderSave?.('Reports'));
     expect(onCreateFolder).not.toHaveBeenCalled();
-    expect(onSelectedPathChange).not.toHaveBeenCalled();
+  });
+
+  it('warns about a hidden dot name without blocking its creation', async () => {
+    const onCreateFolder = vi.fn();
+    renderTree({
+      selectedPath: ['Shared'],
+      onCreateFolder,
+      hiddenFolderNameWarning: 'warning__Hidden',
+    });
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Create new folder' }),
+    );
+    expect(
+      capturedProps.current?.onRenameValidate?.('.cache', {} as never),
+    ).toBe('warning__Hidden');
+    act(() => capturedProps.current?.onCreateFolderSave?.('.cache'));
+    expect(onCreateFolder).toHaveBeenCalledWith(['Shared'], '.cache');
+  });
+
+  it('does not match hidden dot-folders in a search, like the file manager search', () => {
+    renderTree({
+      items: [
+        ...items,
+        { path: ['.secrets'], name: '.secrets' },
+        {
+          path: ['Archive'],
+          name: 'Archive',
+          children: [
+            { path: ['Archive', '.secrets-old'], name: '.secrets-old' },
+          ],
+        },
+      ],
+      searchQuery: 'secrets',
+    });
+    expect(capturedProps.current?.items).toEqual([]);
   });
 
   it('flags a path-traversal name as invalid via onRenameValidate, which also gates the create-folder row', async () => {
@@ -503,19 +541,6 @@ describe('FolderDestinationTree', () => {
         .getByRole('button', { name: 'Create new folder' })
         .hasAttribute('disabled'),
     ).toBe(true);
-  });
-
-  /*
-   * The tree's inline create/rename editor is rendered by DialFoldersTree, and
-   * the kit input inside it renders at its default 40px height, which the 24px
-   * tree row clips. The row-height correction is a CSS rule scoped to the
-   * element wrapping the tree, so the class has to stay on that element.
-   */
-  it('scopes the inline editor row-height rule to the element wrapping the tree', () => {
-    renderTree();
-    expect(screen.getByRole('tree').parentElement?.className).toContain(
-      '[&_.dial-kit-input]:h-5!',
-    );
   });
 
   describe('root selection', () => {
@@ -941,7 +966,7 @@ describe('FolderDestinationTree', () => {
       );
 
       expect(capturedProps.current?.createdFolderPath).toBe(':personal/Design');
-      expect(capturedProps.current?.newFolderDefaultName).toBe('New folder 2');
+      expect(capturedProps.current?.newFolderDefaultName).toBe('New folder 1');
       expect(
         capturedProps.current?.onRenameValidate?.('new folder', {} as never),
       ).toBe('A folder with this name already exists.');

@@ -15,7 +15,6 @@ import {
 } from '@epam/ai-dial-ui-kit';
 import { IconFolder } from '@tabler/icons-react';
 import { type FC, useId, useMemo, useState } from 'react';
-import { buildCssVars } from '@/utils/css-vars';
 import type { FolderDestination } from '@/models/folder-destination';
 import type { FolderDestinationPanelBodyProps } from '@/models/folder-destination-panel';
 import {
@@ -24,15 +23,6 @@ import {
   FolderDestinationView,
 } from '@/types/folder-destination-panel';
 import { FolderDestinationTree } from '@/components/FolderDestinationTree/FolderDestinationTree';
-
-const HEADING_CLASS =
-  'text-[color:var(--fdpb-heading-text,--theme(--text-color-primary))]';
-const DESTINATION_CLASS =
-  'text-[color:var(--fdpb-destination-text,--theme(--text-color-secondary))]';
-const SUMMARY_CLASS =
-  'border-[color:var(--fdpb-summary-border,--theme(--border-color-tertiary))] bg-[color:var(--fdpb-summary-bg,--theme(--background-color-layer-sunken))]';
-const TREE_SCROLL_CLASS =
-  '[scrollbar-width:thin] [scrollbar-color:var(--fdp-scrollbar-thumb,--theme(--border-color-secondary))_transparent]';
 
 /** Body of the folder destination panel: the item summary, destination and host sections, or the destination folder tree. */
 export const FolderDestinationPanelBody: FC<
@@ -48,6 +38,7 @@ export const FolderDestinationPanelBody: FC<
   onCreateFolder,
   onCreateFolderError,
   getDisabledReason,
+  onValidateFolderName,
   onChangeFolderClick,
   changeFolderButtonRef,
   pendingDestination,
@@ -78,21 +69,10 @@ export const FolderDestinationPanelBody: FC<
     createFolderInvalidNameError,
     createFolderDuplicateNameError,
     createFolderSameAsParentNameError,
+    createFolderHiddenNameWarning,
     retryLabel = 'Retry',
   } = panelLabels;
-  const { colors, folderTree: folderTreeStyles } = panelStyles;
-  const cssVars = {
-    ...buildCssVars({
-      '--fdpb-heading-text': colors?.headingText,
-      '--fdpb-destination-text': colors?.destinationText,
-    }),
-    ...panelStyles.cssVars,
-  };
-  /* The summary row reads its border and background from variables of its own. */
-  const summaryCssVars = buildCssVars({
-    '--fdpb-summary-border': colors?.summaryBorder,
-    '--fdpb-summary-bg': colors?.summaryBackground,
-  });
+  const { folderTree: folderTreeStyles, cssVars } = panelStyles;
 
   const [searchQuery, setSearchQuery] = useState('');
   const destinationReasonId = useId();
@@ -105,7 +85,7 @@ export const FolderDestinationPanelBody: FC<
     return [root?.label ?? destination.rootKey, ...destination.path];
   }, [roots, destination]);
 
-  const headingClass = mergeClasses(headingClassName, HEADING_CLASS);
+  const headingClass = mergeClasses(headingClassName, 'text-primary');
 
   const isInline = layout === FolderDestinationLayout.Inline;
   const pickerDestination = isInline ? destination : pendingDestination;
@@ -165,6 +145,8 @@ export const FolderDestinationPanelBody: FC<
         invalidFolderNameError={createFolderInvalidNameError}
         duplicateFolderNameError={createFolderDuplicateNameError}
         sameAsParentFolderNameError={createFolderSameAsParentNameError}
+        hiddenFolderNameWarning={createFolderHiddenNameWarning}
+        onValidateFolderName={onValidateFolderName}
         styles={folderTreeStyles}
       />
       {renderFolderViewFooter?.(pickerDestination)}
@@ -194,13 +176,7 @@ export const FolderDestinationPanelBody: FC<
       )}
       style={cssVars}
     >
-      <div
-        style={summaryCssVars}
-        className={mergeClasses(
-          'flex items-center justify-between gap-3 rounded-xl border p-3',
-          SUMMARY_CLASS,
-        )}
-      >
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-tertiary bg-layer-sunken p-3">
         {item.summary ??
           (item.iconKind != null ? (
             <FileName
@@ -225,12 +201,7 @@ export const FolderDestinationPanelBody: FC<
           <h2 className={headingClass}>{destinationHeading}</h2>
           {pickerSearch}
           {/* Only the folder hierarchy scrolls; the item, heading and search stay put. */}
-          <div
-            className={mergeClasses(
-              'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto',
-              TREE_SCROLL_CLASS,
-            )}
-          >
+          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
             {pickerTree}
           </div>
         </section>
@@ -251,7 +222,7 @@ export const FolderDestinationPanelBody: FC<
                 name={destinationSegments.join(' / ')}
                 nameClassName={mergeClasses(
                   destinationClassName,
-                  DESTINATION_CLASS,
+                  'text-secondary',
                 )}
               />
             </div>

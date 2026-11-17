@@ -8,7 +8,6 @@ import {
   Spinner,
 } from '@epam/ai-dial-ui-kit';
 import { type FC, useEffect, useRef, useState } from 'react';
-import { buildCssVars } from '@/utils/css-vars';
 import type { FolderDestination } from '@/models/folder-destination';
 import type { FolderDestinationPanelProps } from '@/models/folder-destination-panel';
 import {
@@ -17,25 +16,6 @@ import {
 } from '@/types/folder-destination-panel';
 import { FolderDestinationPanelBody } from './FolderDestinationPanelBody';
 
-/*
- * The panel is the UI kit's `SideDrawer`, which paints its backdrop, panel,
- * header rule and text with single-class utilities, so the overrides are
- * important utilities that read the `--fdp-*` variables and fall back to the
- * theme tokens of `styles/theme.scss`, referenced with `--theme()` so the values live in one place.
- */
-const BACKDROP_CLASS =
-  'bg-[color:var(--fdp-backdrop-bg,--theme(--background-color-backdrop))]!';
-const PANEL_CLASS =
-  'bg-[color:var(--fdp-panel-bg,--theme(--background-color-layer-raised))]! border-s-[color:var(--fdp-panel-border,--theme(--border-color-secondary))]!';
-const DIVIDER_CLASS =
-  'border-b! border-b-[color:var(--fdp-divider-border,--theme(--border-color-tertiary))]!';
-const FOOTER_CLASS =
-  'border-[color:var(--fdp-divider-border,--theme(--border-color-tertiary))]';
-const CONTENT_CLASS =
-  '[scrollbar-width:thin] [scrollbar-color:var(--fdp-scrollbar-thumb,--theme(--border-color-secondary))_transparent]';
-const TITLE_CLASS =
-  'text-[color:var(--fdp-title-text,--theme(--text-color-primary))]!';
-
 /** End-edge slide-in panel for choosing a destination folder for an item, with a summary view and a folder view. */
 export const FolderDestinationPanel: FC<FolderDestinationPanelProps> = ({
   isOpen,
@@ -43,7 +23,6 @@ export const FolderDestinationPanel: FC<FolderDestinationPanelProps> = ({
   action,
   returnFocusRef,
   labels = {},
-  colors,
   titleClassName = 'dial-body-semi-text',
   destination,
   onDestinationChange,
@@ -60,15 +39,6 @@ export const FolderDestinationPanel: FC<FolderDestinationPanelProps> = ({
     cancelLabel = 'Cancel',
     selectLabel = 'Select',
   } = labels;
-  const cssVars = buildCssVars({
-    '--fdp-backdrop-bg': colors?.backdropBackground,
-    '--fdp-panel-bg': colors?.panelBackground,
-    '--fdp-panel-border': colors?.panelBorder,
-    '--fdp-divider-border': colors?.dividerBorder,
-    '--fdp-scrollbar-thumb': colors?.scrollbarThumb,
-    '--fdp-title-text': colors?.titleText,
-  });
-
   const [view, setView] = useState(FolderDestinationView.Main);
   const [pendingDestination, setPendingDestination] = useState<
     FolderDestination | undefined
@@ -141,9 +111,8 @@ export const FolderDestinationPanel: FC<FolderDestinationPanelProps> = ({
           ref={titleRef}
           tabIndex={-1}
           className={mergeClasses(
-            'block truncate outline-none',
+            'block truncate text-primary outline-none',
             titleClassName,
-            TITLE_CLASS,
           )}
         >
           {isChangingFolder ? changeFolderTitle : title}
@@ -155,14 +124,13 @@ export const FolderDestinationPanel: FC<FolderDestinationPanelProps> = ({
       backDisabled={isSubmitting}
       closeAriaLabel={closeAriaLabel}
       closeDisabled={isSubmitting}
-      style={cssVars}
-      overlayStyle={cssVars}
-      className={mergeClasses(
-        PANEL_CLASS,
-        'tablet:w-[540px]! tablet:max-w-[calc(100%-32px)]!',
-      )}
-      overlayClassName={BACKDROP_CLASS}
-      headerClassName={mergeClasses('px-[22px]', DIVIDER_CLASS)}
+      /*
+       * TODO(ui-kit): `SideDrawer` applies its 540px width only from `desktop:`,
+       * so every consumer repeats this tablet width override. The default
+       * belongs in the kit; drop `className` once it ships.
+       */
+      className="tablet:w-[540px]! tablet:max-w-[calc(100%-32px)]!"
+      headerClassName="px-[22px]"
       bodyClassName="flex flex-col overflow-hidden"
     >
       <div
@@ -170,7 +138,6 @@ export const FolderDestinationPanel: FC<FolderDestinationPanelProps> = ({
           'flex min-h-0 flex-1 flex-col p-[22px]',
           /* An inline body scrolls only its folder tree, so the panel itself must not. */
           layout === FolderDestinationLayout.Steps && 'overflow-y-auto',
-          CONTENT_CLASS,
         )}
       >
         <FolderDestinationPanelBody
@@ -187,13 +154,15 @@ export const FolderDestinationPanel: FC<FolderDestinationPanelProps> = ({
         />
       </div>
 
-      {/* Below the desktop breakpoint the two actions split the row in half. */}
-      <div
-        className={mergeClasses(
-          'flex items-center justify-end gap-2 border-t px-4 py-4 desktop:px-3.5',
-          FOOTER_CLASS,
-        )}
-      >
+      {/*
+       * Below the desktop breakpoint the two actions split the row in half.
+       * TODO(ui-kit): this footer is rebuilt by hand in every drawer; it
+       * belongs in `SideDrawer` as data (`mainButtons` / `additionalButtons` /
+       * `footerDivider`, like `Popup`), and the whole panel shell (header,
+       * scrolling body, footer, busy state, tablet width, focus return) should
+       * be a kit component so this file keeps only the content.
+       */}
+      <div className="flex items-center justify-end gap-2 border-t border-tertiary p-4 desktop:px-3.5">
         <GhostButton
           label={cancelLabel}
           className="mobile:flex-1"

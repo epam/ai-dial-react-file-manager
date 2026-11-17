@@ -22,31 +22,22 @@ import {
 } from '@/utils/folder-destination';
 import {
   collectFolderKeys,
-  filterFolderTree,
   findFolderNode,
+  FORBIDDEN_FOLDER_NAME_CHARS_RE,
+  fromDialFileTree,
   fromFolderPathKey,
   getSiblingFolderNames,
-  getUniqueFolderName,
   sortFolderTree,
   toDialFileTree,
   toFolderPathKey,
-  validateFolderName,
 } from '@/utils/folder-tree';
-import { buildCssVars } from '@/utils/css-vars';
-
-const DIVIDER_CLASS =
-  'bg-[color:var(--fdt-divider,--theme(--border-color-tertiary))]';
-
-/*
- * `DialFoldersTree` renders the inline create/rename editor itself and sizes
- * it through the kit `Input`'s `containerClassName`, which lands on the
- * input's outer label/caption stack rather than on the `.dial-kit-input`
- * field. The field would keep its default 40px height inside a 20px stack and
- * overflow the tree's 24px row, so the geometry is applied to the field
- * itself, the only `.dial-kit-input` this subtree renders.
- */
-const TREE_CLASS =
-  '[&_.dial-kit-input]:h-5! [&_.dial-kit-input]:py-0! [&_.dial-kit-input]:px-[7px]!';
+import {
+  getFolderNameError,
+  getNextFolderNameFromNames,
+  isBlockingValidationError,
+  searchFoldersByName,
+} from '@/components/FileManager/utils';
+import { DEFAULT_WARNINGS } from '@/components/FileManager/errors';
 
 const CANCEL_CREATING_FOLDER_ATTRIBUTE = 'data-cancel-creating-folder';
 
@@ -79,6 +70,8 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
   invalidFolderNameError = 'Folder name contains invalid characters.',
   duplicateFolderNameError = 'A folder with this name already exists.',
   sameAsParentFolderNameError = 'A folder cannot have the same name as its parent folder.',
+  hiddenFolderNameWarning = DEFAULT_WARNINGS.hiddenItemWarning,
+  onValidateFolderName,
   rootLabel = 'Root',
   collapsibleRoots = false,
   expandedPaths: controlledExpandedPaths,
@@ -86,13 +79,6 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
   loadingPaths: loadingPathsProp,
   styles: stylesProp = {},
 }) => {
-  const cssVars = {
-    ...buildCssVars({
-      '--fdt-divider': stylesProp.colors?.divider,
-    }),
-    ...stylesProp.cssVars,
-  };
-
   const isMultiRoot = roots != null;
   /* Every node in multi-root mode lives under a root token (see `folder-destination.ts`). */
   const treeItems = useMemo(
@@ -203,15 +189,6 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
   const [creatingFolderName, setCreatingFolderName] =
     useState(newFolderDefaultName);
   /*
-   * The host `DialFoldersTree` component shows `onRenameValidate`'s result
-   * inline but does not reliably block its own confirm callback on it (the
-   * error can still be visible when the folder gets created).
-   * Track the last live-typed validation result ourselves so `handleConfirmCreatingFolder`
-   * can refuse to create even when the value it receives no longer reflects
-   * that error.
-   */
-  const lastLiveValidationErrorRef = useRef<string | null>(null);
-  /*
    * The inline editor (`useEditableItem` in the ui-kit) commits on any press
    * outside it, which includes the Cancel button, and again on the blur raised
    * when the editor is removed. Both run before this component's own cancel
@@ -219,6 +196,11 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
    * hook's (added once the editor opens), so it flags a press on Cancel and
    * `handleConfirmCreatingFolder` drops the commits that follow, until the next
    * creation starts.
+   *
+   * TODO(ui-kit): `useEditableItem` lives in `@epam/ai-dial-ui-kit`, so this
+   * cannot be fixed here. It should let the host exclude elements (or hand it
+   * an `onCancel` that wins) so a press on Cancel is not a commit; drop this
+   * listener and `CANCEL_CREATING_FOLDER_ATTRIBUTE` once the kit offers that.
    */
   const isCancellingRef = useRef(false);
   useEffect(() => {
@@ -238,9 +220,15 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
   const trimmedQuery = searchQuery.trim();
   const isCreatingFolder = creatingParentPath != null;
 
+  /* The file manager's folder search (it skips hidden dot-folders), run over the tree as `DialFile`s. */
   const matchingItems = useMemo(
-    () => filterFolderTree(treeItems, searchQuery),
-    [treeItems, searchQuery],
+    () =>
+      trimmedQuery
+        ? fromDialFileTree(
+            searchFoldersByName(toDialFileTree(treeItems), trimmedQuery).items,
+          )
+        : treeItems,
+    [treeItems, trimmedQuery],
   );
   const hasNoSearchMatches =
     trimmedQuery.length > 0 && matchingItems.length === 0;
@@ -320,6 +308,7 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
     invalid: invalidFolderNameError,
     duplicate: duplicateFolderNameError,
     sameAsParent: sameAsParentFolderNameError,
+    hidden: hiddenFolderNameWarning,
   };
 
   /* The name a new folder under `parentPath` may not take; a root (single-root `[]` or a multi-root token) has none. */
@@ -377,17 +366,21 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
    * which also keeps the confirmed folder visible once the filter resumes.
    */
   const resolveNewFolderName = (parentPath: string[]): string => {
+    const parentName = getParentFolderName(parentPath);
+    const takenNames = [
+      ...getSiblingFolderNames(treeItems, parentPath),
+      ...(parentName ? [parentName] : []),
+    ];
     const isQueryUsableAsName =
       hasNoSearchMatches &&
-      validateFolderName(trimmedQuery, [], folderNameErrors) == null;
-    const parentName = getParentFolderName(parentPath);
-    return getUniqueFolderName(
-      isQueryUsableAsName ? trimmedQuery : newFolderDefaultName,
-      [
-        ...getSiblingFolderNames(treeItems, parentPath),
-        ...(parentName ? [parentName] : []),
-      ],
-    );
+      getFolderNameError(trimmedQuery, {
+        siblingNames: takenNames,
+        messages: folderNameErrors,
+        forbiddenChars: FORBIDDEN_FOLDER_NAME_CHARS_RE,
+      }) == null;
+    return isQueryUsableAsName
+      ? trimmedQuery
+      : getNextFolderNameFromNames(takenNames, newFolderDefaultName);
   };
 
   /*
@@ -443,7 +436,6 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
     setCreatingParentPath(null);
     setPendingCreateParentPath(parentPath);
     setSettledCreateParentKey(null);
-    lastLiveValidationErrorRef.current = null;
     isCancellingRef.current = false;
     const parentKey = toFolderPathKey(parentPath);
     if (parentKey) {
@@ -459,11 +451,13 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
    * Per-row context menu, mirroring the file manager's "Add sibling" /
    * "Add child" folder-creation actions (see
    * `useFolderCreation`/`startTreeSiblingFolderCreation`/
-   * `startTreeChildFolderCreation` in `@epam/ai-dial-react-file-manager`'s `FileManager`
-   * — not exported from the package, so reimplemented here against the
-   * public `getContextMenuItems` prop instead). "Add sibling" is omitted for
-   * a root node, which has no parent to create a sibling under, and a root
-   * that does not accept new folders offers neither action.
+   * `startTreeChildFolderCreation` in `FileManager`). The state machines
+   * differ — this tree creates folders in a `FolderNode` model, the grid in
+   * `DialFile`s — but name validation (`getFolderNameError`) and default
+   * naming (`getNextFolderNameFromNames`) are shared with the grid.
+   * "Add sibling" is omitted for a root node, which has no parent to create a
+   * sibling under, and a root that does not accept new folders offers neither
+   * action.
    */
   const getFolderContextMenuItems = (file: DialFile): DropdownItem[] => {
     const childPath = fromFolderPathKey(file.path);
@@ -505,14 +499,21 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
     if (!creatingParentPath) {
       return null;
     }
-    const error = validateFolderName(
-      rawValue,
-      getSiblingFolderNames(treeItemsRef.current, creatingParentPath),
-      folderNameErrors,
-      getParentFolderName(creatingParentPath),
-    );
-    lastLiveValidationErrorRef.current = error;
-    return error;
+    return getFolderNameError(rawValue, {
+      siblingNames: getSiblingFolderNames(
+        treeItemsRef.current,
+        creatingParentPath,
+      ),
+      messages: folderNameErrors,
+      parentName: getParentFolderName(creatingParentPath),
+      forbiddenChars: FORBIDDEN_FOLDER_NAME_CHARS_RE,
+      onValidate: (trimmedName) => {
+        const parent = toDestination(creatingParentPath);
+        return parent
+          ? (onValidateFolderName?.(trimmedName, parent) ?? null)
+          : null;
+      },
+    });
   };
 
   const handleConfirmCreatingFolder = (rawValue: string) => {
@@ -520,9 +521,9 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
       return;
     }
     const trimmed = rawValue.trim();
-    const priorLiveError = lastLiveValidationErrorRef.current;
-    const error = validateNewFolderName(rawValue) ?? priorLiveError;
-    if (!error) {
+    const error = validateNewFolderName(rawValue);
+    /* A warning (hidden name) is informational; only an error blocks the creation. */
+    if (!isBlockingValidationError(error)) {
       const parent = roots ? fromRootedPath(creatingParentPath) : undefined;
       const createdPath = [...creatingParentPath, trimmed];
       const selectionVersionAtStart = selectionVersionRef.current;
@@ -567,7 +568,7 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
 
   return (
     <div
-      style={cssVars}
+      style={stylesProp.cssVars}
       className={mergeClasses(
         disabled && 'pointer-events-none opacity-60',
         stylesProp.className,
@@ -575,7 +576,7 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
       /* `pointer-events-none` alone leaves the keyboard working; `inert` removes the subtree from focus and the accessibility tree. */
       inert={disabled}
     >
-      <div className={mergeClasses('w-full max-w-full min-w-0', TREE_CLASS)}>
+      <div className="w-full max-w-full min-w-0">
         <DialFoldersTree
           items={dialFiles}
           showFiles={false}
@@ -604,7 +605,7 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
         />
       </div>
 
-      <div className={mergeClasses('my-2 h-px', DIVIDER_CLASS)} aria-hidden />
+      <div className="my-2 border-t border-tertiary" aria-hidden />
 
       {/*
        * Plain `GhostButton` stands in for a tertiary button: the installed
@@ -612,6 +613,8 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
        * the real Button/GhostButton, so it would silently render as
        * primary-solid. Switch to `variant={ButtonVariant.Tertiary}` once the
        * kit adds the style.
+       * TODO(ui-kit): `ButtonVariant.Tertiary` has an empty style map in the
+       * kit's `Button/constants.ts`; the style needs to ship there first.
        */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <GhostButton

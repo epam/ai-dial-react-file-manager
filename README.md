@@ -98,7 +98,7 @@ Upgrading from 0.4.x? See the Breaking Changes in the [CHANGELOG](CHANGELOG.md).
 
 ### Folder destination panel
 
-`FolderDestinationPanel` is an end-edge side panel that shows the item being acted on and a folder hierarchy to choose a destination from. `FolderDestinationTree` is the hierarchy on its own, in a single-root form (`items`, `selectedPath`) or a multi-root form (`roots`, `destination`). The panel renders its primary button from a host-supplied `action`, takes its text through `labels`, `panelLabels` and its colors through CSS variables (`colors`, `panelStyles`), and has two layouts: `FolderDestinationLayout.Steps` (a main view and a Change-folder view) and `FolderDestinationLayout.Inline` (search and hierarchy in one view, no Change or Select step).
+`FolderDestinationPanel` is an end-edge side panel that shows the item being acted on and a folder hierarchy to choose a destination from. `FolderDestinationTree` is the hierarchy on its own, in a single-root form (`items`, `selectedPath`) or a multi-root form (`roots`, `destination`). The panel renders its primary button from a host-supplied `action`, takes its text through `labels` and `panelLabels`, is themed through the same theme tokens as the rest of the file manager (`styles/theme.scss`; there are no per-component color props), and has two layouts: `FolderDestinationLayout.Steps` (a main view and a Change-folder view) and `FolderDestinationLayout.Inline` (search and hierarchy in one view, no Change or Select step).
 
 ```tsx
 import {
@@ -133,7 +133,7 @@ const roots: FolderDestinationRoot[] = [
 />;
 ```
 
-The panel knows nothing about the host: `item.summary` replaces the title-only summary row with a node the host renders (for example an entity header). If `onCreateFolder` rejects, the new folder is not selected and `onCreateFolderError` is called; the panel shows no message of its own, so the host reports the failure. Folder helpers (`validateFolderName`, `toFolderPathKey`, `fromFolderPathKey`) are exported alongside.
+The panel knows nothing about the host: `item.summary` replaces the title-only summary row with a node the host renders (for example an entity header). If `onCreateFolder` rejects, the new folder is not selected and `onCreateFolderError` is called; the panel shows no message of its own, so the host reports the failure. Folder helpers (`getFolderNameError`, `getNextFolderNameFromNames`, `toFolderPathKey`, `fromFolderPathKey`) are exported alongside; `getFolderNameError` and `getNextFolderNameFromNames` are the same validation and default-naming the grid uses, and `onValidateFolderName` adds the host's own name check.
 
 ## Public API
 
@@ -141,7 +141,7 @@ The primary export is `DialFileManager`. The package also exports:
 
 - `FileManagerProvider` and `useFileManagerContext`
 - `DialFoldersTree`
-- `FolderDestinationPanel`, `FolderDestinationTree`, their prop, label and color types, `FolderDestinationLayout` and the `toFolderPathKey`, `fromFolderPathKey` and `validateFolderName` helpers
+- `FolderDestinationPanel`, `FolderDestinationTree`, their prop and label types, `FolderDestinationLayout` and the `toFolderPathKey`, `fromFolderPathKey`, `getFolderNameError` and `getNextFolderNameFromNames` helpers
 - File models, permissions, resource types, and selection modes
 - File-manager actions, tabs, trigger views, and column definitions
 - Public option and prop types used by the exported components

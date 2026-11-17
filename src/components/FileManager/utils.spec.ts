@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type { DialFileAcceptType } from '@/models/file-manager';
 import { DialFileNodeType, type DialFile } from '@/models/file';
 import { baseColumnComparator } from '@epam/ai-dial-ui-kit';
@@ -15,6 +15,9 @@ import {
   normalizeExtensionWithoutDot,
   splitPathAndName,
   getNextFolderName,
+  getNextFolderNameFromNames,
+  getFolderNameError,
+  isBlockingValidationError,
   sortGridRows,
   excludePathsFromTree,
   getAncestorPaths,
@@ -224,6 +227,132 @@ describe('Dial UI Kit :: getNextFolderName', () => {
       } as DialFile,
     ];
     expect(getNextFolderName(existing)).toBe('New folder 1');
+  });
+});
+
+describe('Dial UI Kit :: getNextFolderNameFromNames', () => {
+  it('numbers a custom base name', () => {
+    expect(getNextFolderNameFromNames(['Docs 1', 'Docs 4'], 'Docs')).toBe(
+      'Docs 5',
+    );
+  });
+
+  it('treats regex characters in the base name literally', () => {
+    expect(getNextFolderNameFromNames(['a+b 1', 'aab 7'], 'a+b')).toBe('a+b 2');
+  });
+
+  it('skips a taken name case-insensitively', () => {
+    expect(getNextFolderNameFromNames(['new folder 1'])).toBe('New folder 2');
+  });
+});
+
+describe('Dial UI Kit :: getFolderNameError', () => {
+  const messages = {
+    empty: 'empty',
+    invalid: 'invalid',
+    duplicate: 'duplicate',
+    sameAsParent: 'same-as-parent',
+    hidden: 'hidden',
+  };
+  const forbiddenChars = /[/\:]/;
+
+  it('returns null for a valid, non-duplicate name and trims it first', () => {
+    expect(
+      getFolderNameError('  New folder  ', {
+        siblingNames: ['Shared'],
+        messages,
+      }),
+    ).toBeNull();
+  });
+
+  it('returns the empty message for a blank name', () => {
+    expect(getFolderNameError('   ', { siblingNames: [], messages })).toBe(
+      'empty',
+    );
+  });
+
+  it('rejects consecutive dots and forbidden characters with the invalid message', () => {
+    expect(getFolderNameError('a..b', { siblingNames: [], messages })).toBe(
+      'invalid',
+    );
+    expect(
+      getFolderNameError('a/b', { siblingNames: [], messages, forbiddenChars }),
+    ).toBe('invalid');
+    expect(
+      getFolderNameError('a/b', { siblingNames: [], messages }),
+    ).toBeNull();
+  });
+
+  it('returns the duplicate message for a case-insensitive sibling match', () => {
+    expect(
+      getFolderNameError('shared', { siblingNames: ['Shared'], messages }),
+    ).toBe('duplicate');
+  });
+
+  it('returns the same-as-parent message, falling back to duplicate', () => {
+    expect(
+      getFolderNameError(' TEST ', {
+        siblingNames: [],
+        messages,
+        parentName: 'test',
+      }),
+    ).toBe('same-as-parent');
+    const { sameAsParent: _omitted, ...withoutSameAsParent } = messages;
+    expect(
+      getFolderNameError('test', {
+        siblingNames: [],
+        messages: withoutSameAsParent,
+        parentName: 'test',
+      }),
+    ).toBe('duplicate');
+  });
+
+  it('runs the host check with the trimmed name after the built-in checks', () => {
+    const onValidate = vi.fn(() => 'host error');
+    expect(
+      getFolderNameError(' Reports ', {
+        siblingNames: [],
+        messages,
+        onValidate,
+      }),
+    ).toBe('host error');
+    expect(onValidate).toHaveBeenCalledWith('Reports');
+
+    onValidate.mockClear();
+    expect(
+      getFolderNameError('Shared', {
+        siblingNames: ['Shared'],
+        messages,
+        onValidate,
+      }),
+    ).toBe('duplicate');
+    expect(onValidate).not.toHaveBeenCalled();
+  });
+
+  it('returns the hidden notice last, so it never masks a blocking error', () => {
+    expect(getFolderNameError('.git', { siblingNames: [], messages })).toBe(
+      'hidden',
+    );
+    expect(
+      getFolderNameError('.git', { siblingNames: ['.Git'], messages }),
+    ).toBe('duplicate');
+    expect(
+      getFolderNameError('.git', {
+        siblingNames: [],
+        messages,
+        onValidate: () => 'host error',
+      }),
+    ).toBe('host error');
+    expect(getFolderNameError('.', { siblingNames: [], messages })).toBeNull();
+  });
+});
+
+describe('Dial UI Kit :: isBlockingValidationError', () => {
+  it('blocks on an error but not on a warning, empty or missing result', () => {
+    expect(isBlockingValidationError('Bad name')).toBe(true);
+    expect(isBlockingValidationError('warning__Hidden')).toBe(false);
+    expect(isBlockingValidationError('')).toBe(false);
+    expect(isBlockingValidationError(null)).toBe(false);
   });
 });
 

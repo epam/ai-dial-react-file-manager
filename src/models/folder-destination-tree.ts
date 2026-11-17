@@ -5,16 +5,8 @@ import type {
 } from './folder-destination';
 import type { FolderNode } from './folder-tree';
 
-/** Color overrides for the destination folder tree. */
-export interface FolderDestinationTreeColors {
-  /** Divider color above the folder-creation controls. Defaults to `--stroke-tertiary`. */
-  divider?: string;
-}
-
 /** Style overrides for the destination folder tree. */
 export interface FolderDestinationTreeStyles {
-  /** Color overrides. */
-  colors?: FolderDestinationTreeColors;
   /** Additional class name applied to the component root. */
   className?: string;
   /** Additional CSS custom properties applied to the component root. */
@@ -73,6 +65,13 @@ export interface FolderDestinationTreeProps {
   duplicateFolderNameError?: string;
   /** Validation message for a new folder named like its parent folder. Defaults to `'A folder cannot have the same name as its parent folder.'`. */
   sameAsParentFolderNameError?: string;
+  /** Non-blocking notice for a new folder name starting with a dot, which hides the folder. Defaults to the file manager's hidden-item notice. */
+  hiddenFolderNameWarning?: string;
+  /** The host's own check of a new folder name, called with the trimmed name and the folder it would be created under (`rootKey` is `''` in single-root mode) once the built-in checks pass. Return an error message, or `null` when the name is acceptable. */
+  onValidateFolderName?: (
+    name: string,
+    parent: FolderDestination,
+  ) => string | null;
   /** Label for the selectable bucket root of the single-root tree. Ignored when `roots` is set. Defaults to `'Root'`. */
   rootLabel?: string;
   /** Externally controlled expanded folder path keys of the single-root tree; use `FolderDestinationRoot.expandedPaths` in multi-root mode. */

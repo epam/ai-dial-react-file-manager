@@ -41,16 +41,18 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **`FolderDestinationTree` and `FolderDestinationPanelBody` — `getDisabledReason`** — a destination folder with a non-empty reason is disabled (muted, `aria-disabled`, tooltip, not selectable, still expandable) and gets no folder creation under it; the panel body forwards it and announces the reason of the committed destination. `FolderDestinationPanelBody`, `FolderDestinationView` and the folder helpers (`collectFolderKeys`, `filterFolderTree`, `getSiblingFolderNames`, `getUniqueFolderName`, `mergeFolderPaths`, `sortFolderTree`, `toDialFileTree`) are exported too.
+- **`FolderDestinationTree` and `FolderDestinationPanelBody` — `getDisabledReason`** — a destination folder with a non-empty reason is disabled (muted, `aria-disabled`, tooltip, not selectable, still expandable) and gets no folder creation under it; the panel body forwards it and announces the reason of the committed destination. `FolderDestinationPanelBody`, `FolderDestinationView` and the folder helpers (`collectFolderKeys`, `fromDialFileTree`, `getSiblingFolderNames`, `mergeFolderPaths`, `sortFolderTree`, `toDialFileTree`) are exported too.
 
 - **`FolderDestinationPanel` and `FolderDestinationTree`** — the destination UI
   for Copy and Move, for a host that handles `onDestinationRequest`: an end-edge
   panel (Steps or Inline layout) with the item summary, a folder search, the
   hierarchy, folder creation and a host-supplied primary `action`, and the tree
-  alone in single-root and multi-root forms. The prop, label and color types,
+  alone in single-root and multi-root forms. The prop and label types,
   `FolderDestinationLayout`, `FolderDestinationItemIcon` and the
-  `validateFolderName`, `toFolderPathKey` and `fromFolderPathKey` helpers are
-  exported too.
+  `getFolderNameError`, `getNextFolderNameFromNames`, `toFolderPathKey` and
+  `fromFolderPathKey` helpers are exported too. Folder names are validated, and
+  default names chosen, by the same helpers the file manager grid uses, and the
+  host can add its own check through `onValidateFolderName`.
   `FolderDestinationItem.summary` lets the host render the summary row, and a
   `tablet` variant (768px up to 1280px) is added to the stylesheet theme.
 
