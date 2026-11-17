@@ -41,6 +41,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`FolderDestinationTree` and `FolderDestinationPanelBody` — `getDisabledReason`** — a destination folder with a non-empty reason is disabled (muted, `aria-disabled`, tooltip, not selectable, still expandable) and gets no folder creation under it; the panel body forwards it and announces the reason of the committed destination. `FolderDestinationPanelBody`, `FolderDestinationView` and the folder helpers (`collectFolderKeys`, `filterFolderTree`, `getSiblingFolderNames`, `getUniqueFolderName`, `mergeFolderPaths`, `sortFolderTree`, `toDialFileTree`) are exported too.
+
 - **`FolderDestinationPanel` and `FolderDestinationTree`** — the destination UI
   for Copy and Move, for a host that handles `onDestinationRequest`: an end-edge
   panel (Steps or Inline layout) with the item summary, a folder search, the

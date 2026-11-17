@@ -47,6 +47,8 @@ export interface FolderDestinationTreeProps {
   onCreateFolderError?: (error: unknown) => void;
   /** Host-owned search query used to filter the tree. */
   searchQuery: string;
+  /** Reason a folder is unavailable as a destination; a non-empty string disables that row (`aria-disabled`, tooltip, accessible description, no selection) while it stays focusable and expandable, and no folder is created under it. `rootKey` is `''` in single-root mode. The whole-tree `disabled` wins. Without it, or while it returns `undefined`, nothing changes. */
+  getDisabledReason?: (destination: FolderDestination) => string | undefined;
   /** Lets the user collapse and expand the root nodes of the tree. Roots start expanded, and a search expands them again. Defaults to `false`, which keeps every root expanded. */
   collapsibleRoots?: boolean;
   /** Disables every control, for the pointer and the keyboard. Defaults to `false`. */

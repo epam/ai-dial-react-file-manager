@@ -108,6 +108,8 @@ export interface FolderDestinationPanelBaseProps {
   ) => Promise<void>;
   /** Called when `onCreateFolder` rejects; the new folder is then not selected, and the host is responsible for telling the user. Without it a rejection is left unhandled. */
   onCreateFolderError?: (error: unknown) => void;
+  /** Reason a folder is unavailable as a destination, or `undefined` when it is usable; forwarded to the folder tree, see `FolderDestinationTreeProps.getDisabledReason`. The reason of the committed `destination` is also announced in the main view. */
+  getDisabledReason?: (destination: FolderDestination) => string | undefined;
   /** Lets the user collapse and expand the root nodes of the folder tree. Defaults to `false`. */
   collapsibleRoots?: boolean;
   /** How the folder picker is presented. Defaults to `FolderDestinationLayout.Steps`. */

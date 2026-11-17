@@ -14,7 +14,7 @@ import {
   Search,
 } from '@epam/ai-dial-ui-kit';
 import { IconFolder } from '@tabler/icons-react';
-import { type FC, useMemo, useState } from 'react';
+import { type FC, useId, useMemo, useState } from 'react';
 import { buildCssVars } from '@/utils/css-vars';
 import type { FolderDestination } from '@/models/folder-destination';
 import type { FolderDestinationPanelBodyProps } from '@/models/folder-destination-panel';
@@ -47,6 +47,7 @@ export const FolderDestinationPanelBody: FC<
   onDestinationChange,
   onCreateFolder,
   onCreateFolderError,
+  getDisabledReason,
   onChangeFolderClick,
   changeFolderButtonRef,
   pendingDestination,
@@ -94,6 +95,8 @@ export const FolderDestinationPanelBody: FC<
   });
 
   const [searchQuery, setSearchQuery] = useState('');
+  const destinationReasonId = useId();
+  const destinationDisabledReason = getDisabledReason?.(destination);
 
   const destinationSegments = useMemo(() => {
     const root = roots.find(
@@ -150,6 +153,7 @@ export const FolderDestinationPanelBody: FC<
         onCreateDestinationFolder={onCreateFolder}
         onCreateFolderError={onCreateFolderError}
         searchQuery={searchQuery}
+        getDisabledReason={getDisabledReason}
         collapsibleRoots={collapsibleRoots}
         disabled={isSubmitting}
         noResultsLabel={folderEmptyStateLabel}
@@ -238,6 +242,9 @@ export const FolderDestinationPanelBody: FC<
             <div
               role="group"
               aria-label={destinationAriaLabel}
+              aria-describedby={
+                destinationDisabledReason ? destinationReasonId : undefined
+              }
               className="min-w-0 flex-1"
             >
               <FolderName
@@ -269,6 +276,12 @@ export const FolderDestinationPanelBody: FC<
       {mainSections}
 
       <LiveRegion politeness={LiveRegionPoliteness.Assertive}>
+        {destinationDisabledReason && (
+          <ErrorText
+            id={destinationReasonId}
+            text={destinationDisabledReason}
+          />
+        )}
         {submitError && <ErrorText text={submitError} />}
       </LiveRegion>
     </div>

@@ -274,3 +274,41 @@ describe('FolderDestinationPanelBody — inline layout', () => {
     expect(screen.getByText('api keys.xls')).toBeTruthy();
   });
 });
+
+describe('FolderDestinationPanelBody disabled destinations', () => {
+  const REASON = 'No access to this folder.';
+
+  it('forwards getDisabledReason to the folder tree', async () => {
+    const getDisabledReason = vi.fn();
+    renderPanel({
+      view: FolderDestinationView.ChangeFolder,
+      getDisabledReason,
+    });
+
+    expect(treeProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ getDisabledReason }),
+    );
+  });
+
+  it('announces the reason of a disabled committed destination and links it to the destination', () => {
+    renderPanel({ getDisabledReason: () => REASON });
+
+    const reason = screen.getByText(REASON);
+    expect(
+      screen
+        .getByRole('group', { name: 'Destination folder' })
+        .getAttribute('aria-describedby'),
+    ).toBe(reason.id);
+  });
+
+  it('shows no reason when the destination is usable', () => {
+    renderPanel({ getDisabledReason: () => undefined });
+
+    expect(screen.queryByText(REASON)).toBeNull();
+    expect(
+      screen
+        .getByRole('group', { name: 'Destination folder' })
+        .getAttribute('aria-describedby'),
+    ).toBeNull();
+  });
+});

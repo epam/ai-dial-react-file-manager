@@ -67,20 +67,31 @@ export type {
   FolderDestinationPanelContentStyles,
   FolderDestinationPanelColors,
   FolderDestinationPanelLabels,
+  FolderDestinationPanelBodyProps,
   FolderDestinationPanelProps,
 } from './models/folder-destination-panel';
 export {
   FolderDestinationItemIcon,
   FolderDestinationLayout,
+  FolderDestinationView,
 } from './types/folder-destination-panel';
 export {
+  collectFolderKeys,
+  filterFolderTree,
   fromFolderPathKey,
+  getFolderDisplayName,
+  getSiblingFolderNames,
+  getUniqueFolderName,
+  mergeFolderPaths,
+  sortFolderTree,
+  toDialFileTree,
   toFolderPathKey,
   validateFolderName,
 } from './utils/folder-tree';
 export type { FolderNameValidationMessages } from './utils/folder-tree';
 export { FolderDestinationTree } from './components/FolderDestinationTree/FolderDestinationTree';
 export { FolderDestinationPanel } from './components/FolderDestinationPanel/FolderDestinationPanel';
+export { FolderDestinationPanelBody } from './components/FolderDestinationPanel/FolderDestinationPanelBody';
 
 export {
   DestinationFolderMode,
