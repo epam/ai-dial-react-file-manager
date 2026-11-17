@@ -536,7 +536,13 @@ export const useFileUpload = ({
         });
       }
 
-      if (files.length === 0 && e.dataTransfer.files?.length) {
+      /*
+       * Fall back to `dataTransfer.files` only when the browser exposed no
+       * `items`. A dropped folder also appears in `files` as a zero-byte
+       * pseudo-file named after it: Chrome fails to read it (reported as a
+       * network error) and Safari uploads it as an empty document.
+       */
+      if (items.length === 0 && e.dataTransfer.files?.length) {
         files.push(...Array.from(e.dataTransfer.files));
       }
 
