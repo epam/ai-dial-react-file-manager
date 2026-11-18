@@ -771,6 +771,132 @@ describe('FolderDestinationTree', () => {
       nodeType: DialFileNodeType.FOLDER,
     });
 
+    describe('starting a folder creation with collapsible roots', () => {
+      const clickMenuItem = (menuItems: DropdownItem[], key: string) =>
+        act(() =>
+          menuItems
+            .find((item) => item.key === key)
+            ?.onClick?.({ key, domEvent: {} as never }),
+        );
+      const folderFile = (path: string): DialFile => ({
+        path,
+        name: path.split('/').at(-1) ?? path,
+        folderId: path,
+        nodeType: DialFileNodeType.FOLDER,
+      });
+
+      it('keeps every root open and shows the editor when adding a child to a folder', () => {
+        renderMultiRoot({ collapsibleRoots: true });
+
+        clickMenuItem(
+          capturedProps.current?.getContextMenuItems?.(
+            folderFile(':personal/Design'),
+          ) ?? [],
+          'add-child',
+        );
+
+        expect(capturedProps.current?.createdFolderPath).toBe(
+          ':personal/Design',
+        );
+        expect(capturedProps.current?.expandedPaths).toEqual(
+          new Set([':personal', ':organization', ':personal/Design']),
+        );
+      });
+
+      it('keeps every root open when adding a sibling', () => {
+        renderMultiRoot({ collapsibleRoots: true });
+
+        clickMenuItem(
+          capturedProps.current?.getContextMenuItems?.(
+            folderFile(':personal/Design'),
+          ) ?? [],
+          'add-sibling',
+        );
+
+        expect(capturedProps.current?.createdFolderPath).toBe(':personal');
+        expect(capturedProps.current?.expandedPaths).toEqual(
+          new Set([':personal', ':organization']),
+        );
+      });
+
+      it('leaves the other roots open when the parent is a root', () => {
+        renderMultiRoot({ collapsibleRoots: true });
+
+        clickMenuItem(
+          capturedProps.current?.getContextMenuItems?.(
+            rootFile('personal', 'Personal'),
+          ) ?? [],
+          'add-child',
+        );
+
+        expect(capturedProps.current?.expandedPaths).toEqual(
+          new Set([':personal', ':organization']),
+        );
+      });
+
+      it('keeps a root the user collapsed collapsed, while opening the one holding the parent', () => {
+        renderMultiRoot({ collapsibleRoots: true });
+        act(() =>
+          capturedProps.current?.onExpandedPathsChange?.(
+            new Set([':personal']),
+          ),
+        );
+        expect(capturedProps.current?.expandedPaths).toEqual(
+          new Set([':personal']),
+        );
+
+        clickMenuItem(
+          capturedProps.current?.getContextMenuItems?.(
+            folderFile(':personal/Design'),
+          ) ?? [],
+          'add-child',
+        );
+
+        expect(capturedProps.current?.expandedPaths).toEqual(
+          new Set([':personal', ':personal/Design']),
+        );
+      });
+
+      it('re-opens the root holding the parent when the user had collapsed it', async () => {
+        renderMultiRoot({
+          collapsibleRoots: true,
+          destination: { rootKey: 'personal', path: ['Design'] },
+        });
+        act(() =>
+          capturedProps.current?.onExpandedPathsChange?.(
+            new Set([':organization']),
+          ),
+        );
+        expect(capturedProps.current?.expandedPaths).toEqual(
+          new Set([':organization']),
+        );
+
+        await userEvent.click(
+          screen.getByRole('button', { name: 'Create new folder' }),
+        );
+
+        expect(capturedProps.current?.createdFolderPath).toBe(
+          ':personal/Design',
+        );
+        expect(capturedProps.current?.expandedPaths).toEqual(
+          new Set([':personal', ':organization', ':personal/Design']),
+        );
+      });
+
+      it('keeps the single root open when creating from the trailing button', async () => {
+        renderTree({ collapsibleRoots: true, selectedPath: ['Shared'] });
+
+        await userEvent.click(
+          screen.getByRole('button', { name: 'Create new folder' }),
+        );
+
+        expect(capturedProps.current?.createdFolderPath).toBe('Shared');
+        expect(capturedProps.current?.expandedPaths).toEqual(
+          new Set(['', 'Shared']),
+        );
+      });
+    });
+
     it('renders one top-level node per root in the given order, with folders sorted inside each', () => {
       renderMultiRoot();
       expect(capturedProps.current?.items.map((file) => file.name)).toEqual([

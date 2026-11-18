@@ -133,6 +133,8 @@ const roots: FolderDestinationRoot[] = [
 />;
 ```
 
+`FolderDestinationPanelBody` is the panel's content without the drawer (the item summary and destination, or the search and tree), exported for a host that renders it in its own container; it takes the panel's props plus `view`, `onChangeFolderClick`, `pendingDestination` and `onPendingDestinationChange`, and the `FolderDestinationPanelBody` stories show each view.
+
 The panel knows nothing about the host: `item.summary` replaces the title-only summary row with a node the host renders (for example an entity header). If `onCreateFolder` rejects, the new folder is not selected and `onCreateFolderError` is called; the panel shows no message of its own, so the host reports the failure. Folder helpers (`getFolderNameError`, `getNextFolderNameFromNames`, `toFolderPathKey`, `fromFolderPathKey`) are exported alongside; `getFolderNameError` and `getNextFolderNameFromNames` are the same validation and default-naming the grid uses, and `onValidateFolderName` adds the host's own name check.
 
 ## Public API
@@ -141,7 +143,7 @@ The primary export is `DialFileManager`. The package also exports:
 
 - `FileManagerProvider` and `useFileManagerContext`
 - `DialFoldersTree`
-- `FolderDestinationPanel`, `FolderDestinationTree`, their prop and label types, `FolderDestinationLayout` and the `toFolderPathKey`, `fromFolderPathKey`, `getFolderNameError` and `getNextFolderNameFromNames` helpers
+- `FolderDestinationPanel`, `FolderDestinationPanelBody`, `FolderDestinationTree`, their prop and label types, `FolderDestinationLayout` and the `toFolderPathKey`, `fromFolderPathKey`, `getFolderNameError` and `getNextFolderNameFromNames` helpers
 - File models, permissions, resource types, and selection modes
 - File-manager actions, tabs, trigger views, and column definitions
 - Public option and prop types used by the exported components

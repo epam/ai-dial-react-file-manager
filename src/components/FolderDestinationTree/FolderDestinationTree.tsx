@@ -438,9 +438,31 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
     setSettledCreateParentKey(null);
     isCancellingRef.current = false;
     const parentKey = toFolderPathKey(parentPath);
-    if (parentKey) {
-      handleExpandedPathsChange(new Set(expandedPaths).add(parentKey));
+    /*
+     * `expandedPaths` never holds root keys, so building the next set from it
+     * alone would read as "every root collapsed" and hide the editor, which
+     * renders under the parent. Keep the roots that are open, and open the
+     * root the parent lives in even if the user had collapsed it.
+     */
+    const parentRootKey = isMultiRoot ? parentPath[0] : SINGLE_ROOT_KEY;
+    const next = new Set([
+      ...expandedPaths,
+      ...rootKeys.filter(
+        (key) => !collapsibleRoots || !collapsedRootKeys.has(key),
+      ),
+      parentRootKey,
+    ]);
+    if (parentKey) next.add(parentKey);
+    if (collapsibleRoots) {
+      /* A search skips the collapse bookkeeping below, so a root collapsed earlier would stay collapsed. */
+      setCollapsedRootKeys((collapsed) => {
+        if (!collapsed.has(parentRootKey)) return collapsed;
+        const remaining = new Set(collapsed);
+        remaining.delete(parentRootKey);
+        return remaining;
+      });
     }
+    handleExpandedPathsChange(next);
   };
 
   const handleStartCreatingFolder = () => {
