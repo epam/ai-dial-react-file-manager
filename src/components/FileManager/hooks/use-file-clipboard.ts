@@ -43,6 +43,28 @@ export const useFileClipboard = ({
     sourceFolder?: string;
   } | null>(null);
 
+  /*
+   * Contents of the destination the host passed to `confirm`: a folder picked in
+   * the destination panel may not be loaded into the file manager's own items.
+   */
+  const destinationItemsRef = useRef<{
+    path: string;
+    items: DialFile[];
+  } | null>(null);
+  const getDestinationFilesWithHostItems = useCallback(
+    (path: string): DialFile[] => {
+      const files = getDestinationFiles(path);
+      const hostItems = destinationItemsRef.current;
+      if (!hostItems || hostItems.path !== path) return files;
+      const known = new Set(files.map((file) => file.path));
+      return [
+        ...files,
+        ...hostItems.items.filter((file) => !known.has(file.path)),
+      ];
+    },
+    [getDestinationFiles],
+  );
+
   const {
     conflictingFiles,
     conflictResolutionOpen,
@@ -56,7 +78,7 @@ export const useFileClipboard = ({
     handleCancelAll: baseHandleCancelAll,
     handleDecideForEach: baseHandleDecideForEach,
   } = useConflictResolution({
-    getDestinationFiles,
+    getDestinationFiles: getDestinationFilesWithHostItems,
     onResolve: (items, destinationFolder) => {
       if (!items?.length) {
         return;
@@ -83,6 +105,7 @@ export const useFileClipboard = ({
     setCopiedFiles([]);
     setMovedFiles([]);
     setOperationMetadata(null);
+    destinationItemsRef.current = null;
   }, []);
 
   const handleCopyTo = useCallback(
@@ -223,7 +246,10 @@ export const useFileClipboard = ({
         mode,
         items: files,
         sourceFolder: sourcePath,
-        confirm: (destinationFolder) => {
+        confirm: (destinationFolder, destinationItems) => {
+          destinationItemsRef.current = destinationItems
+            ? { path: destinationFolder, items: destinationItems }
+            : null;
           if (mode === DestinationFolderMode.Copy) {
             latestHandlersRef.current.handleCopyTo(destinationFolder, files);
           } else {

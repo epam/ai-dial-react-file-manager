@@ -92,7 +92,7 @@ Common integration callbacks include:
 
 ### Copy and Move destination
 
-Copy and Move need `onDestinationRequest`; without it they do nothing. When the user chooses Copy or Move, the file manager calls it with a `DialDestinationRequest` (`mode`, `items`, `sourceFolder`, `confirm`, `cancel`). It does not render a destination picker itself: show `FolderDestinationPanel` (see below) or your own UI, then call `request.confirm(destinationFolder)` to run the operation — name conflicts are resolved first, and the result reaches `onCopyFiles` / `onMoveToFiles` — or `request.cancel()` if the user dismisses it. The folders of the destination must be present in `items` for conflict detection.
+Copy and Move need `onDestinationRequest`; without it they do nothing. When the user chooses Copy or Move, the file manager calls it with a `DialDestinationRequest` (`mode`, `items`, `sourceFolder`, `confirm`, `cancel`). It does not render a destination picker itself: show `FolderDestinationPanel` (see below) or your own UI, then call `request.confirm(destinationFolder)` to run the operation — name conflicts are resolved first, and the result reaches `onCopyFiles` / `onMoveToFiles` — or `request.cancel()` if the user dismisses it. Conflicts are checked against the files the file manager already holds for the destination folder. The panel lists folders only, so for a folder the user never opened in the grid, load its contents first and pass them as the second argument — `request.confirm(destinationFolder, destinationItems)` — otherwise existing files with the same names are not detected and can be overwritten.
 
 Upgrading from 0.4.x? See the Breaking Changes in the [CHANGELOG](CHANGELOG.md).
 
@@ -108,7 +108,11 @@ import {
   type FolderDestinationRoot,
 } from '@epam/ai-dial-react-file-manager';
 
-// `request` comes from `onDestinationRequest`; `destination`, `setDestination`, `createFolder` and `showToast` are the host's own.
+// `request` comes from `onDestinationRequest`; `destination`, `setDestination`, `setRequest`, `createFolder`,
+// `loadFolderItems` and `showToast` are the host's own.
+// The panel reports a `FolderDestination` (`rootKey` + `path`); turning it into the file manager's folder path is up to the host.
+const toFolderPath = ({ rootKey, path }: FolderDestination) =>
+  [rootKey, ...path].join('/');
 const roots: FolderDestinationRoot[] = [
   {
     key: 'files',
@@ -118,8 +122,11 @@ const roots: FolderDestinationRoot[] = [
 ];
 
 <FolderDestinationPanel
-  isOpen
-  onClose={request.cancel}
+  isOpen={request != null}
+  onClose={() => {
+    request.cancel();
+    setRequest(null);
+  }}
   layout={FolderDestinationLayout.Inline}
   item={{ title: 'report.pdf' }}
   roots={roots}
@@ -129,7 +136,15 @@ const roots: FolderDestinationRoot[] = [
     createFolder(rootKey, parentPath, name)
   }
   onCreateFolderError={(error) => showToast(String(error))}
-  action={{ label: 'Copy', onClick: () => request.confirm('files/Reports') }}
+  action={{
+    label: 'Copy',
+    onClick: async () => {
+      const folder = toFolderPath(destination);
+      // Load the destination's files so name conflicts are detected.
+      request.confirm(folder, await loadFolderItems(folder));
+      setRequest(null); // closes the panel
+    },
+  }}
 />;
 ```
 

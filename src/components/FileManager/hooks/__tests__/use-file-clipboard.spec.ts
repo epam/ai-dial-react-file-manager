@@ -611,6 +611,32 @@ describe('Dial UI Kit :: FileManager :: useFileClipboard', () => {
     expect(onCopyFiles).not.toHaveBeenCalled();
   });
 
+  it('detects conflicts against destination items the host passes to confirm', () => {
+    const onCopyFiles = vi.fn();
+    const onDestinationRequest = vi.fn();
+    const { result } = renderHook(() =>
+      useFileClipboard({
+        getDestinationFiles: () => [],
+        getSourceFiles,
+        onCopyFiles,
+        onDestinationRequest,
+      }),
+    );
+
+    act(() => {
+      result.current.handleSetCopiedFiles([file('a.txt')]);
+      result.current.handleRequestDestination(DestinationFolderMode.Copy);
+    });
+    act(() => {
+      onDestinationRequest.mock.calls[0][0].confirm('/dest', [
+        file('a.txt', '/dest'),
+      ]);
+    });
+
+    expect(result.current.conflictResolutionOpen).toBe(true);
+    expect(onCopyFiles).not.toHaveBeenCalled();
+  });
+
   it('does nothing when no host handles destination requests', () => {
     const onCopyFiles = vi.fn();
     const { result } = renderHook(() =>

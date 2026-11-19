@@ -96,6 +96,15 @@ export const FolderDestinationPanel: FC<FolderDestinationPanelProps> = ({
     onPendingDestinationChange?.(destination);
     setView(FolderDestinationView.Main);
   };
+  /*
+   * While a submit runs the panel must stay open: the host may call
+   * `request.cancel()` on close, which would abandon the copy/move midway.
+   * The kit drawer closes on Escape and on a backdrop press as well as on the
+   * X button, so the guard sits on `onClose` itself.
+   */
+  const handleClose = () => {
+    if (!isSubmitting) onClose();
+  };
   const handleSelect = () => {
     if (pendingDestination) onDestinationChange(pendingDestination);
     setView(FolderDestinationView.Main);
@@ -105,7 +114,8 @@ export const FolderDestinationPanel: FC<FolderDestinationPanelProps> = ({
   return (
     <SideDrawer
       open={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
+      closeOnOutsideClick={!isSubmitting}
       header={
         <span
           ref={titleRef}

@@ -34,8 +34,13 @@ export interface DialDestinationRequest {
   items: DialFile[];
   /** Path of the folder the items are in. */
   sourceFolder: string;
-  /** Copies or moves the items into `destinationFolder`; name conflicts are resolved by the file manager first. */
-  confirm: (destinationFolder: string) => void;
+  /**
+   * Copies or moves the items into `destinationFolder`; name conflicts are resolved by the file manager first.
+   * Conflicts are checked against the files the file manager already holds for that folder. A destination
+   * panel lists folders only, so for a folder the user never opened in the grid pass its current contents as
+   * `destinationItems`; otherwise existing files with the same names are not detected and can be overwritten.
+   */
+  confirm: (destinationFolder: string, destinationItems?: DialFile[]) => void;
   /** Abandons the request; call it when the host closes its destination UI without confirming. */
   cancel: () => void;
 }

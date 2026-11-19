@@ -11,7 +11,7 @@ import { sortFolderTree, toFolderPathKey } from './folder-tree';
  *
  * A multi-root tree is rendered as one combined tree whose top-level nodes
  * are the roots. Each root's path starts with a token `:{key}`: `:` is a
- * forbidden folder-name character (see `validateFolderName`), so the token
+ * forbidden folder-name character (see `getFolderNameError`), so the token
  * can never collide with a real folder segment.
  */
 const ROOT_TOKEN_PREFIX = ':';

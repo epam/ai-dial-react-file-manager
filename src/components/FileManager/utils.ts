@@ -439,15 +439,24 @@ export interface FolderNameValidationMessages {
   duplicate: string;
   /** Shown when the name equals the parent folder's name (case-insensitive). Falls back to `duplicate`. */
   sameAsParent?: string;
-  /** Non-blocking notice for a name starting with a dot, which hides the folder. Omit for no notice. */
+  /**
+   * Non-blocking notice for a name starting with a dot, which hides the folder. Omit for no notice.
+   * Pass plain text: the `warning__` prefix that marks it non-blocking is added here
+   * (a message that already has it is left as is).
+   */
   hidden?: string;
 }
+
+const WARNING_PREFIX = `${NotificationVariant.Warning}__`;
+
+/** Marks a message as a non-blocking warning; a message that is already marked is returned unchanged. */
+const asWarningMessage = (message: string): string =>
+  message.startsWith(WARNING_PREFIX) ? message : `${WARNING_PREFIX}${message}`;
 
 /** Whether a validation result stops a save; a `warning__`-prefixed message is informational only. */
 export const isBlockingValidationError = (
   error: string | null | undefined,
-): error is string =>
-  !!error && !error.startsWith(`${NotificationVariant.Warning}__`);
+): error is string => !!error && !error.startsWith(WARNING_PREFIX);
 
 /** Options of {@link getFolderNameError}. */
 export interface FolderNameValidationOptions {
@@ -501,7 +510,7 @@ export const getFolderNameError = (
     return customError;
   }
   if (messages.hidden && trimmed.startsWith('.') && trimmed.length > 1) {
-    return messages.hidden;
+    return asWarningMessage(messages.hidden);
   }
   return null;
 };

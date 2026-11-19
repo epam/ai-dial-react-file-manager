@@ -329,9 +329,20 @@ describe('Dial UI Kit :: getFolderNameError', () => {
     expect(onValidate).not.toHaveBeenCalled();
   });
 
+  it('marks the hidden notice as a non-blocking warning, without doubling a prefix the host added', () => {
+    const plain = getFolderNameError('.git', { siblingNames: [], messages });
+    const prefixed = getFolderNameError('.git', {
+      siblingNames: [],
+      messages: { ...messages, hidden: 'warning__hidden' },
+    });
+    expect(plain).toBe('warning__hidden');
+    expect(prefixed).toBe('warning__hidden');
+    expect(isBlockingValidationError(plain)).toBe(false);
+  });
+
   it('returns the hidden notice last, so it never masks a blocking error', () => {
     expect(getFolderNameError('.git', { siblingNames: [], messages })).toBe(
-      'hidden',
+      'warning__hidden',
     );
     expect(
       getFolderNameError('.git', { siblingNames: ['.Git'], messages }),

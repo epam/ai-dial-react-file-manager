@@ -64,7 +64,7 @@ export interface FolderDestinationPanelContentLabels {
   createFolderDuplicateNameError?: string;
   /** Inline error for a new folder named like its parent folder. */
   createFolderSameAsParentNameError?: string;
-  /** Non-blocking notice for a new folder name starting with a dot, which hides the folder. */
+  /** Non-blocking notice for a new folder name starting with a dot, which hides the folder. Pass plain text; it is shown as a warning and never blocks the creation. */
   createFolderHiddenNameWarning?: string;
   /** Label of the action that retries a failed folder listing. Defaults to `'Retry'`. */
   retryLabel?: string;

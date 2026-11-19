@@ -65,7 +65,7 @@ export interface FolderDestinationTreeProps {
   duplicateFolderNameError?: string;
   /** Validation message for a new folder named like its parent folder. Defaults to `'A folder cannot have the same name as its parent folder.'`. */
   sameAsParentFolderNameError?: string;
-  /** Non-blocking notice for a new folder name starting with a dot, which hides the folder. Defaults to the file manager's hidden-item notice. */
+  /** Non-blocking notice for a new folder name starting with a dot, which hides the folder. Pass plain text; it is shown as a warning and never blocks the creation. Defaults to the file manager's hidden-item notice. */
   hiddenFolderNameWarning?: string;
   /** The host's own check of a new folder name, called with the trimmed name and the folder it would be created under (`rootKey` is `''` in single-root mode) once the built-in checks pass. Return an error message, or `null` when the name is acceptable. */
   onValidateFolderName?: (

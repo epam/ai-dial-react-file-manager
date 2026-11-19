@@ -85,6 +85,29 @@ describe('FolderDestinationPanel', () => {
     );
   });
 
+  it('stays open on Escape while submitting, and closes on Escape otherwise', async () => {
+    const onClose = vi.fn();
+    const { rerender } = renderPanel({ isSubmitting: true, onClose });
+    await userEvent.keyboard('{Escape}');
+    expect(onClose).not.toHaveBeenCalled();
+
+    rerender(
+      <FolderDestinationPanel
+        isOpen
+        onClose={onClose}
+        action={{ label: 'Copy', busyLabel: 'Copying…', onClick: vi.fn() }}
+        item={{ title: 'report.pdf' }}
+        roots={roots}
+        destination={{ rootKey: 'personal', path: [] }}
+        onDestinationChange={vi.fn()}
+        onCreateFolder={vi.fn()}
+        labels={{ title: 'Copy report.pdf' }}
+      />,
+    );
+    await userEvent.keyboard('{Escape}');
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('switches to the folder view, moving focus to its heading', async () => {
     renderPanel();
     await userEvent.click(screen.getByRole('button', { name: 'Change' }));

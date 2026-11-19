@@ -197,6 +197,12 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
    * `handleConfirmCreatingFolder` drops the commits that follow, until the next
    * creation starts.
    *
+   * The same applies to the keyboard: Tab from the editor to Cancel blurs the
+   * input (the hook commits on blur) before Enter or Space can activate Cancel,
+   * so a `focusout` that lands on Cancel is flagged too. The flag is lifted
+   * again when focus or a press goes anywhere else, so tabbing back into the
+   * editor and pressing Enter still creates the folder.
+   *
    * TODO(ui-kit): `useEditableItem` lives in `@epam/ai-dial-ui-kit`, so this
    * cannot be fixed here. It should let the host exclude elements (or hand it
    * an `onCancel` that wins) so a press on Cancel is not a commit; drop this
@@ -204,17 +210,30 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
    */
   const isCancellingRef = useRef(false);
   useEffect(() => {
+    const isCancelTarget = (target: EventTarget | null) =>
+      target instanceof Element &&
+      target.closest(`[${CANCEL_CREATING_FOLDER_ATTRIBUTE}]`) != null;
     const flagCancelPress = (event: PointerEvent) => {
-      if (
-        event.target instanceof Element &&
-        event.target.closest(`[${CANCEL_CREATING_FOLDER_ATTRIBUTE}]`)
-      ) {
+      isCancellingRef.current = isCancelTarget(event.target);
+    };
+    const flagCancelFocusOut = (event: FocusEvent) => {
+      if (isCancelTarget(event.relatedTarget)) {
         isCancellingRef.current = true;
       }
     };
+    const clearOnOtherFocus = (event: FocusEvent) => {
+      if (!isCancelTarget(event.target)) {
+        isCancellingRef.current = false;
+      }
+    };
     document.addEventListener('pointerdown', flagCancelPress, true);
-    return () =>
+    document.addEventListener('focusout', flagCancelFocusOut, true);
+    document.addEventListener('focusin', clearOnOtherFocus, true);
+    return () => {
       document.removeEventListener('pointerdown', flagCancelPress, true);
+      document.removeEventListener('focusout', flagCancelFocusOut, true);
+      document.removeEventListener('focusin', clearOnOtherFocus, true);
+    };
   }, []);
 
   const trimmedQuery = searchQuery.trim();

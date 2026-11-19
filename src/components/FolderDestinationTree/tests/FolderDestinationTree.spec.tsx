@@ -510,6 +510,43 @@ describe('FolderDestinationTree', () => {
     expect(capturedProps.current?.createdFolderPath).toBeNull();
   });
 
+  it('drops the blur commit raised when keyboard focus moves from the editor to Cancel', async () => {
+    const onCreateFolder = vi.fn();
+    renderTree({ onCreateFolder });
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Create new folder' }),
+    );
+    const cancel = screen.getByRole('button', { name: 'Cancel' });
+    fireEvent.focusOut(
+      screen.getByRole('button', { name: 'Create new folder' }),
+      {
+        relatedTarget: cancel,
+      },
+    );
+    fireEvent.focusIn(cancel);
+    act(() => capturedProps.current?.onCreateFolderSave?.('New folder'));
+    expect(onCreateFolder).not.toHaveBeenCalled();
+
+    cancel.focus();
+    await userEvent.keyboard('{Enter}');
+    expect(onCreateFolder).not.toHaveBeenCalled();
+    expect(capturedProps.current?.createdFolderPath).toBeNull();
+  });
+
+  it('commits again once focus returns from Cancel to the editor', async () => {
+    const onCreateFolder = vi.fn();
+    renderTree({ onCreateFolder, selectedPath: ['Shared'] });
+    const create = screen.getByRole('button', { name: 'Create new folder' });
+    await userEvent.click(create);
+    const cancel = screen.getByRole('button', { name: 'Cancel' });
+    fireEvent.focusOut(create, { relatedTarget: cancel });
+    fireEvent.focusIn(cancel);
+    fireEvent.focusOut(cancel);
+    fireEvent.focusIn(create);
+    act(() => capturedProps.current?.onCreateFolderSave?.('Model releases'));
+    expect(onCreateFolder).toHaveBeenCalledWith(['Shared'], 'Model releases');
+  });
+
   it('creates a folder again after a cancelled creation', async () => {
     const onCreateFolder = vi.fn();
     renderTree({ onCreateFolder, selectedPath: ['Shared'] });
