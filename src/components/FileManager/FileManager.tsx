@@ -83,6 +83,10 @@ import {
 } from '@/types/file-manager';
 import type { FileManagerGridRow } from './FileManagerContext';
 import { FileManagerProvider } from './FileManagerProvider';
+import {
+  FileManagerDestinationPanel,
+  type DialFileManagerDestinationPanelOptions,
+} from './components/FileManagerDestinationPanel/FileManagerDestinationPanel';
 import { FileManagerTooltip } from './FileManagerTooltip';
 import {
   DialFileManagerBulkActionsToolbar,
@@ -173,6 +177,8 @@ const DEFAULT_SORT: FileManagerSort = {
   field: FileManagerSortField.Name,
   direction: FileManagerSortDirection.Asc,
 };
+
+export type { DialFileManagerDestinationPanelOptions };
 
 export type DialFileManagerConflictResolutionPopupOptions = Omit<
   ConflictResolutionPopupProps,
@@ -499,10 +505,14 @@ export interface DialFileManagerProps {
 
   sharedWithMeIds?: string[];
   /**
-   * Called when the user starts Copy or Move. The host shows its own destination UI and
-   * calls `request.confirm(destinationFolder)` to run the operation, or `request.cancel()`.
+   * Called when the user starts Copy or Move. Without it the file manager shows its own
+   * `FolderDestinationPanel` over its folders (see `destinationPanelOptions`). A host that
+   * wants its own destination UI handles the request, shows the UI, and calls
+   * `request.confirm(destinationFolder)` to run the operation, or `request.cancel()`.
    */
   onDestinationRequest?: (request: DialDestinationRequest) => void;
+  /** Text and behavior overrides of the built-in destination panel; ignored when `onDestinationRequest` is set. */
+  destinationPanelOptions?: DialFileManagerDestinationPanelOptions;
   onManagePermissions?: (path?: string) => void;
   onPreview?: (path?: string) => void;
   onOpenInNewTab?: (file: DialFile) => void;
@@ -725,6 +735,12 @@ export const DialFileManagerView: FC = () => {
     onGridApiChange,
 
     handleRequestDestination,
+    destinationRequest,
+    clearDestinationRequest,
+    destinationPanelOptions,
+    onCreateFolder,
+    onCreateFolderValidate,
+    folderCreationValidationMessages,
     handleSetCopiedFiles,
     handleSetMovedFiles,
     handleDuplicate,
@@ -2051,6 +2067,23 @@ export const DialFileManagerView: FC = () => {
           onClose={closeUnshareConfirmation}
           onConfirm={confirmUnshare}
         />
+        {destinationRequest && (
+          <FileManagerDestinationPanel
+            request={destinationRequest}
+            items={items}
+            rootItem={rootItem}
+            areHiddenFilesVisible={areHiddenFilesVisible}
+            onCreateFolder={onCreateFolder}
+            onCreateFolderValidate={onCreateFolderValidate}
+            folderCreationValidationMessages={folderCreationValidationMessages}
+            options={destinationPanelOptions}
+            onCancel={() => {
+              destinationRequest.cancel();
+              clearDestinationRequest();
+            }}
+            onConfirmed={clearDestinationRequest}
+          />
+        )}
         <ConflictResolutionPopup
           {...conflictResolutionPopupOptions}
           open={conflictResolutionOpen}

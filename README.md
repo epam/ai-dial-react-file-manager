@@ -88,11 +88,13 @@ Common integration callbacks include:
 - `onCopyFiles`, `onMoveToFiles`, and `onDeleteFiles`
 - `onDownloadFiles`, `onUnshareFiles`, and `onRemoveFilesAccess`
 - `onManagePermissions`, `onPreview`, and `onOpenInNewTab`
-- `onDestinationRequest`, called when the user starts Copy or Move so the host can show its own destination UI (see below)
+- `onDestinationRequest`, called when the user starts Copy or Move so the host can show its own destination UI instead of the built-in panel (see below), and `destinationPanelOptions` for the text of that panel
 
 ### Copy and Move destination
 
-Copy and Move need `onDestinationRequest`; without it they do nothing. When the user chooses Copy or Move, the file manager calls it with a `DialDestinationRequest` (`mode`, `items`, `sourceFolder`, `confirm`, `cancel`). It does not render a destination picker itself: show `FolderDestinationPanel` (see below) or your own UI, then call `request.confirm(destinationFolder)` to run the operation — name conflicts are resolved first, and the result reaches `onCopyFiles` / `onMoveToFiles` — or `request.cancel()` if the user dismisses it. Conflicts are checked against the files the file manager already holds for the destination folder. The panel lists folders only, so for a folder the user never opened in the grid, load its contents first and pass them as the second argument — `request.confirm(destinationFolder, destinationItems)` — otherwise existing files with the same names are not detected and can be overwritten.
+By default Copy and Move open a built-in `FolderDestinationPanel` over the file manager's own folders: it lists the loaded folders, offers folder creation through `onCreateFolder`, disables the folder a Move starts from and, for a moved folder, itself and its subfolders, and runs the same conflict resolution and `onCopyFiles` / `onMoveToFiles` flow when the user confirms. Its text comes from `destinationPanelOptions` (`copyTitle`, `moveTitle`, `copyLabel`, `moveLabel`, `rootLabel`, `getSourceItemsLabel`, `disabledPathTooltip`, `movedIntoItselfTooltip`, `labels`, `panelLabels`) and `excludedPaths` leaves folders out of it.
+
+A host that wants its own destination UI passes `onDestinationRequest`, which replaces the built-in panel. When the user chooses Copy or Move, the file manager calls it with a `DialDestinationRequest` (`mode`, `items`, `sourceFolder`, `confirm`, `cancel`). Show `FolderDestinationPanel` (see below) or your own UI, then call `request.confirm(destinationFolder)` to run the operation — name conflicts are resolved first, and the result reaches `onCopyFiles` / `onMoveToFiles` — or `request.cancel()` if the user dismisses it. Conflicts are checked against the files the file manager already holds for the destination folder. The panel lists folders only, so for a folder the user never opened in the grid, load its contents first and pass them as the second argument — `request.confirm(destinationFolder, destinationItems)` — otherwise existing files with the same names are not detected and can be overwritten.
 
 Upgrading from 0.4.x? See the Breaking Changes in the [CHANGELOG](CHANGELOG.md).
 

@@ -5,11 +5,15 @@ import {
   useMemo,
   useCallback,
   useRef,
+  useState,
   type DragEvent,
 } from 'react';
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
-import type { DialUploadFileItem } from '@/models/file-manager';
+import type {
+  DialDestinationRequest,
+  DialUploadFileItem,
+} from '@/models/file-manager';
 import {
   cleanForbiddenSymbolsRegExp,
   collectAllDescendants,
@@ -136,6 +140,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
 
   sharedWithMeIds,
   onDestinationRequest,
+  destinationPanelOptions,
   onManagePermissions,
   onPreview,
   onOpenInNewTab,
@@ -356,6 +361,17 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     onNewFolderDepthExceeded?.();
   }, [onNewFolderDepthExceeded]);
 
+  /*
+   * Without `onDestinationRequest` the file manager shows its own destination
+   * panel: the request is kept here and rendered by the view.
+   */
+  const [builtInDestinationRequest, setBuiltInDestinationRequest] =
+    useState<DialDestinationRequest | null>(null);
+  const clearDestinationRequest = useCallback(
+    () => setBuiltInDestinationRequest(null),
+    [],
+  );
+
   const {
     handleCopyTo,
     handleMoveTo,
@@ -381,7 +397,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     onCopySuccess: clearSelection,
     onMoveSuccess: clearSelection,
     onDuplicateSuccess: clearSelection,
-    onDestinationRequest,
+    onDestinationRequest: onDestinationRequest ?? setBuiltInDestinationRequest,
   });
 
   const {
@@ -926,6 +942,12 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     handleSetCopiedFiles,
     handleSetMovedFiles,
     handleRequestDestination,
+    destinationRequest: onDestinationRequest ? null : builtInDestinationRequest,
+    clearDestinationRequest,
+    destinationPanelOptions,
+    onCreateFolder,
+    onCreateFolderValidate,
+    folderCreationValidationMessages,
     handleGridAddSibling,
     handleGridAddChild,
     handleTreeAddSibling,

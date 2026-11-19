@@ -6,7 +6,6 @@ import {
 } from '@/models/file';
 import type {
   DialCopiedItem,
-  DialDestinationRequest,
   DialDeletedItem,
   DialFileAcceptType,
   DialUploadFileItem,
@@ -292,19 +291,6 @@ export const HandleTableFileClick: Story = {
   },
 };
 
-/* A demo destination UI: a real host renders its own panel and calls `confirm` or `cancel`. */
-const demoDestinationRequest = (request: DialDestinationRequest) => {
-  const destination = window.prompt(
-    `${request.mode === 'copy' ? 'Copy' : 'Move'} to folder`,
-    request.sourceFolder,
-  );
-  if (destination) {
-    request.confirm(destination);
-  } else {
-    request.cancel();
-  }
-};
-
 const PopupComponent = (args: DialFileManagerProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { activeTab, handleTabChange, tabs } = useDialFileManagerTabs(
@@ -463,7 +449,6 @@ const PopupComponent = (args: DialFileManagerProps) => {
             }
             selectedPaths={selectedPaths}
             onSelectedPathsChange={setSelectedPaths}
-            onDestinationRequest={demoDestinationRequest}
             gridOptions={{
               ...(args.gridOptions ?? {}),
               selectionMode: GridSelectionMode.MULTIPLE,
@@ -789,7 +774,6 @@ const WithConflictResolutionComponent = (args: DialFileManagerProps) => {
       <DialFileManager
         {...args}
         items={itemsWithDuplicates}
-        onDestinationRequest={demoDestinationRequest}
         conflictResolutionPopupOptions={{
           actionLabels: {
             [DialFileManagerConflictActions.Replace]: 'Replace',
@@ -950,7 +934,6 @@ const WithMultipleConflictsComponent = (args: DialFileManagerProps) => {
         {...args}
         items={itemsWithMultipleDuplicates}
         path="All files/Design/Icons/SVG/24px"
-        onDestinationRequest={demoDestinationRequest}
         conflictResolutionPopupOptions={{
           actionLabels: {
             [DialFileManagerConflictActions.Replace]: 'Replace',
@@ -2257,7 +2240,6 @@ const InteractiveDemoComponent = (args: DialFileManagerProps) => {
         onCopyFiles={onCopyFiles}
         onDeleteFiles={onDeleteFiles}
         onCreateFolder={onCreateFolder}
-        onDestinationRequest={demoDestinationRequest}
         navigationPanelOptions={{ searchable: true }}
         gridOptions={{
           ...(args.gridOptions ?? {}),

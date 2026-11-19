@@ -18,8 +18,10 @@ import type {
   DeleteConfirmationOptions,
   UnshareConfirmationOptions,
   DialFileManagerConflictResolutionPopupOptions,
+  CreateFolderValidationMessages,
   FileMetadataPopupOptions,
 } from './FileManager';
+import type { DialFileManagerDestinationPanelOptions } from './components/FileManagerDestinationPanel/FileManagerDestinationPanel';
 import type { FileUploadValidationMessages } from './hooks/use-file-upload';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
 import type { FileConflictDecision } from './components/ConflictResolutionPopup/ConflictResolutionPopup';
@@ -28,8 +30,10 @@ import type {
   FileManagerColumnKey,
 } from '@/types/file-manager';
 import type {
+  DialDestinationRequest,
   DialFileAcceptType,
   DialFileManagerActionsRef,
+  DialUploadFileItem,
 } from '@/models/file-manager';
 import type { GridApi } from 'ag-grid-community';
 import type { GetItemActionRestriction } from './utils';
@@ -106,6 +110,20 @@ export interface FileManagerContextValue {
   ) => void;
   handleDuplicate: (files: DialFile[]) => void;
   handleRequestDestination: (mode: DestinationFolderMode) => void;
+  /** The Copy or Move the file manager's own destination panel is open for; `null` when closed or when the host handles `onDestinationRequest`. */
+  destinationRequest: DialDestinationRequest | null;
+  clearDestinationRequest: () => void;
+  destinationPanelOptions?: DialFileManagerDestinationPanelOptions;
+  onCreateFolder?: (
+    file: DialUploadFileItem,
+    folderPath: string,
+    fileId: string,
+  ) => void | Promise<void>;
+  onCreateFolderValidate?: (
+    name: string,
+    parentFolder: DialFile,
+  ) => string | null;
+  folderCreationValidationMessages?: CreateFolderValidationMessages;
   handleSetCopiedFiles: (files: DialFile[]) => void;
   handleSetMovedFiles: (files: DialFile[]) => void;
   handleGridAddSibling?: (files: DialFile[]) => void;

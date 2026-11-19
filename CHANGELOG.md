@@ -10,20 +10,23 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Breaking Changes
 
 - **`DialFileManager` — Copy/Move destination picker replaced by
-  `onDestinationRequest`** — the destination-folder popup and phone sheet built
-  into `DialFileManager` are replaced by `FolderDestinationPanel`, which the
-  host now renders itself (see Added). Removed: `DialDestinationFolderPopup`,
+  `FolderDestinationPanel`** — the destination-folder popup and phone sheet
+  built into `DialFileManager` are replaced by a built-in
+  `FolderDestinationPanel` over the file manager's own folders; Copy and Move
+  keep working with no host code. A host that wants its own destination UI
+  passes `onDestinationRequest`, which replaces the panel (see Added).
+  Removed: `DialDestinationFolderPopup`,
   `DestinationFolderPopupProps`,
   `DialFileManagerDestinationFolderPopupOptions` and the props that only
   configured the old popup: `destinationFolderPopupOptions`,
   `onFolderPopupPathChange`, `showHiddenFileSwitcherInDestinationPopup` and
-  `showCreateFolderButtonInDestinationPopup`. Copy and Move now call the new
-  `onDestinationRequest(request)` with a `DialDestinationRequest`
-  (`mode`, `items`, `sourceFolder`, `confirm(destinationFolder)`, `cancel()`);
-  the host shows `FolderDestinationPanel` (or its own destination UI) and calls
-  `confirm`, which runs the same conflict resolution and `onCopyFiles` /
-  `onMoveToFiles` flow as before. Without `onDestinationRequest` the actions do
-  nothing.
+  `showCreateFolderButtonInDestinationPopup`. A host that handles the new
+  `onDestinationRequest(request)` gets a `DialDestinationRequest` (`mode`,
+  `items`, `sourceFolder`, `confirm(destinationFolder, destinationItems?)`,
+  `cancel()`), shows its own destination UI and calls `confirm`, which runs the same conflict resolution and `onCopyFiles` /
+  `onMoveToFiles` flow as before. The panel's text is set with the new
+  `destinationPanelOptions`; `destinationFolderPopupOptions.excludedPaths`
+  becomes `destinationPanelOptions.excludedPaths`.
 
 - **`styles.css` — built with Tailwind CSS v4 inside the kit's `ui` layer** —
   the stylesheet used to be entirely unlayered, preflight included. Its
@@ -40,6 +43,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
   for the preflight and browser-baseline differences, which apply here too.
 
 ### Added
+
+- **`DialFileManager` — `destinationPanelOptions`** — text and behavior of the built-in Copy/Move panel (`copyTitle`, `moveTitle`, `copyLabel`, `moveLabel`, `rootLabel`, `getSourceItemsLabel`, `disabledPathTooltip`, `movedIntoItselfTooltip`, `excludedPaths`, `labels`, `panelLabels`). `DialDestinationRequest.confirm` takes an optional second argument, the destination folder's existing items, so name conflicts are detected for a folder the user never opened in the grid. The hidden-name notice of `FolderDestinationTree` / `FolderDestinationPanel` is passed as plain text; the `warning__` prefix is added internally.
 
 - **`FolderDestinationTree` and `FolderDestinationPanelBody` — `getDisabledReason`** — a destination folder with a non-empty reason is disabled (muted, `aria-disabled`, tooltip, not selectable, still expandable) and gets no folder creation under it; the panel body forwards it and announces the reason of the committed destination. `FolderDestinationPanelBody`, `FolderDestinationView` and the folder helpers (`collectFolderKeys`, `fromDialFileTree`, `getSiblingFolderNames`, `mergeFolderPaths`, `sortFolderTree`, `toDialFileTree`) are exported too.
 

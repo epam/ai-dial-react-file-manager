@@ -3148,12 +3148,92 @@ describe('DialFileManager onDestinationRequest', () => {
     expect(onMoveToFiles).not.toHaveBeenCalled();
   });
 
-  test('does nothing when no handler is provided', async () => {
-    const onCopyFiles = vi.fn();
-    renderWithRequestHandler({ onCopyFiles });
+  test('shows no panel of its own when a handler is provided', async () => {
+    renderWithRequestHandler({ onDestinationRequest: vi.fn() });
 
     await clickBulkAction('Copy to');
 
-    expect(onCopyFiles).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog', { name: 'Copy to' })).toBeNull();
+  });
+
+  describe('built-in destination panel', () => {
+    test('opens a Copy panel naming the item when no handler is provided', async () => {
+      renderWithRequestHandler();
+
+      await clickBulkAction('Copy to');
+
+      const dialog = await screen.findByRole('dialog', { name: 'Copy to' });
+      expect(within(dialog).getByText('Design')).toBeInTheDocument();
+      expect(
+        within(dialog).getByRole('button', { name: 'Copy' }),
+      ).toBeEnabled();
+    });
+
+    test('opens a Move panel that disables the folder the items are already in', async () => {
+      renderWithRequestHandler();
+
+      await clickBulkAction('Move to');
+
+      const dialog = await screen.findByRole('dialog', { name: 'Move to' });
+      expect(
+        within(dialog).getByRole('button', { name: 'Move' }),
+      ).toBeDisabled();
+    });
+
+    test('copies into the folder picked in the panel and closes it', async () => {
+      const onCopyFiles = vi.fn();
+      renderWithRequestHandler({ onCopyFiles });
+
+      await clickBulkAction('Copy to');
+      const dialog = await screen.findByRole('dialog', { name: 'Copy to' });
+      await userEvent.click(
+        within(dialog).getByRole('button', { name: 'Change' }),
+      );
+      await userEvent.click(
+        within(await within(dialog).findByRole('tree')).getByText('Deep Nest'),
+      );
+      await userEvent.click(
+        within(dialog).getByRole('button', { name: 'Select' }),
+      );
+      await userEvent.click(
+        within(dialog).getByRole('button', { name: 'Copy' }),
+      );
+
+      await waitFor(() => expect(onCopyFiles).toHaveBeenCalled());
+      expect(onCopyFiles.mock.calls[0][1]).toBe('All files/Deep Nest');
+      expect(screen.queryByRole('dialog', { name: 'Copy to' })).toBeNull();
+    });
+
+    test('Cancel closes the panel without copying', async () => {
+      const onCopyFiles = vi.fn();
+      renderWithRequestHandler({ onCopyFiles });
+
+      await clickBulkAction('Copy to');
+      const dialog = await screen.findByRole('dialog', { name: 'Copy to' });
+      await userEvent.click(
+        within(dialog).getByRole('button', { name: 'Cancel' }),
+      );
+
+      await waitFor(() =>
+        expect(screen.queryByRole('dialog', { name: 'Copy to' })).toBeNull(),
+      );
+      expect(onCopyFiles).not.toHaveBeenCalled();
+    });
+
+    test('takes its text from destinationPanelOptions', async () => {
+      renderWithRequestHandler({
+        destinationPanelOptions: {
+          copyTitle: 'Duplicate into',
+          copyLabel: 'Go',
+        },
+      });
+
+      await clickBulkAction('Copy to');
+
+      const dialog = await screen.findByRole('dialog', {
+        name: 'Duplicate into',
+      });
+      expect(within(dialog).getByRole('button', { name: 'Go' })).toBeTruthy();
+    });
   });
 });

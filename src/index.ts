@@ -4,6 +4,7 @@ export type {
   CreateFolderValidationMessages,
   DeleteConfirmationOptions,
   DialFileManagerConflictResolutionPopupOptions,
+  DialFileManagerDestinationPanelOptions,
   DialFileManagerProps,
   FileMetadataPopupOptions,
   FileTreeOptions,
