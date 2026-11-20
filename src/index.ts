@@ -4,7 +4,7 @@ export type {
   CreateFolderValidationMessages,
   DeleteConfirmationOptions,
   DialFileManagerConflictResolutionPopupOptions,
-  DialFileManagerDestinationFolderPopupOptions,
+  DialFileManagerDestinationPanelOptions,
   DialFileManagerProps,
   FileMetadataPopupOptions,
   FileTreeOptions,
@@ -15,8 +15,6 @@ export type {
   ToolbarOptions,
   UnshareConfirmationOptions,
 } from './components/FileManager/FileManager';
-export { DialDestinationFolderPopup } from './components/FileManager/components/DestinationFolderPopup/DestinationFolderPopup';
-export type { DestinationFolderPopupProps } from './components/FileManager/components/DestinationFolderPopup/DestinationFolderPopup';
 export { DialFoldersTree } from './components/FileManager/components/FoldersTree/FoldersTree';
 export type { DialFoldersTreeProps } from './components/FileManager/components/FoldersTree/FoldersTree';
 export { DialFileManagerSortDropdown } from './components/FileManager/components/FileManagerSortDropdown/FileManagerSortDropdown';
@@ -44,12 +42,59 @@ export {
 export type { DialRootFolder } from './models/file';
 export {
   type DialCopiedItem,
+  type DialDestinationRequest,
   type DialDeletedItem,
   type DialFileAcceptType,
   type DialFileManagerActionsRef,
   type DialUploadFileItem,
 } from './models/file-manager';
 export { GridSelectionMode } from './models/selection-mode';
+
+export type { FolderNode } from './models/folder-tree';
+export type {
+  FolderDestination,
+  FolderDestinationRoot,
+} from './models/folder-destination';
+export type {
+  FolderDestinationTreeProps,
+  FolderDestinationTreeStyles,
+} from './models/folder-destination-tree';
+export type {
+  FolderDestinationAction,
+  FolderDestinationItem,
+  FolderDestinationPanelContentLabels,
+  FolderDestinationPanelContentStyles,
+  FolderDestinationPanelLabels,
+  FolderDestinationPanelBodyProps,
+  FolderDestinationPanelProps,
+} from './models/folder-destination-panel';
+export {
+  FolderDestinationItemIcon,
+  FolderDestinationLayout,
+  FolderDestinationView,
+} from './types/folder-destination-panel';
+export {
+  collectFolderKeys,
+  fromDialFileTree,
+  fromFolderPathKey,
+  getFolderDisplayName,
+  getSiblingFolderNames,
+  mergeFolderPaths,
+  sortFolderTree,
+  toDialFileTree,
+  toFolderPathKey,
+} from './utils/folder-tree';
+export {
+  getFolderNameError,
+  getNextFolderNameFromNames,
+} from './components/FileManager/utils';
+export type {
+  FolderNameValidationMessages,
+  FolderNameValidationOptions,
+} from './components/FileManager/utils';
+export { FolderDestinationTree } from './components/FolderDestinationTree/FolderDestinationTree';
+export { FolderDestinationPanel } from './components/FolderDestinationPanel/FolderDestinationPanel';
+export { FolderDestinationPanelBody } from './components/FolderDestinationPanel/FolderDestinationPanelBody';
 
 export {
   DestinationFolderMode,

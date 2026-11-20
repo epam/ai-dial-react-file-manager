@@ -34,6 +34,7 @@ import {
 } from './constants';
 import {
   getForbiddenSymbolsTooltip,
+  isBlockingValidationError,
   isHiddenDotFile,
 } from '@/components/FileManager/utils';
 import { DialFileManagerItemName } from '@/components/FileManager/components/FileManagerItemName/FileManagerItemName';
@@ -447,6 +448,17 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
 
       const validateHandler =
         onRenameValidate && ((value: string) => onRenameValidate(value, node));
+      /*
+       * The inline editor shows `onRenameValidate`'s message but commits
+       * through these callbacks regardless, so a value the host rejected must
+       * never reach them.
+       */
+      const guardSave = (save?: (value: string) => void) =>
+        save &&
+        ((value: string) => {
+          if (isBlockingValidationError(validateHandler?.(value))) return;
+          save(value);
+        });
 
       const selectedClass = isSelected
         ? 'bg-control-accent-alpha-active-subtle'
@@ -577,10 +589,10 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                   editing: isRenaming,
                   creating:
                     path === `${createdFolderPath}/${NEW_FOLDER_TEMP_NAME}`,
-                  onSave: onRenameSave,
+                  onSave: guardSave(onRenameSave),
                   onCancel: onRenameCancel,
                   validate: validateHandler,
-                  onCreateFolderSave: onCreateFolderSave,
+                  onCreateFolderSave: guardSave(onCreateFolderSave),
                   onCreateFolderCancel: onCreateFolderCancel,
                 })}
               />
