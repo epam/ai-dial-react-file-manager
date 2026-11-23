@@ -9,7 +9,10 @@ import {
 } from '@/components/FileManager/errors';
 import { FileManagerCreateFolderType } from '@/types/file-manager';
 import { findFolderForPath } from '../utils';
-import { getNextFolderName } from '@/components/FileManager/utils';
+import {
+  getFolderNameError,
+  getNextFolderName,
+} from '@/components/FileManager/utils';
 
 export interface FolderCreationValidationMessages {
   emptyName?: string;
@@ -220,47 +223,22 @@ export const useFolderCreation = ({
   }, []);
 
   const validateFolderName = useCallback(
-    (name: string): string | null => {
-      const trimmedName = name.trim();
-
-      if (!trimmedName) {
-        return messages.emptyName;
-      }
-
-      if (trimmedName.includes('..')) {
-        return messages.consecutiveDotsError;
-      }
-
-      if (targetFolder && targetFolder.items) {
-        const existingNames = new Set(
-          (targetFolder.items ?? [])
-            .filter((item) => item.nodeType === DialFileNodeType.FOLDER)
-            .map((item) => item.name.toLowerCase()),
-        );
-
-        if (existingNames.has(trimmedName.toLowerCase())) {
-          return messages.duplicateName;
-        }
-      }
-
-      if (onValidateFolderName && targetFolder) {
-        const customError = onValidateFolderName(trimmedName, targetFolder);
-        if (customError) {
-          return customError;
-        }
-      }
-
-      /*
-       * The hidden-item notice is a non-blocking warning, so it comes last:
-       * returning it earlier would skip every blocking check above (duplicate
-       * name, the host's `onValidateFolderName`) for any name starting with `.`.
-       */
-      if (trimmedName.startsWith('.') && trimmedName.length > 1) {
-        return messages.hiddenItemWarning;
-      }
-
-      return null;
-    },
+    (name: string): string | null =>
+      getFolderNameError(name, {
+        siblingNames: (targetFolder?.items ?? [])
+          .filter((item) => item.nodeType === DialFileNodeType.FOLDER)
+          .map((item) => item.name),
+        messages: {
+          empty: messages.emptyName,
+          invalid: messages.consecutiveDotsError,
+          duplicate: messages.duplicateName,
+          hidden: messages.hiddenItemWarning,
+        },
+        onValidate:
+          onValidateFolderName && targetFolder
+            ? (trimmedName) => onValidateFolderName(trimmedName, targetFolder)
+            : undefined,
+      }),
     [targetFolder, onValidateFolderName, messages],
   );
 

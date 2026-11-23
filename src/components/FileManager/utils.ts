@@ -2,7 +2,7 @@ import { DialFileNodeType, type DialFile } from '@/models/file';
 import type { DialFileAcceptType } from '@/models/file-manager';
 import { extensions } from 'mime-types';
 import type { ReactNode } from 'react';
-import type { DropdownItem } from '@epam/ai-dial-ui-kit';
+import { NotificationVariant, type DropdownItem } from '@epam/ai-dial-ui-kit';
 import { DEFAULT_FOLDER_BASE_NAME } from './constants';
 import type { FileManagerGridRow } from './FileManagerContext';
 import { baseColumnComparator } from '@epam/ai-dial-ui-kit';
@@ -391,29 +391,128 @@ export const getFolderNestingDepth = (folderPath: string): number => {
   return segments.length;
 };
 
-export const getNextFolderName = (existingFolders: DialFile[]): string => {
-  const prefix = `${DEFAULT_FOLDER_BASE_NAME} `;
-  const regex = new RegExp(`^${DEFAULT_FOLDER_BASE_NAME} (\\d+)$`);
+/**
+ * Picks the default name for a new folder: `<baseName> <max+1>`, bumped until
+ * no name in `existingNames` (case-insensitive) takes it. The one naming rule
+ * shared by the grid and the destination folder tree.
+ * @param existingNames - Names already taken by the sibling folders
+ * @param baseName - Name the number is appended to; defaults to `'New folder'`
+ * @returns The first free default name, e.g. `'New folder 3'`
+ */
+export const getNextFolderNameFromNames = (
+  existingNames: string[],
+  baseName: string = DEFAULT_FOLDER_BASE_NAME,
+): string => {
+  const prefix = `${baseName} `;
+  const escapedBaseName = baseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`^${escapedBaseName} (\\d+)$`);
 
-  const existingNames = new Set(
-    existingFolders.map((f) => f.name.toLowerCase()),
-  );
+  const takenNames = new Set(existingNames.map((name) => name.toLowerCase()));
 
-  const maxNumber = existingFolders
-    .map((f) => {
-      const match = f.name.match(regex);
+  const maxNumber = existingNames
+    .map((name) => {
+      const match = name.match(regex);
       return match ? parseInt(match[1], 10) : 0;
     })
     .reduce((max, n) => Math.max(max, n), 0);
 
   let candidate = `${prefix}${maxNumber + 1}`;
   let counter = maxNumber + 1;
-  while (existingNames.has(candidate.toLowerCase())) {
+  while (takenNames.has(candidate.toLowerCase())) {
     counter++;
     candidate = `${prefix}${counter}`;
   }
 
   return candidate;
+};
+
+export const getNextFolderName = (existingFolders: DialFile[]): string =>
+  getNextFolderNameFromNames(existingFolders.map((folder) => folder.name));
+
+/** Error messages returned by {@link getFolderNameError} for each rejection reason. */
+export interface FolderNameValidationMessages {
+  /** Shown when the trimmed name is empty. */
+  empty: string;
+  /** Shown when the name contains `..` or a character matched by `forbiddenChars`. */
+  invalid: string;
+  /** Shown when a sibling folder already has this name (case-insensitive). */
+  duplicate: string;
+  /** Shown when the name equals the parent folder's name (case-insensitive). Falls back to `duplicate`. */
+  sameAsParent?: string;
+  /**
+   * Non-blocking notice for a name starting with a dot, which hides the folder. Omit for no notice.
+   * Pass plain text: the `warning__` prefix that marks it non-blocking is added here
+   * (a message that already has it is left as is).
+   */
+  hidden?: string;
+}
+
+const WARNING_PREFIX = `${NotificationVariant.Warning}__`;
+
+/** Marks a message as a non-blocking warning; a message that is already marked is returned unchanged. */
+const asWarningMessage = (message: string): string =>
+  message.startsWith(WARNING_PREFIX) ? message : `${WARNING_PREFIX}${message}`;
+
+/** Whether a validation result stops a save; a `warning__`-prefixed message is informational only. */
+export const isBlockingValidationError = (
+  error: string | null | undefined,
+): error is string => !!error && !error.startsWith(WARNING_PREFIX);
+
+/** Options of {@link getFolderNameError}. */
+export interface FolderNameValidationOptions {
+  /** Names of the folders that already exist next to the new one. */
+  siblingNames: string[];
+  /** Messages returned for each rejection reason. */
+  messages: FolderNameValidationMessages;
+  /** Name of the parent folder, which a new folder may not take; omit for a root. */
+  parentName?: string;
+  /** Characters a folder name may not contain, in addition to `..`. */
+  forbiddenChars?: RegExp;
+  /** The host's own check, called with the trimmed name once the built-in blocking checks pass. */
+  onValidate?: (trimmedName: string) => string | null;
+}
+
+/**
+ * The one validator for a new folder's name, used by the file manager grid and
+ * the destination folder tree. Blocking checks run first (empty, `..`,
+ * forbidden characters, duplicate sibling, parent name, the host's
+ * `onValidate`); the hidden-name notice comes last so it never masks them.
+ * @param rawValue - The name as typed, untrimmed
+ * @param options - Siblings, messages and the optional extra checks
+ * @returns An error or notice message, or `null` when the name is valid
+ */
+export const getFolderNameError = (
+  rawValue: string,
+  {
+    siblingNames,
+    messages,
+    parentName,
+    forbiddenChars,
+    onValidate,
+  }: FolderNameValidationOptions,
+): string | null => {
+  const trimmed = rawValue.trim();
+  if (!trimmed) {
+    return messages.empty;
+  }
+  if (trimmed.includes('..') || forbiddenChars?.test(trimmed)) {
+    return messages.invalid;
+  }
+  const lowerName = trimmed.toLowerCase();
+  if (siblingNames.some((name) => name.toLowerCase() === lowerName)) {
+    return messages.duplicate;
+  }
+  if (parentName?.toLowerCase() === lowerName) {
+    return messages.sameAsParent ?? messages.duplicate;
+  }
+  const customError = onValidate?.(trimmed);
+  if (customError) {
+    return customError;
+  }
+  if (messages.hidden && trimmed.startsWith('.') && trimmed.length > 1) {
+    return asWarningMessage(messages.hidden);
+  }
+  return null;
 };
 
 const getRowTime = (row: FileManagerGridRow): number => {
