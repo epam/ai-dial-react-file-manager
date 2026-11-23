@@ -290,6 +290,9 @@
 /* Up to and including 768px — the complement of `desktop:`. */
 @custom-variant mobile (@media (width <= 768px));
 
+/* Above 768px and below 1280px: disjoint from `mobile:`, which owns exactly 768px. */
+@custom-variant tablet (@media (768px < width < 1280px));
+
 /*
  * `fill-*` paints surfaces (a tooltip arrow, a chart area), so it takes the
  * background tokens; `stroke-*` and `outline-*` take the border ones.

@@ -88,13 +88,79 @@ Common integration callbacks include:
 - `onCopyFiles`, `onMoveToFiles`, and `onDeleteFiles`
 - `onDownloadFiles`, `onUnshareFiles`, and `onRemoveFilesAccess`
 - `onManagePermissions`, `onPreview`, and `onOpenInNewTab`
+- `onDestinationRequest`, called when the user starts Copy or Move so the host can show its own destination UI instead of the built-in panel (see below), and `destinationPanelOptions` for the text of that panel
+
+### Copy and Move destination
+
+By default Copy and Move open a built-in `FolderDestinationPanel` over the file manager's own folders: it lists the loaded folders, offers folder creation through `onCreateFolder`, disables the folder a Move starts from and, for a moved folder, itself and its subfolders, and runs the same conflict resolution and `onCopyFiles` / `onMoveToFiles` flow when the user confirms. Its text comes from `destinationPanelOptions` (`copyTitle`, `moveTitle`, `copyLabel`, `moveLabel`, `rootLabel`, `getSourceItemsLabel`, `disabledPathTooltip`, `movedIntoItselfTooltip`, `labels`, `panelLabels`) and `excludedPaths` leaves folders out of it.
+
+A host that wants its own destination UI passes `onDestinationRequest`, which replaces the built-in panel. When the user chooses Copy or Move, the file manager calls it with a `DialDestinationRequest` (`mode`, `items`, `sourceFolder`, `confirm`, `cancel`). Show `FolderDestinationPanel` (see below) or your own UI, then call `request.confirm(destinationFolder)` to run the operation — name conflicts are resolved first, and the result reaches `onCopyFiles` / `onMoveToFiles` — or `request.cancel()` if the user dismisses it. Conflicts are checked against the files the file manager already holds for the destination folder. The panel lists folders only, so for a folder the user never opened in the grid, load its contents first and pass them as the second argument — `request.confirm(destinationFolder, destinationItems)` — otherwise existing files with the same names are not detected and can be overwritten.
+
+Upgrading from 0.4.x? See the Breaking Changes in the [CHANGELOG](CHANGELOG.md).
+
+### Folder destination panel
+
+`FolderDestinationPanel` is an end-edge side panel that shows the item being acted on and a folder hierarchy to choose a destination from. `FolderDestinationTree` is the hierarchy on its own, in a single-root form (`items`, `selectedPath`) or a multi-root form (`roots`, `destination`). The panel renders its primary button from a host-supplied `action`, takes its text through `labels` and `panelLabels`, is themed through the same theme tokens as the rest of the file manager (`styles/theme.scss`; there are no per-component color props), and has two layouts: `FolderDestinationLayout.Steps` (a main view and a Change-folder view) and `FolderDestinationLayout.Inline` (search and hierarchy in one view, no Change or Select step).
+
+```tsx
+import {
+  FolderDestinationLayout,
+  FolderDestinationPanel,
+  type FolderDestination,
+  type FolderDestinationRoot,
+} from '@epam/ai-dial-react-file-manager';
+
+// `request` comes from `onDestinationRequest`; `destination`, `setDestination`, `setRequest`, `createFolder`,
+// `loadFolderItems` and `showToast` are the host's own.
+// The panel reports a `FolderDestination` (`rootKey` + `path`); turning it into the file manager's folder path is up to the host.
+const toFolderPath = ({ rootKey, path }: FolderDestination) =>
+  [rootKey, ...path].join('/');
+const roots: FolderDestinationRoot[] = [
+  {
+    key: 'files',
+    label: 'Files',
+    items: [{ path: ['Reports'], name: 'Reports' }],
+  },
+];
+
+<FolderDestinationPanel
+  isOpen={request != null}
+  onClose={() => {
+    request.cancel();
+    setRequest(null);
+  }}
+  layout={FolderDestinationLayout.Inline}
+  item={{ title: 'report.pdf' }}
+  roots={roots}
+  destination={destination}
+  onDestinationChange={setDestination}
+  onCreateFolder={async (rootKey, parentPath, name) =>
+    createFolder(rootKey, parentPath, name)
+  }
+  onCreateFolderError={(error) => showToast(String(error))}
+  action={{
+    label: 'Copy',
+    onClick: async () => {
+      const folder = toFolderPath(destination);
+      // Load the destination's files so name conflicts are detected.
+      request.confirm(folder, await loadFolderItems(folder));
+      setRequest(null); // closes the panel
+    },
+  }}
+/>;
+```
+
+`FolderDestinationPanelBody` is the panel's content without the drawer (the item summary and destination, or the search and tree), exported for a host that renders it in its own container; it takes the panel's props plus `view`, `onChangeFolderClick`, `pendingDestination` and `onPendingDestinationChange`, and the `FolderDestinationPanelBody` stories show each view.
+
+The panel knows nothing about the host: `item.summary` replaces the title-only summary row with a node the host renders (for example an entity header). If `onCreateFolder` rejects, the new folder is not selected and `onCreateFolderError` is called; the panel shows no message of its own, so the host reports the failure. Folder helpers (`getFolderNameError`, `getNextFolderNameFromNames`, `toFolderPathKey`, `fromFolderPathKey`) are exported alongside; `getFolderNameError` and `getNextFolderNameFromNames` are the same validation and default-naming the grid uses, and `onValidateFolderName` adds the host's own name check.
 
 ## Public API
 
 The primary export is `DialFileManager`. The package also exports:
 
 - `FileManagerProvider` and `useFileManagerContext`
-- `DialDestinationFolderPopup` and `DialFoldersTree`
+- `DialFoldersTree`
+- `FolderDestinationPanel`, `FolderDestinationPanelBody`, `FolderDestinationTree`, their prop and label types, `FolderDestinationLayout` and the `toFolderPathKey`, `fromFolderPathKey`, `getFolderNameError` and `getNextFolderNameFromNames` helpers
 - File models, permissions, resource types, and selection modes
 - File-manager actions, tabs, trigger views, and column definitions
 - Public option and prop types used by the exported components

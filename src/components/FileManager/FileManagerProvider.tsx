@@ -1,16 +1,19 @@
 import {
   type FC,
   type ReactNode,
-  useState,
   useEffect,
   useMemo,
   useCallback,
   useRef,
+  useState,
   type DragEvent,
 } from 'react';
 import type { DialFile } from '@/models/file';
 import { DialFileNodeType } from '@/models/file';
-import type { DialUploadFileItem } from '@/models/file-manager';
+import type {
+  DialDestinationRequest,
+  DialUploadFileItem,
+} from '@/models/file-manager';
 import {
   cleanForbiddenSymbolsRegExp,
   collectAllDescendants,
@@ -89,7 +92,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   gridOptions: rawGridOptions,
   toolbarOptions,
   bulkActionsToolbarOptions,
-  destinationFolderPopupOptions,
   conflictResolutionPopupOptions,
   onPathChange,
   onTableFileClick,
@@ -137,7 +139,8 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   searchEmptyStateTitle,
 
   sharedWithMeIds,
-  onFolderPopupPathChange,
+  onDestinationRequest,
+  destinationPanelOptions,
   onManagePermissions,
   onPreview,
   onOpenInNewTab,
@@ -156,8 +159,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   contentHeaderClassName,
   nonClickableTableColumns,
   hideSearchPathItemName,
-  showHiddenFileSwitcherInDestinationPopup,
-  showCreateFolderButtonInDestinationPopup,
   autoSelectUploadedItems = false,
   maxNewFolderDepth,
   onNewFolderDepthExceeded,
@@ -295,24 +296,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   const showFiles = memoizedGridOptions.showFiles;
   const showFolders = memoizedGridOptions.showFolders;
 
-  const [internalDestinationPath, setInternalDestinationPath] =
-    useState<string>();
-
-  const destinationFolderPath =
-    destinationFolderPopupOptions?.destinationFolderPath ??
-    internalDestinationPath;
-
-  const setDestinationFolderPath = useCallback(
-    (path?: string) => {
-      if (destinationFolderPopupOptions?.setDestinationFolderPath) {
-        destinationFolderPopupOptions.setDestinationFolderPath(path);
-      } else {
-        setInternalDestinationPath(path);
-      }
-    },
-    [destinationFolderPopupOptions],
-  );
-
   const { areHiddenFilesVisible, toggleHiddenFilesVisibility } =
     useShowHiddenFiles({
       showHiddenFiles,
@@ -378,17 +361,24 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     onNewFolderDepthExceeded?.();
   }, [onNewFolderDepthExceeded]);
 
+  /*
+   * Without `onDestinationRequest` the file manager shows its own destination
+   * panel: the request is kept here and rendered by the view.
+   */
+  const [builtInDestinationRequest, setBuiltInDestinationRequest] =
+    useState<DialDestinationRequest | null>(null);
+  const clearDestinationRequest = useCallback(
+    () => setBuiltInDestinationRequest(null),
+    [],
+  );
+
   const {
     handleCopyTo,
     handleMoveTo,
     handleDuplicate,
-    handleOpenDestinationFolderPopup,
-    handleCloseDestinationFolderPopup,
-    openDestinationFolderPopup,
+    handleRequestDestination,
     handleSetCopiedFiles,
     handleSetMovedFiles,
-    destinationFolderMode,
-    destinationFolderTitle,
     conflictingFiles,
     conflictResolutionOpen,
     closeConflictResolution,
@@ -396,8 +386,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     handleConflictDuplicate,
     handleConflictCancel,
     handleConflictDecideForEach,
-    sourceFolder,
-    sourceItems,
   } = useFileClipboard({
     getDestinationFiles: (path: string) => {
       const folder = findFolderForPath(items, path);
@@ -409,15 +397,8 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     onCopySuccess: clearSelection,
     onMoveSuccess: clearSelection,
     onDuplicateSuccess: clearSelection,
-    getCopyHeader: destinationFolderPopupOptions?.getCopyHeader,
-    getMoveHeader: destinationFolderPopupOptions?.getMoveHeader,
+    onDestinationRequest: onDestinationRequest ?? setBuiltInDestinationRequest,
   });
-
-  useEffect(() => {
-    if (!openDestinationFolderPopup) {
-      setDestinationFolderPath(undefined);
-    }
-  }, [openDestinationFolderPopup, setDestinationFolderPath]);
 
   const {
     deleteConfirmationOpen,
@@ -930,17 +911,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     bulkActionsToolbarOptions,
     deleteConfirmationOptions,
     unshareConfirmationOptions,
-    destinationFolderPopupOptions: {
-      ...destinationFolderPopupOptions,
-      destinationFolderPath,
-      setDestinationFolderPath,
-      header: destinationFolderTitle,
-      sourceItems,
-      onCreateFolder,
-      onCreateFolderValidate,
-      folderCreationValidationMessages,
-      sourceFolder,
-    },
 
     currentPath,
     setCurrentPath,
@@ -971,10 +941,13 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
       : handleDuplicate,
     handleSetCopiedFiles,
     handleSetMovedFiles,
-    openDestinationFolderPopup,
-    handleCloseDestinationFolderPopup,
-    handleOpenDestinationFolderPopup,
-    destinationFolderMode,
+    handleRequestDestination,
+    destinationRequest: onDestinationRequest ? null : builtInDestinationRequest,
+    clearDestinationRequest,
+    destinationPanelOptions,
+    onCreateFolder,
+    onCreateFolderValidate,
+    folderCreationValidationMessages,
     handleGridAddSibling,
     handleGridAddChild,
     handleTreeAddSibling,
@@ -1088,7 +1061,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
 
     sharedWithMeIds,
 
-    onFolderPopupPathChange,
     onManagePermissions,
     onPreview,
     onOpenInNewTab,
@@ -1103,8 +1075,6 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     getDisabledTooltip,
     fileTooLargeTooltip,
     unsupportedFileTypeTooltip,
-    showHiddenFileSwitcherInDestinationPopup,
-    showCreateFolderButtonInDestinationPopup,
     maxNewFolderDepth,
     onNewFolderDepthExceeded,
   };
