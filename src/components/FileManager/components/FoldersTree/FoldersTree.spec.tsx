@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 import { DialFoldersTree } from './FoldersTree';
 import { DialFileNodeType } from '@/models/file';
@@ -766,5 +766,413 @@ describe('Dial UI Kit :: DialFoldersTree — disabled rows', () => {
     expect(
       [...container.querySelectorAll('mark')].map((mark) => mark.textContent),
     ).toEqual(['Roo']);
+  });
+
+  describe('first-load skeleton', () => {
+    test('shows a busy skeleton instead of the empty state while loading', () => {
+      const { container } = render(
+        <DialFoldersTree items={[]} loading emptyStateTitle="No folders" />,
+      );
+
+      expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
+      expect(screen.queryByText('No folders')).not.toBeInTheDocument();
+      expect(screen.queryByRole('tree')).not.toBeInTheDocument();
+    });
+
+    test('announces the loading label once the skeleton shows', () => {
+      vi.useFakeTimers();
+      try {
+        render(
+          <DialFoldersTree items={[]} loading loadingLabel="Loading tree" />,
+        );
+        expect(screen.queryByText('Loading tree')).not.toBeInTheDocument();
+
+        act(() => {
+          vi.advanceTimersByTime(400);
+        });
+
+        expect(screen.getByText('Loading tree')).toBeInTheDocument();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    test('shows the empty state once loading ends with no items', () => {
+      const { rerender, container } = render(
+        <DialFoldersTree items={[]} loading emptyStateTitle="No folders" />,
+      );
+      rerender(
+        <DialFoldersTree
+          items={[]}
+          loading={false}
+          emptyStateTitle="No folders"
+        />,
+      );
+
+      expect(screen.getByText('No folders')).toBeInTheDocument();
+      expect(
+        container.querySelector('[aria-busy="true"]'),
+      ).not.toBeInTheDocument();
+    });
+
+    test('keeps showing the tree while loading when it already has items', () => {
+      const { container } = render(
+        <DialFoldersTree items={mockItems} loading />,
+      );
+
+      expect(screen.getByRole('tree')).toBeInTheDocument();
+      expect(
+        container.querySelector('[aria-busy="true"]'),
+      ).not.toBeInTheDocument();
+    });
+
+    describe('a folder loading its children', () => {
+      const ROOT = '/root';
+      const loadingRoot = [
+        {
+          name: 'Root',
+          path: ROOT,
+          nodeType: DialFileNodeType.FOLDER,
+          folderId: '1',
+          items: [] as typeof mockItems,
+        },
+      ];
+
+      test('keeps its icon and name during the delay, then hides them under skeletons, never a spinner', () => {
+        vi.useFakeTimers();
+        try {
+          const { container } = render(
+            <DialFoldersTree
+              items={loadingRoot}
+              loadingPaths={new Set([ROOT])}
+            />,
+          );
+
+          // A fast load changes nothing: the name stays, with no spinner.
+          expect(screen.getByText('Root')).toBeInTheDocument();
+          expect(screen.getByRole('status')).toBeEmptyDOMElement();
+
+          act(() => {
+            vi.advanceTimersByTime(400);
+          });
+
+          const row = screen.getByRole('treeitem', { name: 'Root' });
+          expect(row.querySelector('.rounded-full')).toBeInTheDocument();
+          expect(row.querySelector('.rounded-xl')).toBeInTheDocument();
+          expect(screen.queryByText('Root')).not.toBeInTheDocument();
+          // Only the tree's live region: no spinner.
+          expect(screen.getByRole('status')).toHaveTextContent(
+            'Loading folders',
+          );
+          // Collapsed: no placeholder rows under it.
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).not.toBeInTheDocument();
+        } finally {
+          vi.useRealTimers();
+        }
+      });
+
+      test('keeps the placeholders for the minimum duration when loading ends right after they show', () => {
+        vi.useFakeTimers();
+        try {
+          const props = { items: loadingRoot, expandedPaths: new Set([ROOT]) };
+          const { container, rerender } = render(
+            <DialFoldersTree {...props} loadingPaths={new Set([ROOT])} />,
+          );
+          act(() => {
+            vi.advanceTimersByTime(450);
+          });
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).toBeInTheDocument();
+
+          rerender(<DialFoldersTree {...props} loadingPaths={new Set()} />);
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).toBeInTheDocument();
+
+          act(() => {
+            vi.advanceTimersByTime(500);
+          });
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).not.toBeInTheDocument();
+        } finally {
+          vi.useRealTimers();
+        }
+      });
+
+      test('shows placeholder rows under it once expanded, after the delay', () => {
+        vi.useFakeTimers();
+        try {
+          const { container } = render(
+            <DialFoldersTree
+              items={loadingRoot}
+              expandedPaths={new Set([ROOT])}
+              loadingPaths={new Set([ROOT])}
+              loadingLabel="Loading folders"
+            />,
+          );
+          const announcement = screen.getByRole('status');
+          expect(announcement).toBeEmptyDOMElement();
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).not.toBeInTheDocument();
+
+          act(() => {
+            vi.advanceTimersByTime(400);
+          });
+
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).toBeInTheDocument();
+          expect(screen.getByText('Loading folders')).toBe(announcement);
+        } finally {
+          vi.useRealTimers();
+        }
+      });
+
+      test('shows no placeholder rows when the folder already has children', () => {
+        vi.useFakeTimers();
+        try {
+          const { container } = render(
+            <DialFoldersTree
+              items={mockItems}
+              expandedPaths={new Set(['/root'])}
+              loadingPaths={new Set(['/root'])}
+            />,
+          );
+          act(() => {
+            vi.advanceTimersByTime(400);
+          });
+
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).not.toBeInTheDocument();
+        } finally {
+          vi.useRealTimers();
+        }
+      });
+    });
+
+    describe('root folder whose children are not loaded yet', () => {
+      const ROOT = '/My files';
+      const rootWith = (items: typeof mockItems) => [
+        {
+          name: 'My files',
+          path: ROOT,
+          nodeType: DialFileNodeType.FOLDER,
+          folderId: 'bucket',
+          items,
+        },
+      ];
+      const loadedRoot = rootWith([
+        {
+          name: 'Documents',
+          path: `${ROOT}/Documents`,
+          nodeType: DialFileNodeType.FOLDER,
+          folderId: 'bucket',
+          items: [],
+        },
+      ]);
+
+      test('keeps a decorative skeleton directly under the expanded root', () => {
+        const { container } = render(
+          <DialFoldersTree
+            items={rootWith([])}
+            expandedPaths={new Set([ROOT])}
+            loading
+          />,
+        );
+
+        const tree = screen.getByRole('tree');
+        expect(
+          screen.getByRole('treeitem', { name: 'My files' }),
+        ).toBeInTheDocument();
+        const busy = container.querySelector('[aria-busy="true"]');
+        expect(busy).toBeInTheDocument();
+        expect(tree).toContainElement(busy as HTMLElement);
+        expect(busy?.closest('[aria-hidden="true"]')).toHaveAttribute('inert');
+      });
+
+      test('shows no skeleton under a collapsed root', () => {
+        const { container } = render(
+          <DialFoldersTree items={rootWith([])} loading />,
+        );
+
+        expect(
+          container.querySelector('[aria-busy="true"]'),
+        ).not.toBeInTheDocument();
+      });
+
+      test('shows no skeleton when not loading: the root is just empty', () => {
+        const { container } = render(
+          <DialFoldersTree
+            items={rootWith([])}
+            expandedPaths={new Set([ROOT])}
+          />,
+        );
+
+        expect(
+          container.querySelector('[aria-busy="true"]'),
+        ).not.toBeInTheDocument();
+      });
+
+      test('preserves the gap between top-level children', () => {
+        render(
+          <DialFoldersTree
+            items={loadedRoot}
+            expandedPaths={new Set([ROOT])}
+          />,
+        );
+        const child = screen.getByRole('treeitem', { name: 'Documents' });
+        const childrenWrapper = child.closest('.cursor-pointer')?.parentElement;
+        expect(childrenWrapper).toHaveClass('flex', 'flex-col', 'gap-1');
+      });
+
+      test('puts a placeholder beneath each expanded root instead of after the tree', () => {
+        const secondRoot = {
+          name: 'Shared',
+          path: '/Shared',
+          nodeType: DialFileNodeType.FOLDER,
+          folderId: 'shared',
+          items: [],
+        };
+        const { container } = render(
+          <DialFoldersTree
+            items={[...rootWith([]), secondRoot]}
+            expandedPaths={new Set([ROOT, secondRoot.path])}
+            loading
+          />,
+        );
+        const placeholders = container.querySelectorAll('[aria-busy="true"]');
+        expect(placeholders).toHaveLength(2);
+        const roots = screen.getAllByRole('treeitem');
+        roots.forEach((root, index) => {
+          expect(root.parentElement?.parentElement).toContainElement(
+            placeholders[index] as HTMLElement,
+          );
+        });
+      });
+
+      test('only the pending root shows a placeholder when another root is loaded and empty', () => {
+        const pendingRoot = {
+          name: 'Shared',
+          path: '/Shared',
+          nodeType: DialFileNodeType.FOLDER,
+          folderId: 'shared',
+          items: [],
+        };
+        render(
+          <DialFoldersTree
+            items={[...rootWith([]), pendingRoot]}
+            expandedPaths={new Set([ROOT, pendingRoot.path])}
+            loadedPaths={new Set([ROOT])}
+            loading
+          />,
+        );
+        const loadedBranch = screen.getByRole('treeitem', { name: 'My files' })
+          .parentElement?.parentElement;
+        const pendingBranch = screen.getByRole('treeitem', { name: 'Shared' })
+          .parentElement?.parentElement;
+        expect(
+          loadedBranch?.querySelector('[aria-busy="true"]'),
+        ).not.toBeInTheDocument();
+        expect(
+          pendingBranch?.querySelector('[aria-busy="true"]'),
+        ).toBeInTheDocument();
+      });
+
+      test('a loaded empty root does not show a first-load skeleton again', () => {
+        const { container } = render(
+          <DialFoldersTree
+            items={rootWith([])}
+            expandedPaths={new Set([ROOT])}
+            loadedPaths={new Set([ROOT])}
+            loading
+          />,
+        );
+        expect(
+          container.querySelector('[aria-busy="true"]'),
+        ).not.toBeInTheDocument();
+      });
+
+      test('keeps a visible Tab stop and arrow navigation while incoming children are hidden', () => {
+        vi.useFakeTimers();
+        try {
+          const props = {
+            expandedPaths: new Set([ROOT]),
+            selectedPath: `${ROOT}/Documents`,
+          };
+          const { rerender } = render(
+            <DialFoldersTree {...props} items={rootWith([])} loading />,
+          );
+          act(() => vi.advanceTimersByTime(400));
+          rerender(<DialFoldersTree {...props} items={loadedRoot} />);
+          const root = screen.getByRole('treeitem', { name: 'My files' });
+          expect(root).toHaveAttribute('tabindex', '0');
+          expect(
+            screen.queryByRole('treeitem', { name: 'Documents' }),
+          ).not.toBeInTheDocument();
+          act(() => root.focus());
+          fireEvent.keyDown(root, { key: 'ArrowDown' });
+          expect(root).toHaveFocus();
+
+          act(() => vi.advanceTimersByTime(500));
+          fireEvent.keyDown(root, { key: 'ArrowDown' });
+          expect(
+            screen.getByRole('treeitem', { name: 'Documents' }),
+          ).toHaveFocus();
+        } finally {
+          vi.useRealTimers();
+        }
+      });
+
+      test('holds the children back for the minimum time, then shows them', () => {
+        vi.useFakeTimers();
+        try {
+          const { container, rerender } = render(
+            <DialFoldersTree
+              items={rootWith([])}
+              expandedPaths={new Set([ROOT])}
+              loading
+            />,
+          );
+          act(() => {
+            vi.advanceTimersByTime(400);
+          });
+
+          rerender(
+            <DialFoldersTree
+              items={loadedRoot}
+              expandedPaths={new Set([ROOT])}
+              loading={false}
+            />,
+          );
+
+          // The skeleton is still within its minimum time: no children yet.
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).toBeInTheDocument();
+          expect(
+            screen.queryByRole('treeitem', { name: 'Documents' }),
+          ).not.toBeInTheDocument();
+
+          act(() => {
+            vi.advanceTimersByTime(500);
+          });
+
+          expect(
+            screen.getByRole('treeitem', { name: 'Documents' }),
+          ).toBeInTheDocument();
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).not.toBeInTheDocument();
+        } finally {
+          vi.useRealTimers();
+        }
+      });
+    });
   });
 });

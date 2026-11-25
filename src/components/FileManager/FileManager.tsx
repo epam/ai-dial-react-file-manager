@@ -33,6 +33,7 @@ import MoveToIcon from '@/assets/icons/move-to.svg?react';
 import {
   baseColumnComparator,
   Grid,
+  GridLoadingAppearance,
   GRID_SELECTION_COLUMN_ID,
   type GridProps,
   NoDataContent,
@@ -44,6 +45,7 @@ import {
   Notification,
   NotificationType,
   NotificationVariant,
+  useSkeletonTiming,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import {
@@ -187,6 +189,10 @@ export type DialFileManagerConflictResolutionPopupOptions = Omit<
 
 export interface FileMetadataPopupOptions {
   fileMetadata?: DialFile;
+  /**
+   * Shows the loading skeleton. When omitted, the skeleton shows while the
+   * promise returned by `onGetInfo` is pending.
+   */
   loading?: boolean;
   clearMetadata?: () => void;
   header?: ReactNode;
@@ -195,6 +201,8 @@ export interface FileMetadataPopupOptions {
   modifiedDateLabel?: string;
   sizeLabel?: string;
   authorLabel?: string;
+  /** Text announced to assistive technology while metadata loads. */
+  loadingLabel?: string;
 }
 
 export interface FileTreeOptions extends Omit<
@@ -406,6 +414,8 @@ export interface DialFileManagerProps {
   items?: DialFile[];
   rootItem?: DialRootFolder;
   filesLoading?: boolean;
+  /** Text announced to assistive technology while the grid shows its loading skeleton. Defaults to `'Loading files'`. */
+  filesLoadingLabel?: string;
   sharedByMePaths?: Set<string>;
   maxSelectableFileSize?: number;
 
@@ -487,6 +497,13 @@ export interface DialFileManagerProps {
   uploadEnabled?: boolean;
 
   fileMetadataPopupOptions?: FileMetadataPopupOptions;
+  /**
+   * Called when the user opens a file's info popup, to load its metadata. The
+   * popup opens at once; while a returned promise is pending it shows its
+   * loading skeleton (unless `fileMetadataPopupOptions.loading` is set). A
+   * rejection ends the loading state and is not caught: handle errors inside
+   * this callback (e.g. show a notification and pass fallback metadata).
+   */
   onGetInfo?: (file: DialFile) => void | Promise<void>;
 
   onUnshareFiles?: (files: DialFile[]) => void | Promise<void>;
@@ -621,6 +638,7 @@ export interface DialFileManagerProps {
  * @param [items] - Full hierarchical list of files and folders used by both tree and grid
  * @param [rootItem] - Optional root folder item to represent the top-level container in the tree
  * @param [filesLoading=false] - When true, shows skeleton loading state in the grid
+ * @param [filesLoadingLabel='Loading files'] - Text announced to assistive technology while the grid skeleton shows
  * @param [selectedPaths] - Controlled set of selected item paths
  * @param [defaultSelectedPaths] - Initial selected paths used in uncontrolled mode
  *
@@ -696,6 +714,7 @@ export const DialFileManagerView: FC = () => {
     items,
     rootItem,
     filesLoading,
+    filesLoadingLabel = 'Loading files',
     treeOptions,
 
     showNavigationPanel,
@@ -807,6 +826,7 @@ export const DialFileManagerView: FC = () => {
     openMetadataPopup,
     fileMetadataPopupOptions,
     isMetadataPopupOpen,
+    isMetadataLoading,
     selectedFileForMetadata,
     closeMetadataPopup,
 
@@ -1428,8 +1448,15 @@ export const DialFileManagerView: FC = () => {
     renderToolbar,
   ]);
 
-  const isEmptyStateShown =
-    gridRows.length === 0 && !filesLoading && !searchInProgress;
+  // Keep the grid mounted through the loading delay and minimum duration,
+  // even when the result is empty. The kit Grid owns the skeleton overlay.
+  const isGridLoading = !!filesLoading || !!searchInProgress;
+  const {
+    showPlaceholder: isGridLoadPending,
+    showSkeleton: isGridSkeletonShown,
+  } = useSkeletonTiming(isGridLoading);
+
+  const isEmptyStateShown = gridRows.length === 0 && !isGridLoadPending;
 
   const isBulkActionsToolbarShown =
     !!bulkActionsToolbarOptions &&
@@ -1897,34 +1924,46 @@ export const DialFileManagerView: FC = () => {
       isEmptyStateShown ? (
         emptyStateRenderer()
       ) : (
-        <Grid<GridRow>
-          columnDefs={columnDefs}
-          rowData={sortedGridRows}
-          getRowId={gridRowIdGetter}
-          loading={filesLoading || searchInProgress}
-          getContextMenuItems={getGridContextMenuItems}
-          withoutHeaderBorders={isCompactView}
-          onGridApiChange={handleGridApiChange}
-          className={dialGridClassName}
-          {...forwardedGridOptions}
-          wrapperBorder={false}
-          selectionMode={selectionMode}
-          wrapCustomCellRenderers={wrapCustomCellRenderers}
-          additionalGridOptions={gridAdditionalOptions}
-          selectedRowIds={selectedGridRowsIds}
-          onSelectionChange={handleSelectionChange}
-          disabledRowIds={disabledGridRowIds}
-          allowDisabledContextMenu={allowDisabledContextMenu}
-        />
+        // The kit leaves headers interactive. Disable form controls while the
+        // skeleton covers the rows, so select-all cannot act on them. During
+        // the delay the real rows are still shown, so focus is not disturbed.
+        <fieldset
+          disabled={isGridSkeletonShown}
+          role="none"
+          className="contents"
+        >
+          <Grid<GridRow>
+            columnDefs={columnDefs}
+            rowData={sortedGridRows}
+            getRowId={gridRowIdGetter}
+            getContextMenuItems={getGridContextMenuItems}
+            withoutHeaderBorders={isCompactView}
+            onGridApiChange={handleGridApiChange}
+            className={dialGridClassName}
+            {...forwardedGridOptions}
+            loading={isGridLoading}
+            loadingAppearance={GridLoadingAppearance.Skeleton}
+            loadingLabel={filesLoadingLabel}
+            wrapperBorder={false}
+            selectionMode={selectionMode}
+            wrapCustomCellRenderers={wrapCustomCellRenderers}
+            additionalGridOptions={gridAdditionalOptions}
+            selectedRowIds={selectedGridRowsIds}
+            onSelectionChange={handleSelectionChange}
+            disabledRowIds={disabledGridRowIds}
+            allowDisabledContextMenu={allowDisabledContextMenu}
+          />
+        </fieldset>
       ),
     [
       isEmptyStateShown,
       sortedGridRows,
-      filesLoading,
+      isGridLoading,
+      isGridSkeletonShown,
+      filesLoadingLabel,
       emptyStateRenderer,
       columnDefs,
       gridRowIdGetter,
-      searchInProgress,
       getGridContextMenuItems,
       isCompactView,
       handleGridApiChange,
@@ -2110,13 +2149,14 @@ export const DialFileManagerView: FC = () => {
           fileMetadata={
             fileMetadataPopupOptions?.fileMetadata ?? selectedFileForMetadata
           }
-          loading={fileMetadataPopupOptions?.loading}
+          loading={fileMetadataPopupOptions?.loading ?? isMetadataLoading}
           header={fileMetadataPopupOptions?.header}
           nameLabel={fileMetadataPopupOptions?.nameLabel}
           pathLabel={fileMetadataPopupOptions?.pathLabel}
           modifiedDateLabel={fileMetadataPopupOptions?.modifiedDateLabel}
           sizeLabel={fileMetadataPopupOptions?.sizeLabel}
           authorLabel={fileMetadataPopupOptions?.authorLabel}
+          loadingLabel={fileMetadataPopupOptions?.loadingLabel}
           dateLocale={gridOptions?.dateLocale}
           dateOptions={gridOptions?.dateOptions}
         />

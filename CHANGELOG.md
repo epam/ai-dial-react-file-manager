@@ -44,6 +44,20 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Skeleton loading in the grid, the folders tree and the file info popup** —
+  while data loads, the grid covers its rows with the kit's skeleton
+  (`loadingAppearance={GridLoadingAppearance.Skeleton}`), the folders tree shows
+  placeholder rows, and the info popup shows a placeholder over its values. A
+  skeleton appears only if loading lasts longer than 400 ms and then stays for
+  at least 500 ms. New props: `filesLoadingLabel` (grid announcement),
+  `DialFoldersTree.loading` and `loadingLabel`, `treeOptions.loading` and
+  `fileMetadataPopupOptions.loadingLabel`. The tree's loading signal is
+  `treeOptions.loading`, independent of `filesLoading` and `searchInProgress`,
+  and defaults to `false`: a host that wants a tree skeleton on first load must
+  set it. The promise returned by `onGetInfo` is now tracked: while it is
+  pending the popup shows its skeleton, unless `fileMetadataPopupOptions.loading`
+  is set; a rejection ends the loading state.
+
 - **`FolderDestinationTree`, `FolderDestinationPanel` and `FolderDestinationPanelBody` — `canCreateFolderIn`** — an optional `(destination) => boolean`. Where it returns `false` for a folder, the tree offers no "Create new folder" for it, no "Add child" on it and no "Add sibling" on its children; the folder stays selectable, and in multi-root mode the trailing button falls back to the first root the predicate allows. For a host that would not list a folder created there. Without it nothing changes.
 
 - **`DialFileManager` — `destinationPanelOptions`** — text and behavior of the built-in Copy/Move panel (`copyTitle`, `moveTitle`, `copyLabel`, `moveLabel`, `rootLabel`, `getSourceItemsLabel`, `disabledPathTooltip`, `movedIntoItselfTooltip`, `excludedPaths`, `labels`, `panelLabels`). `DialDestinationRequest.confirm` takes an optional second argument, the destination folder's existing items, so name conflicts are detected for a folder the user never opened in the grid. The hidden-name notice of `FolderDestinationTree` / `FolderDestinationPanel` is passed as plain text; the `warning__` prefix is added internally.
@@ -197,6 +211,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
   tint. The tint is now drawn only while the caret is visible.
 
 ### Changed
+
+- **`@epam/ai-dial-ui-kit` peer is `^0.17.0`** (was `^0.16.0-dev.72`).
+
+- **`DialFoldersTree` — `loadingPaths` shows a skeleton, not a spinner** — a
+  folder in `loadingPaths` shows a placeholder for its name and, once expanded,
+  for its children, instead of the kit spinner.
+
+- **`DialFileManager` — `gridOptions.loading` is no longer forwarded** — the
+  grid's loading state comes from `filesLoading` and `searchInProgress`, so a
+  host cannot override it through `gridOptions`.
 
 - **`@epam/ai-dial-ui-kit` peer is `^0.16.0-dev.72`** (was `^0.16.0-dev.51`)
   — the release whose `Dropdown` drops its `aria-hidden` focus guards and the

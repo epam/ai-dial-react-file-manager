@@ -1,4 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
+import {
+  SKELETON_DELAY_MS,
+  SKELETON_MIN_DURATION_MS,
+} from '@epam/ai-dial-ui-kit';
+import { Profiler } from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { FileMetadataPopup } from './FileMetadataPopup';
 import { DialFileNodeType, type DialFile } from '@/models/file';
@@ -17,7 +22,7 @@ const mockFile: DialFile = {
 };
 
 describe('Dial UI Kit :: FileMetadataPopup', () => {
-  it('renders popup when open', () => {
+  it('renders popup when open', async () => {
     render(
       <FileMetadataPopup
         open={true}
@@ -28,9 +33,12 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
 
     expect(screen.getByText('Information')).toBeInTheDocument();
     expect(screen.getByText('test-file.svg')).toBeInTheDocument();
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.querySelector('[aria-busy="true"]')).not.toBeInTheDocument();
+    expect(within(dialog).getByRole('status')).toBeEmptyDOMElement();
   });
 
-  it('does not render when closed', () => {
+  it('does not render when closed', async () => {
     const { container } = render(
       <FileMetadataPopup
         open={false}
@@ -42,7 +50,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument();
   });
 
-  it('displays all file metadata fields', () => {
+  it('displays all file metadata fields', async () => {
     render(
       <FileMetadataPopup
         open={true}
@@ -69,7 +77,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('decodes URI encoded path', () => {
+  it('decodes URI encoded path', async () => {
     const fileWithEncodedPath: DialFile = {
       ...mockFile,
       path: 'files/folder/Screenshot%202025-12-10%20at%2009.44.24.png',
@@ -88,7 +96,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('decodes URI encoded path with special characters', () => {
+  it('decodes URI encoded path with special characters', async () => {
     const fileWithSpecialChars: DialFile = {
       ...mockFile,
       path: 'files/folder/file%20with%20%26%20special%20%23%20chars.txt',
@@ -107,7 +115,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('decodes complex URI encoded path', () => {
+  it('decodes complex URI encoded path', async () => {
     const fileWithComplexPath: DialFile = {
       ...mockFile,
       path: 'files/akWB1YBFr8MR1nshJgXHKUWfPCLZf8x6nMKGsa9WMxmggzPWW42NdcfpPRiPjRHT5/13/Screenshot%202025-12-10%20at%2009.44.24.png',
@@ -128,7 +136,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('handles path with multiple encoded spaces', () => {
+  it('handles path with multiple encoded spaces', async () => {
     const fileWithSpaces: DialFile = {
       ...mockFile,
       path: 'My%20Files/My%20Folder/My%20Document.pdf',
@@ -147,7 +155,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('handles path with plus signs', () => {
+  it('handles path with plus signs', async () => {
     const fileWithPlus: DialFile = {
       ...mockFile,
       path: 'files/folder/file+with+plus.txt',
@@ -166,7 +174,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('handles already decoded path', () => {
+  it('handles already decoded path', async () => {
     const fileWithDecodedPath: DialFile = {
       ...mockFile,
       path: 'files/folder/normal file name.txt',
@@ -203,7 +211,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('displays custom title', () => {
+  it('displays custom title', async () => {
     render(
       <FileMetadataPopup
         open={true}
@@ -216,7 +224,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('File Details')).toBeInTheDocument();
   });
 
-  it('displays custom labels', () => {
+  it('displays custom labels', async () => {
     render(
       <FileMetadataPopup
         open={true}
@@ -237,7 +245,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('Created By:')).toBeInTheDocument();
   });
 
-  it('displays "—" when author is missing', () => {
+  it('displays "—" when author is missing', async () => {
     const fileWithoutAuthor = { ...mockFile, author: undefined };
     render(
       <FileMetadataPopup
@@ -250,7 +258,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('formats file size correctly for bytes', () => {
+  it('formats file size correctly for bytes', async () => {
     const smallFile = { ...mockFile, contentLength: 512 };
     render(
       <FileMetadataPopup
@@ -263,7 +271,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('512 bytes')).toBeInTheDocument();
   });
 
-  it('formats file size correctly for KB', () => {
+  it('formats file size correctly for KB', async () => {
     const mediumFile = { ...mockFile, contentLength: 153600 };
     render(
       <FileMetadataPopup
@@ -276,7 +284,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('150 KB')).toBeInTheDocument();
   });
 
-  it('formats file size correctly for MB', () => {
+  it('formats file size correctly for MB', async () => {
     const largeFile = { ...mockFile, contentLength: 15728640 };
     render(
       <FileMetadataPopup
@@ -289,7 +297,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('15.0 MB')).toBeInTheDocument();
   });
 
-  it('shows labels in loading state', () => {
+  it('shows labels in loading state', async () => {
     render(
       <FileMetadataPopup
         open={true}
@@ -306,7 +314,176 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('Path:')).toBeInTheDocument();
   });
 
-  it('formats date correctly', () => {
+  it('replaces only the values with a busy skeleton while loading', async () => {
+    render(
+      <FileMetadataPopup
+        open={true}
+        onClose={vi.fn()}
+        fileMetadata={mockFile}
+        loading={true}
+      />,
+    );
+
+    const dialog = screen.getByRole('dialog');
+    const busy = dialog.querySelector('[aria-busy="true"]');
+    expect(busy).toBeInTheDocument();
+    expect(busy).not.toHaveTextContent('Name:');
+    expect(screen.queryByText('test-file.svg')).not.toBeInTheDocument();
+    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+  });
+
+  it('announces the loading label once, and clears it when loading ends', async () => {
+    vi.useFakeTimers();
+    try {
+      const { rerender } = render(
+        <FileMetadataPopup
+          open={true}
+          onClose={vi.fn()}
+          loading={true}
+          loadingLabel="Loading info"
+        />,
+      );
+
+      const dialog = screen.getByRole('dialog');
+      // Nothing is announced during the skeleton delay, so a fast load stays silent.
+      expect(
+        within(dialog).queryByText('Loading info'),
+      ).not.toBeInTheDocument();
+      act(() => vi.advanceTimersByTime(SKELETON_DELAY_MS));
+      const status = within(dialog).getByText('Loading info', {
+        selector: '[role="status"]',
+      });
+      expect(status).toHaveAttribute('aria-live', 'polite');
+      expect(within(dialog).getAllByText('Loading info')).toHaveLength(1);
+
+      rerender(
+        <FileMetadataPopup
+          open={true}
+          onClose={vi.fn()}
+          fileMetadata={mockFile}
+          loading={false}
+          loadingLabel="Loading info"
+        />,
+      );
+
+      expect(within(dialog).getAllByRole('status')).toContain(status);
+      act(() => vi.advanceTimersByTime(SKELETON_MIN_DURATION_MS));
+      expect(status).toBeEmptyDOMElement();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('announces the loading label again when the popup is reopened', async () => {
+    const popup = (open: boolean) => (
+      <FileMetadataPopup
+        open={open}
+        onClose={vi.fn()}
+        loading={true}
+        loadingLabel="Loading info"
+      />
+    );
+    const { rerender } = render(popup(true));
+    expect(await screen.findAllByText('Loading info')).toHaveLength(1);
+
+    await act(async () => rerender(popup(false)));
+    expect(screen.queryByText('Loading info')).not.toBeInTheDocument();
+
+    await act(async () => rerender(popup(true)));
+    expect(await screen.findAllByText('Loading info')).toHaveLength(1);
+  });
+
+  it('mounts an empty live region before announcing loading on each open', () => {
+    const announcements: string[] = [];
+    const recordAnnouncement = () => {
+      const [status] = screen.queryAllByRole('status');
+      if (status) announcements.push(status.textContent || '');
+    };
+    const popup = (open: boolean) => (
+      <Profiler id="metadata-popup" onRender={recordAnnouncement}>
+        <FileMetadataPopup
+          open={open}
+          onClose={vi.fn()}
+          loading={true}
+          loadingLabel="Loading info"
+        />
+      </Profiler>
+    );
+
+    vi.useFakeTimers();
+    try {
+      const { rerender } = render(popup(true));
+      act(() => vi.advanceTimersByTime(SKELETON_DELAY_MS));
+      expect(announcements[0]).toBe('');
+      expect(announcements.at(-1)).toBe('Loading info');
+
+      rerender(popup(false));
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      announcements.length = 0;
+
+      rerender(popup(true));
+      act(() => vi.advanceTimersByTime(SKELETON_DELAY_MS));
+      expect(announcements[0]).toBe('');
+      expect(announcements.at(-1)).toBe('Loading info');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('keeps the skeleton for the kit minimum duration after metadata arrives', () => {
+    vi.useFakeTimers();
+    try {
+      const { rerender } = render(
+        <FileMetadataPopup open={true} onClose={vi.fn()} loading={true} />,
+      );
+      const dialog = screen.getByRole('dialog');
+      act(() => vi.advanceTimersByTime(SKELETON_DELAY_MS));
+      expect(dialog.querySelector('[aria-busy="true"]')).toBeInTheDocument();
+
+      rerender(
+        <FileMetadataPopup
+          open={true}
+          onClose={vi.fn()}
+          fileMetadata={mockFile}
+          loading={false}
+        />,
+      );
+
+      expect(dialog.querySelector('[aria-busy="true"]')).toBeInTheDocument();
+      act(() => vi.advanceTimersByTime(SKELETON_MIN_DURATION_MS - 1));
+      expect(screen.queryByText('test-file.svg')).not.toBeInTheDocument();
+
+      act(() => vi.advanceTimersByTime(1));
+      expect(screen.getByText('test-file.svg')).toBeInTheDocument();
+      expect(
+        dialog.querySelector('[aria-busy="true"]'),
+      ).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('shows the values once metadata arrives and loading finishes', async () => {
+    const { rerender } = render(
+      <FileMetadataPopup open={true} onClose={vi.fn()} loading={true} />,
+    );
+
+    rerender(
+      <FileMetadataPopup
+        open={true}
+        onClose={vi.fn()}
+        fileMetadata={mockFile}
+        loading={false}
+      />,
+    );
+
+    expect(await screen.findByText('test-file.svg')).toBeInTheDocument();
+    expect(
+      screen.getByRole('dialog').querySelector('[aria-busy="true"]'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('formats date correctly', async () => {
     render(
       <FileMetadataPopup
         open={true}
@@ -318,7 +495,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('Sep 05, 2025')).toBeInTheDocument();
   });
 
-  it('handles invalid date gracefully', () => {
+  it('handles invalid date gracefully', async () => {
     const fileWithInvalidDate = { ...mockFile, updatedAt: 'invalid-date' };
     render(
       <FileMetadataPopup
