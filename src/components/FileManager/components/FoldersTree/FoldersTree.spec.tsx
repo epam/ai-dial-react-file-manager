@@ -850,7 +850,7 @@ describe('Dial UI Kit :: DialFoldersTree — disabled rows', () => {
 
           // A fast load changes nothing: the name stays, with no spinner.
           expect(screen.getByText('Root')).toBeInTheDocument();
-          expect(screen.queryByRole('status')).not.toBeInTheDocument();
+          expect(screen.getByRole('status')).toBeEmptyDOMElement();
 
           act(() => {
             vi.advanceTimersByTime(400);
@@ -860,8 +860,41 @@ describe('Dial UI Kit :: DialFoldersTree — disabled rows', () => {
           expect(row.querySelector('.rounded-full')).toBeInTheDocument();
           expect(row.querySelector('.rounded-xl')).toBeInTheDocument();
           expect(screen.queryByText('Root')).not.toBeInTheDocument();
-          expect(screen.queryByRole('status')).not.toBeInTheDocument();
+          // Only the tree's live region: no spinner.
+          expect(screen.getByRole('status')).toHaveTextContent(
+            'Loading folders',
+          );
           // Collapsed: no placeholder rows under it.
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).not.toBeInTheDocument();
+        } finally {
+          vi.useRealTimers();
+        }
+      });
+
+      test('keeps the placeholders for the minimum duration when loading ends right after they show', () => {
+        vi.useFakeTimers();
+        try {
+          const props = { items: loadingRoot, expandedPaths: new Set([ROOT]) };
+          const { container, rerender } = render(
+            <DialFoldersTree {...props} loadingPaths={new Set([ROOT])} />,
+          );
+          act(() => {
+            vi.advanceTimersByTime(450);
+          });
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).toBeInTheDocument();
+
+          rerender(<DialFoldersTree {...props} loadingPaths={new Set()} />);
+          expect(
+            container.querySelector('[aria-busy="true"]'),
+          ).toBeInTheDocument();
+
+          act(() => {
+            vi.advanceTimersByTime(500);
+          });
           expect(
             container.querySelector('[aria-busy="true"]'),
           ).not.toBeInTheDocument();

@@ -12,7 +12,7 @@ import {
   GRID_CLASS,
   LABEL_CLASS,
   LABEL_ROW_CLASSES,
-  SKELETON_BAR_WIDTHS,
+  METADATA_SKELETON_BAR_WIDTHS,
   SKELETON_COLUMN_CLASS,
   type FileMetadataRow,
 } from './constants';
@@ -58,7 +58,7 @@ export const FileMetadataSkeleton: FC<FileMetadataSkeletonProps> = ({
         <Skeleton
           key={id}
           variant={SkeletonVariant.Text}
-          width={SKELETON_BAR_WIDTHS[id]}
+          width={METADATA_SKELETON_BAR_WIDTHS[id]}
           height={SKELETON_BAR_HEIGHT}
           tone={getSkeletonTone(index)}
           className={SKELETON_BAR_CLASS_NAME}

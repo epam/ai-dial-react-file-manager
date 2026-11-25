@@ -37,10 +37,11 @@ export const SKELETON_COLUMN_CLASS = 'col-start-2 row-start-1 row-span-5';
  * Skeleton bar width per field: fixed, varied so the placeholder reads as
  * text. The tone alternates by row (`getSkeletonTone`).
  */
-export const SKELETON_BAR_WIDTHS: Record<FileMetadataFieldId, string> = {
-  [FileMetadataFieldId.Name]: '70%',
-  [FileMetadataFieldId.Modified]: '55%',
-  [FileMetadataFieldId.Size]: '40%',
-  [FileMetadataFieldId.Author]: '60%',
-  [FileMetadataFieldId.Path]: '100%',
-};
+export const METADATA_SKELETON_BAR_WIDTHS: Record<FileMetadataFieldId, string> =
+  {
+    [FileMetadataFieldId.Name]: '70%',
+    [FileMetadataFieldId.Modified]: '55%',
+    [FileMetadataFieldId.Size]: '40%',
+    [FileMetadataFieldId.Author]: '60%',
+    [FileMetadataFieldId.Path]: '100%',
+  };

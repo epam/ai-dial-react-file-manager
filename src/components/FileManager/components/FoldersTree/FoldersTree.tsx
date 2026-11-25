@@ -340,6 +340,11 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
     placeholderClassName,
     contentClassName,
   } = useSkeletonTiming(loading && isAwaitingFirstLevel);
+  // One tree-level announcement for the first load and for folder loads, so
+  // several folders loading at once are announced once.
+  const { showSkeleton: showFolderSkeleton } = useSkeletonTiming(
+    loadingPaths.size > 0,
+  );
 
   const rows = useMemo(
     () =>
@@ -668,8 +673,9 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                * technology. A row being renamed keeps its editor, which uses
                * `loading` to lock the input while the rename saves.
                */}
-              {isLoading && !isRenaming ? (
+              {isFolder && !isRenaming ? (
                 <FolderNameSkeleton
+                  loading={isLoading}
                   iconSize={BASE_FILE_MANAGER_ICON_SIZE}
                   name={(isRootFolder ? rootItemLabel : name) ?? ''}
                   index={index}
@@ -778,12 +784,11 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
              */}
             {isFolder &&
               isExpanded &&
-              isLoading &&
               !(Array.isArray(items) && items.some(isNodeVisible)) &&
               !(level === 0 && showPlaceholder && !isLoaded) && (
                 <FolderChildrenSkeleton
                   inset={(level + 1) * FOLDER_LEVEL_PADDING}
-                  label={loadingLabel}
+                  loading={isLoading}
                 />
               )}
           </div>
@@ -808,11 +813,9 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
           icon={emptyStateIcon}
         />
       )}
-      {showPlaceholder && (
-        <LiveRegion visuallyHidden>
-          {showSkeleton ? loadingLabel : ''}
-        </LiveRegion>
-      )}
+      <LiveRegion visuallyHidden>
+        {showSkeleton || showFolderSkeleton ? loadingLabel : ''}
+      </LiveRegion>
     </div>
   );
 };

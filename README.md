@@ -18,9 +18,9 @@ their own persistence and backend integration through callbacks.
 
 ## Compatibility
 
-| File manager               | AI DIAL UI Kit   | React     | AG Grid   | Module format |
-| -------------------------- | ---------------- | --------- | --------- | ------------- |
-| Current development branch | `^0.17.0-dev.16` | `^19.2.5` | `^35.2.1` | ESM           |
+| File manager               | AI DIAL UI Kit | React     | AG Grid   | Module format |
+| -------------------------- | -------------- | --------- | --------- | ------------- |
+| Current development branch | `^0.17.0`      | `^19.2.5` | `^35.2.1` | ESM           |
 
 ## Installation
 
@@ -89,6 +89,14 @@ Common integration callbacks include:
 - `onDownloadFiles`, `onUnshareFiles`, and `onRemoveFilesAccess`
 - `onManagePermissions`, `onPreview`, and `onOpenInNewTab`
 - `onDestinationRequest`, called when the user starts Copy or Move so the host can show its own destination UI instead of the built-in panel (see below), and `destinationPanelOptions` for the text of that panel
+
+### Loading states
+
+The grid, the folders tree and the file info popup show skeletons while they load. A skeleton appears only if loading lasts longer than 400 ms and then stays for at least 500 ms, so fast responses do not flash.
+
+- **Grid** — `filesLoading` and `searchInProgress` cover the rows with the kit's skeleton overlay; `filesLoadingLabel` sets the text announced to assistive technology.
+- **Folders tree** — the tree's loading signal is `treeOptions.loading`. It is independent of `filesLoading` and `searchInProgress` and defaults to `false`, so set it while the tree's first level loads: without it there is no tree skeleton on first load. Use `treeOptions.loadingPaths` for individual expanded folders; `treeOptions.loadingLabel` sets the announcement. Grid reloads do not show a tree skeleton, including when a loaded root is empty.
+- **File info popup** — the promise returned by `onGetInfo` drives the skeleton while it is pending; `fileMetadataPopupOptions.loading` overrides it and `fileMetadataPopupOptions.loadingLabel` sets the announcement. A rejection ends the loading state, so handle errors inside `onGetInfo`.
 
 ### Copy and Move destination
 
@@ -184,11 +192,6 @@ Run the interactive component examples with:
 ```bash
 npm run storybook
 ```
-
-The tree's loading signal is `treeOptions.loading`, independent of the grid's
-`filesLoading` and `searchInProgress`. Set it while the tree's first level loads;
-use `treeOptions.loadingPaths` for individual expanded folders. Grid reloads do
-not show a tree skeleton, including when a loaded root is empty.
 
 ## Publishing
 

@@ -1,5 +1,8 @@
 import { act, render, screen, within } from '@testing-library/react';
-import { SKELETON_MIN_DURATION_MS } from '@epam/ai-dial-ui-kit';
+import {
+  SKELETON_DELAY_MS,
+  SKELETON_MIN_DURATION_MS,
+} from '@epam/ai-dial-ui-kit';
 import { Profiler } from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { FileMetadataPopup } from './FileMetadataPopup';
@@ -330,34 +333,45 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
   });
 
   it('announces the loading label once, and clears it when loading ends', async () => {
-    const { rerender } = render(
-      <FileMetadataPopup
-        open={true}
-        onClose={vi.fn()}
-        loading={true}
-        loadingLabel="Loading info"
-      />,
-    );
+    vi.useFakeTimers();
+    try {
+      const { rerender } = render(
+        <FileMetadataPopup
+          open={true}
+          onClose={vi.fn()}
+          loading={true}
+          loadingLabel="Loading info"
+        />,
+      );
 
-    const dialog = screen.getByRole('dialog');
-    const status = within(dialog).getByText('Loading info', {
-      selector: '[role="status"]',
-    });
-    expect(status).toHaveAttribute('aria-live', 'polite');
-    expect(within(dialog).getAllByText('Loading info')).toHaveLength(1);
+      const dialog = screen.getByRole('dialog');
+      // Nothing is announced during the skeleton delay, so a fast load stays silent.
+      expect(
+        within(dialog).queryByText('Loading info'),
+      ).not.toBeInTheDocument();
+      act(() => vi.advanceTimersByTime(SKELETON_DELAY_MS));
+      const status = within(dialog).getByText('Loading info', {
+        selector: '[role="status"]',
+      });
+      expect(status).toHaveAttribute('aria-live', 'polite');
+      expect(within(dialog).getAllByText('Loading info')).toHaveLength(1);
 
-    rerender(
-      <FileMetadataPopup
-        open={true}
-        onClose={vi.fn()}
-        fileMetadata={mockFile}
-        loading={false}
-        loadingLabel="Loading info"
-      />,
-    );
+      rerender(
+        <FileMetadataPopup
+          open={true}
+          onClose={vi.fn()}
+          fileMetadata={mockFile}
+          loading={false}
+          loadingLabel="Loading info"
+        />,
+      );
 
-    expect(within(dialog).getAllByRole('status')).toContain(status);
-    expect(status).toBeEmptyDOMElement();
+      expect(within(dialog).getAllByRole('status')).toContain(status);
+      act(() => vi.advanceTimersByTime(SKELETON_MIN_DURATION_MS));
+      expect(status).toBeEmptyDOMElement();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('announces the loading label again when the popup is reopened', async () => {
@@ -396,17 +410,24 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
       </Profiler>
     );
 
-    const { rerender } = render(popup(true));
-    expect(announcements[0]).toBe('');
-    expect(announcements.at(-1)).toBe('Loading info');
+    vi.useFakeTimers();
+    try {
+      const { rerender } = render(popup(true));
+      act(() => vi.advanceTimersByTime(SKELETON_DELAY_MS));
+      expect(announcements[0]).toBe('');
+      expect(announcements.at(-1)).toBe('Loading info');
 
-    rerender(popup(false));
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
-    announcements.length = 0;
+      rerender(popup(false));
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      announcements.length = 0;
 
-    rerender(popup(true));
-    expect(announcements[0]).toBe('');
-    expect(announcements.at(-1)).toBe('Loading info');
+      rerender(popup(true));
+      act(() => vi.advanceTimersByTime(SKELETON_DELAY_MS));
+      expect(announcements[0]).toBe('');
+      expect(announcements.at(-1)).toBe('Loading info');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('keeps the skeleton for the kit minimum duration after metadata arrives', () => {
@@ -416,8 +437,8 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
         <FileMetadataPopup open={true} onClose={vi.fn()} loading={true} />,
       );
       const dialog = screen.getByRole('dialog');
+      act(() => vi.advanceTimersByTime(SKELETON_DELAY_MS));
       expect(dialog.querySelector('[aria-busy="true"]')).toBeInTheDocument();
-      act(() => vi.advanceTimersByTime(0));
 
       rerender(
         <FileMetadataPopup
@@ -429,7 +450,6 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
       );
 
       expect(dialog.querySelector('[aria-busy="true"]')).toBeInTheDocument();
-      expect(within(dialog).getAllByRole('status')[0]).toBeEmptyDOMElement();
       act(() => vi.advanceTimersByTime(SKELETON_MIN_DURATION_MS - 1));
       expect(screen.queryByText('test-file.svg')).not.toBeInTheDocument();
 

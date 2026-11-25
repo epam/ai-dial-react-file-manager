@@ -1,7 +1,6 @@
 import {
   Skeleton,
   SkeletonShimmer,
-  LiveRegion,
   SkeletonTone,
   SkeletonVariant,
   SKELETON_BAR_CLASS_NAME,
@@ -57,31 +56,28 @@ export const FoldersTreeSkeleton: FC<FoldersTreeSkeletonProps> = ({
 export interface FolderChildrenSkeletonProps {
   /** Left inset of the children's level, in px. */
   inset: number;
-  /** Announced to assistive technology once the skeleton shows. */
-  label?: string;
+  /** Whether the folder is still loading its children. */
+  loading: boolean;
 }
 
 /**
- * Placeholder rows under an expanded folder whose children are loading. It is
- * mounted only while the folder loads and waits the kit's skeleton delay
- * before drawing, so a fast load adds no rows at all.
+ * Placeholder rows under an expanded folder whose children are loading. The
+ * parent keeps it mounted while the folder has no visible children, so it owns
+ * the kit's skeleton timing: a fast load adds no rows at all, and a shown
+ * skeleton stays for its minimum duration. The tree announces the loading
+ * state once, in its own live region.
  */
 export const FolderChildrenSkeleton: FC<FolderChildrenSkeletonProps> = ({
   inset,
-  label,
+  loading,
 }) => {
-  // Mounted only while loading, so loading is always true here.
-  const { showSkeleton } = useSkeletonTiming(true);
+  const { showSkeleton } = useSkeletonTiming(loading);
+  if (!showSkeleton) return null;
 
   return (
-    <>
-      <LiveRegion visuallyHidden>{showSkeleton ? label : ''}</LiveRegion>
-      {showSkeleton && (
-        <div style={{ paddingLeft: `${inset}px` }}>
-          <FoldersTreeSkeleton rows={FOLDER_CHILDREN_ROW_COUNT} />
-        </div>
-      )}
-    </>
+    <div style={{ paddingLeft: `${inset}px` }}>
+      <FoldersTreeSkeleton rows={FOLDER_CHILDREN_ROW_COUNT} />
+    </div>
   );
 };
 
@@ -98,8 +94,10 @@ export interface FolderNameSkeletonProps {
   iconSize: number;
   /** The folder's name; the bar is about as wide as it. */
   name: string;
-  /** Row index among its siblings: even rows get the dark tone, odd the light one. */
+  /** Row index among its siblings: even rows get the sunken tone, odd the base one. */
   index: number;
+  /** Whether the folder is still loading its children. */
+  loading: boolean;
   /** The row's real icon and name, shown until the skeleton delay has passed. */
   children: ReactNode;
 }
@@ -107,18 +105,18 @@ export interface FolderNameSkeletonProps {
 /**
  * The icon and name of a loading folder. They stay as they are for the kit's
  * skeleton delay, so a fast load changes nothing; after it they are replaced
- * by a circle and a bar until the folder stops loading (this component is
- * mounted only while it loads). Decorative only: the row keeps the name as its
+ * by a circle and a bar until the folder stops loading and the skeleton has
+ * met its minimum duration. Decorative only: the row keeps the name as its
  * accessible name.
  */
 export const FolderNameSkeleton: FC<FolderNameSkeletonProps> = ({
   iconSize,
   name,
   index,
+  loading,
   children,
 }) => {
-  // Mounted only while loading, so loading is always true here.
-  const { showSkeleton } = useSkeletonTiming(true);
+  const { showSkeleton } = useSkeletonTiming(loading);
   if (!showSkeleton) return <>{children}</>;
 
   const nameWidthCh = Math.min(

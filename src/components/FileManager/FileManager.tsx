@@ -228,8 +228,6 @@ export interface FileTreeOptions extends Omit<
   tabsAriaLabel?: string;
   collapsed?: boolean;
   onCollapseChange?: (collapsed: boolean) => void;
-  /** Tree loading signal, independent of `filesLoading`. Defaults to `false`. */
-  loading?: boolean;
   expandedPaths?: Set<string>;
   loadedPaths?: Set<string>;
   onExpandedPathsChange?: (expandedPaths: Set<string>) => void;
@@ -1453,8 +1451,10 @@ export const DialFileManagerView: FC = () => {
   // Keep the grid mounted through the loading delay and minimum duration,
   // even when the result is empty. The kit Grid owns the skeleton overlay.
   const isGridLoading = !!filesLoading || !!searchInProgress;
-  const { showPlaceholder: isGridLoadPending } =
-    useSkeletonTiming(isGridLoading);
+  const {
+    showPlaceholder: isGridLoadPending,
+    showSkeleton: isGridSkeletonShown,
+  } = useSkeletonTiming(isGridLoading);
 
   const isEmptyStateShown = gridRows.length === 0 && !isGridLoadPending;
 
@@ -1924,9 +1924,14 @@ export const DialFileManagerView: FC = () => {
       isEmptyStateShown ? (
         emptyStateRenderer()
       ) : (
-        // The kit leaves headers interactive. Disable form controls during
-        // loading so select-all cannot act on the retained, covered rows.
-        <fieldset disabled={isGridLoadPending} role="none" className="contents">
+        // The kit leaves headers interactive. Disable form controls while the
+        // skeleton covers the rows, so select-all cannot act on them. During
+        // the delay the real rows are still shown, so focus is not disturbed.
+        <fieldset
+          disabled={isGridSkeletonShown}
+          role="none"
+          className="contents"
+        >
           <Grid<GridRow>
             columnDefs={columnDefs}
             rowData={sortedGridRows}
@@ -1954,7 +1959,7 @@ export const DialFileManagerView: FC = () => {
       isEmptyStateShown,
       sortedGridRows,
       isGridLoading,
-      isGridLoadPending,
+      isGridSkeletonShown,
       filesLoadingLabel,
       emptyStateRenderer,
       columnDefs,

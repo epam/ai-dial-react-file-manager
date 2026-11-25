@@ -37,21 +37,24 @@ export const FileMetadataContent: FC<FileMetadataContentProps> = ({
 }) => {
   // The Popup mounts its body on open. Populate the live region in an effect
   // so it is already in the DOM before the loading text is added.
-  const [announcement, setAnnouncement] = useState('');
-  useEffect(() => {
-    setAnnouncement(loading ? loadingLabel : '');
-  }, [loading, loadingLabel]);
-
   /*
-   * The popup is already open while it loads, so the skeleton shows at once
-   * (`delay: 0`) instead of leaving a blank body for the default delay.
+   * The kit's default delay keeps a fast answer (a cached one, say) from
+   * flashing a skeleton. The placeholder is mounted but invisible during the
+   * delay, so it holds the body's height, and the announcement waits for the
+   * skeleton to show.
    */
   const {
     showPlaceholder,
+    showSkeleton,
     placeholderClassName,
     showContent,
     contentClassName,
-  } = useSkeletonTiming(loading, { delay: 0 });
+  } = useSkeletonTiming(loading);
+
+  const [announcement, setAnnouncement] = useState('');
+  useEffect(() => {
+    setAnnouncement(showSkeleton ? loadingLabel : '');
+  }, [showSkeleton, loadingLabel]);
 
   let content: ReactNode = null;
   if (showPlaceholder) {

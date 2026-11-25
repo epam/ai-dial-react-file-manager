@@ -208,8 +208,10 @@ describe('Dial UI Kit :: FileManager grid skeleton', () => {
     expect(selectAll).toBeEnabled();
 
     update({ ...props, filesLoading: true });
-    expect(selectAll).toBeDisabled();
+    // During the delay the real rows are still shown: focus must not be lost.
+    expect(selectAll).toBeEnabled();
     await waitForSkeleton();
+    expect(selectAll).toBeDisabled();
     act(() => selectAll.click());
     expect(getApi().getSelectedRows()).toEqual([]);
     expect(onSelectedPathsChange).not.toHaveBeenCalled();
