@@ -132,7 +132,7 @@ export const FolderNameSkeleton: FC<FolderNameSkeletonProps> = ({
         variant={SkeletonVariant.Circular}
         width={iconSize}
         height={iconSize}
-        tone={SkeletonTone.Dark}
+        tone={SkeletonTone.Sunken}
         className="shrink-0"
       />
       <Skeleton

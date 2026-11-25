@@ -64,7 +64,7 @@ const waitForSkeleton = async (label = 'Loading files') => {
   expect(screen.getByText(label)).toBeInTheDocument();
   expect(gridRegion()).toHaveAttribute('aria-busy', 'true');
   expect(
-    gridRegion().querySelector('.ag-overlay-loading-wrapper [inert]'),
+    gridRegion().querySelector('.dial-kit-grid-skeleton-overlay [inert]'),
   ).toBeInTheDocument();
 };
 
@@ -116,7 +116,7 @@ describe('Dial UI Kit :: FileManager grid skeleton', () => {
 
     // Decorative cells use GridLoadingSkeleton's defaults, not file-specific shapes.
     const overlay = gridRegion().querySelector(
-      '.ag-overlay-loading-wrapper [inert]',
+      '.dial-kit-grid-skeleton-overlay [inert]',
     );
     expect(overlay?.querySelector('.rounded-xl')).toHaveStyle({
       width: SKELETON_BAR_WIDTHS[0],
