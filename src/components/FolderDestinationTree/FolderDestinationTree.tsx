@@ -59,6 +59,7 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
   onCreateFolderError,
   searchQuery,
   getDisabledReason,
+  canCreateFolderIn,
   disabled = false,
   createFolderLabel = 'Create new folder',
   cancelCreatingFolderLabel = 'Cancel',
@@ -355,8 +356,16 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
     return destination != null && !!getDisabledReason?.(destination);
   };
 
+  /* The host's `canCreateFolderIn` for a tree node; without it every node qualifies. */
+  const isCreationAllowedIn = (parentPath: string[]): boolean => {
+    if (!canCreateFolderIn) return true;
+    const destination = toDestination(parentPath);
+    return destination != null && canCreateFolderIn(destination);
+  };
+
   const canCreateUnder = (parentPath: string[]): boolean => {
     if (isPathDisabled(parentPath)) return false;
+    if (!isCreationAllowedIn(parentPath)) return false;
     if (!roots) return true;
     const target = fromRootedPath(parentPath);
     const root = roots.find((candidate) => candidate.key === target?.rootKey);
@@ -371,7 +380,9 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
     }
     if (selectedPath && canCreateUnder(selectedPath)) return selectedPath;
     const firstCreatable = roots.find(
-      (root) => root.canCreateFolders !== false,
+      (root) =>
+        root.canCreateFolders !== false &&
+        isCreationAllowedIn(toRootedPath({ rootKey: root.key, path: [] })),
     );
     return firstCreatable
       ? toRootedPath({ rootKey: firstCreatable.key, path: [] })
@@ -498,7 +509,8 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
    * naming (`getNextFolderNameFromNames`) are shared with the grid.
    * "Add sibling" is omitted for a root node, which has no parent to create a
    * sibling under, and a root that does not accept new folders offers neither
-   * action.
+   * action. A folder the host's `canCreateFolderIn` refuses offers no
+   * "Add child", and its children offer no "Add sibling".
    */
   const getFolderContextMenuItems = (file: DialFile): DropdownItem[] => {
     const childPath = fromFolderPathKey(file.path);
@@ -519,7 +531,10 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
         onClick: () => beginCreatingFolder(childPath),
       },
     ];
-    if (!rootKeys.includes(file.path)) {
+    if (
+      !rootKeys.includes(file.path) &&
+      isCreationAllowedIn(childPath.slice(0, -1))
+    ) {
       items.push({
         key: 'add-sibling',
         label: addSiblingFolderLabel,

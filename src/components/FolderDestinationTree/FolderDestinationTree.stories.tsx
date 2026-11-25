@@ -58,7 +58,13 @@ const addFolder = (
   });
 };
 
-const SingleRootComponent = ({ disabled }: { disabled?: boolean }) => {
+const SingleRootComponent = ({
+  disabled,
+  canCreateFolderIn,
+}: {
+  disabled?: boolean;
+  canCreateFolderIn?: (destination: FolderDestination) => boolean;
+}) => {
   const [items, setItems] = useState(initialItems);
   const [selectedPath, setSelectedPath] = useState<string[] | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,6 +86,7 @@ const SingleRootComponent = ({ disabled }: { disabled?: boolean }) => {
         }
         searchQuery={searchQuery}
         disabled={disabled}
+        canCreateFolderIn={canCreateFolderIn}
       />
     </div>
   );
@@ -96,6 +103,22 @@ export const Disabled: Story = {
       description: {
         story:
           'While `disabled` is set, the tree ignores the pointer and the keyboard alike.',
+      },
+    },
+  },
+};
+
+export const CreateOnlyInsideReports: Story = {
+  render: () => (
+    <SingleRootComponent
+      canCreateFolderIn={({ path }) => path[0] === 'Reports'}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`canCreateFolderIn` allows new folders only inside `Reports`. Every folder stays selectable, but the root and `Archive` offer no "Create new folder" or "Add child", and their children offer no "Add sibling".',
       },
     },
   },
