@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { FolderDestinationRoot } from '../../../models/folder-destination';
@@ -110,6 +110,10 @@ describe('FolderDestinationPanel', () => {
 
   it('switches to the folder view, moving focus to its heading', async () => {
     renderPanel();
+    // The kit focuses the dialog after it opens; let that settle before switching views.
+    await waitFor(() =>
+      expect(screen.getByRole('dialog').matches(':focus')).toBe(true),
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Change' }));
     const heading = screen.getByText('Change folder');
     expect(heading.matches(':focus')).toBe(true);
