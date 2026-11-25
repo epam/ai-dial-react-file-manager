@@ -38,6 +38,7 @@ export const FolderDestinationPanelBody: FC<
   onCreateFolder,
   onCreateFolderError,
   getDisabledReason,
+  canCreateFolderIn,
   onValidateFolderName,
   onChangeFolderClick,
   changeFolderButtonRef,
@@ -134,6 +135,7 @@ export const FolderDestinationPanelBody: FC<
         onCreateFolderError={onCreateFolderError}
         searchQuery={searchQuery}
         getDisabledReason={getDisabledReason}
+        canCreateFolderIn={canCreateFolderIn}
         collapsibleRoots={collapsibleRoots}
         disabled={isSubmitting}
         noResultsLabel={folderEmptyStateLabel}

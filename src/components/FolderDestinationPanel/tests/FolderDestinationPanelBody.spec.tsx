@@ -290,6 +290,18 @@ describe('FolderDestinationPanelBody disabled destinations', () => {
     );
   });
 
+  it('forwards canCreateFolderIn to the folder tree', () => {
+    const canCreateFolderIn = vi.fn(() => false);
+    renderPanel({
+      view: FolderDestinationView.ChangeFolder,
+      canCreateFolderIn,
+    });
+
+    expect(treeProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ canCreateFolderIn }),
+    );
+  });
+
   it('announces the reason of a disabled committed destination and links it to the destination', () => {
     renderPanel({ getDisabledReason: () => REASON });
 

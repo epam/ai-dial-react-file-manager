@@ -344,6 +344,83 @@ describe('FolderDestinationTree', () => {
     });
   });
 
+  describe('canCreateFolderIn', () => {
+    /* Only `Shared` and what lies inside it accept new folders. */
+    const canCreateFolderIn = ({ path }: { path: string[] }) =>
+      path[0] === 'Shared';
+    const folder = (path: string): DialFile => ({
+      path,
+      name: path.split('/').at(-1) ?? path,
+      folderId: path,
+      nodeType: DialFileNodeType.FOLDER,
+    });
+    const menuKeys = (path: string) =>
+      capturedProps.current
+        ?.getContextMenuItems?.(folder(path))
+        ?.map((item) => item.key);
+
+    it('offers no "Add child" on a refused folder and no "Add sibling" under a refused parent', () => {
+      renderTree({ canCreateFolderIn });
+
+      expect(menuKeys('')).toEqual([]);
+      expect(menuKeys('My workspace')).toEqual([]);
+      expect(menuKeys('Shared')).toEqual(['add-child']);
+      expect(menuKeys('Shared/Data Science')).toEqual([
+        'add-child',
+        'add-sibling',
+      ]);
+    });
+
+    it('calls the predicate with a single-root destination', () => {
+      const predicate = vi.fn(() => true);
+      renderTree({ canCreateFolderIn: predicate });
+
+      menuKeys('Shared/Data Science');
+
+      expect(predicate).toHaveBeenCalledWith({
+        rootKey: '',
+        path: ['Shared', 'Data Science'],
+      });
+      expect(predicate).toHaveBeenCalledWith({
+        rootKey: '',
+        path: ['Shared'],
+      });
+    });
+
+    it('disables "Create new folder" for a refused parent and enables it for an allowed one', () => {
+      const { rerender } = renderTree({ canCreateFolderIn });
+      expect(
+        screen.getByRole('button', { name: 'Create new folder' }),
+      ).toHaveProperty('disabled', true);
+
+      rerender(
+        <FolderDestinationTree
+          items={items}
+          searchQuery=""
+          selectedPath={['Shared']}
+          onSelectedPathChange={vi.fn()}
+          onCreateFolder={vi.fn()}
+          canCreateFolderIn={canCreateFolderIn}
+        />,
+      );
+
+      expect(
+        screen.getByRole('button', { name: 'Create new folder' }),
+      ).toHaveProperty('disabled', false);
+    });
+
+    it('keeps a refused folder selectable', async () => {
+      const onSelectedPathChange = vi.fn();
+      renderTree({ canCreateFolderIn, onSelectedPathChange });
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'My workspace' }),
+      );
+
+      expect(onSelectedPathChange).toHaveBeenCalledWith(['My workspace']);
+    });
+  });
+
   it('lets DialFoldersTree render its inline row directly under the selected folder', async () => {
     renderTree({ selectedPath: ['Shared'] });
     await userEvent.click(
@@ -1168,6 +1245,77 @@ describe('FolderDestinationTree', () => {
       expect(
         screen.getByRole('button', { name: 'Create new folder' }),
       ).toHaveProperty('disabled', true);
+    });
+
+    describe('canCreateFolderIn', () => {
+      /* Organization accepts folders only inside `EPAM`; Personal accepts them anywhere. */
+      const canCreateFolderIn = ({
+        rootKey,
+        path,
+      }: {
+        rootKey: string;
+        path: string[];
+      }) => rootKey !== 'organization' || path[0] === 'EPAM';
+
+      it('passes the root key and the path inside that root', () => {
+        const predicate = vi.fn(() => true);
+        renderMultiRoot({ canCreateFolderIn: predicate });
+
+        capturedProps.current?.getContextMenuItems?.({
+          path: ':organization/EPAM',
+          name: 'EPAM',
+          folderId: ':organization/EPAM',
+          nodeType: DialFileNodeType.FOLDER,
+        });
+
+        expect(predicate).toHaveBeenCalledWith({
+          rootKey: 'organization',
+          path: ['EPAM'],
+        });
+      });
+
+      it('offers no creation on a refused root and allows it inside an allowed folder', () => {
+        renderMultiRoot({ canCreateFolderIn });
+
+        expect(
+          capturedProps.current?.getContextMenuItems?.(
+            rootFile('organization', 'Organization'),
+          ),
+        ).toEqual([]);
+        expect(
+          capturedProps.current
+            ?.getContextMenuItems?.({
+              path: ':organization/EPAM',
+              name: 'EPAM',
+              folderId: ':organization/EPAM',
+              nodeType: DialFileNodeType.FOLDER,
+            })
+            ?.map((item) => item.key),
+        ).toEqual(['add-child']);
+      });
+
+      it('falls back the trailing create button to the first root the predicate allows', async () => {
+        renderMultiRoot({
+          roots: [roots[1], roots[0]],
+          canCreateFolderIn,
+        });
+
+        await userEvent.click(
+          screen.getByRole('button', { name: 'Create new folder' }),
+        );
+
+        await waitFor(() =>
+          expect(capturedProps.current?.createdFolderPath).toBe(':personal'),
+        );
+      });
+
+      it('disables the trailing create button when the predicate refuses every root', () => {
+        renderMultiRoot({ canCreateFolderIn: () => false });
+
+        expect(
+          screen.getByRole('button', { name: 'Create new folder' }),
+        ).toHaveProperty('disabled', true);
+      });
     });
 
     it("splits expanded keys back to each root's own handler", () => {

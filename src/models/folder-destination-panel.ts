@@ -98,6 +98,8 @@ export interface FolderDestinationPanelBaseProps {
   onCreateFolderError?: (error: unknown) => void;
   /** Reason a folder is unavailable as a destination, or `undefined` when it is usable; forwarded to the folder tree, see `FolderDestinationTreeProps.getDisabledReason`. The reason of the committed `destination` is also announced in the main view. */
   getDisabledReason?: (destination: FolderDestination) => string | undefined;
+  /** Whether a new folder may be created inside `destination`; forwarded to the folder tree, see `FolderDestinationTreeProps.canCreateFolderIn`. */
+  canCreateFolderIn?: (destination: FolderDestination) => boolean;
   /** The host's own check of a new folder name, called with the trimmed name and the folder it would be created under; see `FolderDestinationTreeProps.onValidateFolderName`. */
   onValidateFolderName?: (
     name: string,
