@@ -23,6 +23,7 @@ import {
   TooltipPlacement,
   TooltipTrigger,
   useSkeletonTiming,
+  LiveRegion,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
@@ -323,13 +324,15 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
    * - only the top-level folder(s), expanded but with no children yet (a host
    *   such as DIAL Chat passes its root folder before listing it): the real
    *   root row stays and the skeleton stands in for its children.
-   * Once any top-level folder has children, expanding a folder shows the row
-   * spinner (`loadingPaths`) instead. Loading is checked before emptiness, so
-   * the empty state never shows while the items are still on their way.
+   * The host supplies the tree's own loading signal, independently of grid
+   * reloads. Loading is checked before emptiness, so the empty state never
+   * shows while the items are still on their way.
    */
   const isAwaitingFirstLevel =
     items.length === 0 ||
-    (items.some((node) => expandedPaths.has(node.path)) &&
+    (items.some(
+      (node) => expandedPaths.has(node.path) && !loadedPaths.has(node.path),
+    ) &&
       !items.some((node) => (node.items?.length ?? 0) > 0));
   const {
     showPlaceholder,
@@ -339,10 +342,31 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   } = useSkeletonTiming(loading && isAwaitingFirstLevel);
 
   const rows = useMemo(
-    () => collectVisibleRows(items, expandedPaths, isNodeVisible),
+    () =>
+      collectVisibleRows(
+        items,
+        showPlaceholder
+          ? new Set(
+              [...expandedPaths].filter(
+                (path) =>
+                  !items.some(
+                    (root) => root.path === path && !loadedPaths.has(path),
+                  ),
+              ),
+            )
+          : expandedPaths,
+        isNodeVisible,
+      ),
     // isNodeVisible only reads the two flags listed here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, expandedPaths, areHiddenFilesVisible, showFiles],
+    [
+      items,
+      expandedPaths,
+      loadedPaths,
+      areHiddenFilesVisible,
+      showFiles,
+      showPlaceholder,
+    ],
   );
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
   const [focusedPath, setFocusedPath] = useState<string>();
@@ -724,12 +748,28 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                    * children (it stays for its minimum time even when they
                    * arrive sooner), they are held back, then fade in.
                    */
-                  !showPlaceholder && (
-                    <div className={contentClassName}>
+                  (!showPlaceholder || isLoaded) && (
+                    <div
+                      className={mergeClasses(
+                        'flex flex-col gap-1',
+                        contentClassName,
+                      )}
+                    >
                       {renderTree(items || [], level + 1, node)}
                     </div>
                   )
                 : renderTree(items || [], level + 1, node))}
+
+            {/* Each expanded root owns its decorative first-level placeholder. */}
+            {level === 0 && isExpanded && showPlaceholder && !isLoaded && (
+              <div
+                aria-hidden="true"
+                inert
+                style={{ paddingLeft: `${FOLDER_LEVEL_PADDING}px` }}
+              >
+                <FoldersTreeSkeleton className={placeholderClassName} />
+              </div>
+            )}
 
             {/*
              * An expanded folder loading its children shows placeholder rows
@@ -740,7 +780,7 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
               isExpanded &&
               isLoading &&
               !(Array.isArray(items) && items.some(isNodeVisible)) &&
-              !(level === 0 && showPlaceholder) && (
+              !(level === 0 && showPlaceholder && !isLoaded) && (
                 <FolderChildrenSkeleton
                   inset={(level + 1) * FOLDER_LEVEL_PADDING}
                   label={loadingLabel}
@@ -755,35 +795,23 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   return (
     <div className="flex-1 size-full overflow-y-auto pb-6">
       {items.length > 0 ? (
-        <>
-          {/* Focus lives on the roving-tabIndex rows; the root only routes their keys. */}
-          <div role="tree" aria-label={ariaLabel} onKeyDown={handleKeyDown}>
-            {renderTree(items, 0)}
-          </div>
-          {/*
-           * Stands in for the root's children, one level in. Kept outside the
-           * `role="tree"` element: a placeholder is not a tree item.
-           */}
-          {showPlaceholder && (
-            <div style={{ paddingLeft: `${FOLDER_LEVEL_PADDING}px` }}>
-              <FoldersTreeSkeleton
-                label={showSkeleton ? loadingLabel : undefined}
-                className={placeholderClassName}
-              />
-            </div>
-          )}
-        </>
+        // Focus lives on the roving-tabIndex rows; the root only routes their keys.
+        <div role="tree" aria-label={ariaLabel} onKeyDown={handleKeyDown}>
+          {renderTree(items, 0)}
+        </div>
       ) : showPlaceholder ? (
-        <FoldersTreeSkeleton
-          label={showSkeleton ? loadingLabel : undefined}
-          className={placeholderClassName}
-        />
+        <FoldersTreeSkeleton className={placeholderClassName} />
       ) : (
         <NoDataContent
           title={emptyStateTitle}
           description={emptyStateDescription}
           icon={emptyStateIcon}
         />
+      )}
+      {showPlaceholder && (
+        <LiveRegion visuallyHidden>
+          {showSkeleton ? loadingLabel : ''}
+        </LiveRegion>
       )}
     </div>
   );

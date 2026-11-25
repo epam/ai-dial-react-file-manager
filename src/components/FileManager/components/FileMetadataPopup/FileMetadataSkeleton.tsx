@@ -2,10 +2,12 @@ import {
   Skeleton,
   SkeletonShimmer,
   SkeletonVariant,
+  SKELETON_BAR_CLASS_NAME,
+  SKELETON_BAR_HEIGHT,
   mergeClasses,
 } from '@epam/ai-dial-ui-kit';
 import type { FC } from 'react';
-import { SKELETON_BAR_HEIGHT, getSkeletonBarClass } from '@/constants/skeleton';
+import { getSkeletonTone } from '@/constants/skeleton';
 import {
   GRID_CLASS,
   LABEL_CLASS,
@@ -23,12 +25,10 @@ export interface FileMetadataSkeletonProps {
 
 /**
  * The loading state of the file metadata popup body: the real labels, with
- * one shimmer over the value column. Used both as the `Suspense` fallback
- * while the body's code loads and as the body's own loading state, so the two
- * waits read as one continuous skeleton.
+ * one shimmer over the value column while the metadata loads.
  *
- * It announces nothing itself: `FileMetadataPopup` keeps one live region
- * mounted for the whole load, so the two waits are announced once.
+ * It announces nothing itself: `FileMetadataContent` keeps one live region
+ * mounted for the whole load.
  */
 export const FileMetadataSkeleton: FC<FileMetadataSkeletonProps> = ({
   rows,
@@ -60,7 +60,8 @@ export const FileMetadataSkeleton: FC<FileMetadataSkeletonProps> = ({
           variant={SkeletonVariant.Text}
           width={SKELETON_BAR_WIDTHS[id]}
           height={SKELETON_BAR_HEIGHT}
-          className={getSkeletonBarClass(index)}
+          tone={getSkeletonTone(index)}
+          className={SKELETON_BAR_CLASS_NAME}
         />
       ))}
     </SkeletonShimmer>

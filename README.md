@@ -18,9 +18,9 @@ their own persistence and backend integration through callbacks.
 
 ## Compatibility
 
-| File manager               | AI DIAL UI Kit  | React     | AG Grid   | Module format |
-| -------------------------- | --------------- | --------- | --------- | ------------- |
-| Current development branch | `0.14.0-dev.12` | `^19.2.5` | `^35.2.1` | ESM           |
+| File manager               | AI DIAL UI Kit   | React     | AG Grid   | Module format |
+| -------------------------- | ---------------- | --------- | --------- | ------------- |
+| Current development branch | `^0.17.0-dev.16` | `^19.2.5` | `^35.2.1` | ESM           |
 
 ## Installation
 
@@ -184,6 +184,11 @@ Run the interactive component examples with:
 ```bash
 npm run storybook
 ```
+
+The tree's loading signal is `treeOptions.loading`, independent of the grid's
+`filesLoading` and `searchInProgress`. Set it while the tree's first level loads;
+use `treeOptions.loadingPaths` for individual expanded folders. Grid reloads do
+not show a tree skeleton, including when a loaded root is empty.
 
 ## Publishing
 

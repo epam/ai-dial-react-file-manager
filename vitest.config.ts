@@ -26,12 +26,6 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
-    /*
-     * The FileManager integration specs render the whole manager with AG Grid
-     * in jsdom: a cold first render takes ~2 s alone and well over the 5 s
-     * default when the full suite runs files in parallel.
-     */
-    testTimeout: 15000,
     coverage: {
       reportsDirectory: './coverage/',
       reporter: ['text', 'json', 'html'],

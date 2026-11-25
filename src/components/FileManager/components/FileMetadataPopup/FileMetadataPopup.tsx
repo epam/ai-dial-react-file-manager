@@ -1,46 +1,8 @@
-import { LiveRegion, Popup, PopupSize } from '@epam/ai-dial-ui-kit';
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type FC,
-  type ReactNode,
-} from 'react';
+import { Popup, PopupSize } from '@epam/ai-dial-ui-kit';
+import { useMemo, type FC, type ReactNode } from 'react';
 import type { DialFile } from '@/models/file';
-import type { FileMetadataRow } from './constants';
-import { FileMetadataSkeleton } from './FileMetadataSkeleton';
-
-/*
- * The body is code-split: it downloads the first time the popup opens (the
- * kit `Popup` renders nothing while closed). Until then the popup shows the
- * same skeleton the body uses while metadata loads.
- */
-const FileMetadataContent = lazy(() =>
-  import('./FileMetadataContent').then((module) => ({
-    default: module.FileMetadataContent,
-  })),
-);
-
-/**
- * The popup's loading announcement. The kit `Popup` unmounts its content while
- * closed, so this region mounts on every open; a region that mounts with its
- * text already in it is often not announced, so the text is set one commit
- * after the region is in the DOM.
- */
-const LoadingAnnouncement: FC<{ busy: boolean; label: string }> = ({
-  busy,
-  label,
-}) => {
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => setIsMounted(true), []);
-
-  return (
-    <LiveRegion visuallyHidden>{isMounted && busy ? label : ''}</LiveRegion>
-  );
-};
+import { FileMetadataFieldId, type FileMetadataRow } from './constants';
+import { FileMetadataContent } from './FileMetadataContent';
 
 export interface FileMetadataPopupProps {
   open: boolean;
@@ -63,9 +25,8 @@ export interface FileMetadataPopupProps {
  *
  * A popup dialog for displaying file metadata information.
  * Shows file details like name, path, modified date, size, and author.
- * While the body's code or the metadata is loading, the values are replaced by
- * a kit skeleton (`SkeletonShimmer` + `useSkeletonTiming`); the labels stay
- * visible.
+ * While the metadata is loading, the values are replaced by a kit skeleton
+ * (`SkeletonShimmer` + `useSkeletonTiming`); the labels stay visible.
  *
  * @example
  * ```tsx
@@ -111,21 +72,14 @@ export const FileMetadataPopup: FC<FileMetadataPopupProps> = ({
 }) => {
   const rows = useMemo<FileMetadataRow[]>(
     () => [
-      { id: 'name', label: nameLabel },
-      { id: 'modified', label: modifiedDateLabel },
-      { id: 'size', label: sizeLabel },
-      { id: 'author', label: authorLabel },
-      { id: 'path', label: pathLabel },
+      { id: FileMetadataFieldId.Name, label: nameLabel },
+      { id: FileMetadataFieldId.Modified, label: modifiedDateLabel },
+      { id: FileMetadataFieldId.Size, label: sizeLabel },
+      { id: FileMetadataFieldId.Author, label: authorLabel },
+      { id: FileMetadataFieldId.Path, label: pathLabel },
     ],
     [nameLabel, modifiedDateLabel, sizeLabel, authorLabel, pathLabel],
   );
-
-  /*
-   * The lazy body's code has loaded once it mounts, and stays loaded. Until
-   * then the popup is waiting for it, the same as it waits for `loading`.
-   */
-  const [isBodyLoaded, setIsBodyLoaded] = useState(false);
-  const handleBodyMount = useCallback(() => setIsBodyLoaded(true), []);
 
   return (
     <Popup
@@ -136,25 +90,14 @@ export const FileMetadataPopup: FC<FileMetadataPopupProps> = ({
       ariaLabel="File information"
     >
       <div className="px-6 py-4">
-        {/*
-         * One live region for both waits (the body's code, then the
-         * metadata), mounted for as long as the popup is open, so the load is
-         * announced once rather than by each skeleton as it mounts.
-         */}
-        <LoadingAnnouncement
-          busy={loading || !isBodyLoaded}
-          label={loadingLabel}
+        <FileMetadataContent
+          rows={rows}
+          fileMetadata={fileMetadata}
+          loading={loading}
+          loadingLabel={loadingLabel}
+          dateLocale={dateLocale}
+          dateOptions={dateOptions}
         />
-        <Suspense fallback={<FileMetadataSkeleton rows={rows} />}>
-          <FileMetadataContent
-            rows={rows}
-            fileMetadata={fileMetadata}
-            loading={loading}
-            dateLocale={dateLocale}
-            dateOptions={dateOptions}
-            onMount={handleBodyMount}
-          />
-        </Suspense>
       </div>
     </Popup>
   );

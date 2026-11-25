@@ -733,13 +733,14 @@ export const WithRootItem: Story = {
 export const Loading: Story = {
   args: {
     filesLoading: true,
+    treeOptions: { loading: true },
     items: [],
   },
   parameters: {
     docs: {
       description: {
         story:
-          'First load: the folders tree and the grid rows show kit skeletons (after a 400 ms delay) instead of their empty states.',
+          'First load: the folders tree uses kit skeleton tokens and the grid uses the kit loading overlay after a 400 ms delay. Empty states stay hidden while loading.',
       },
     },
   },
@@ -753,7 +754,7 @@ export const LoadingWithData: Story = {
     docs: {
       description: {
         story:
-          'Loading with rows already on screen, e.g. a folder switch or a search: the tree stays, and the grid rows are covered by the skeleton once the 400 ms delay passes.',
+          'Loading with rows already on screen, e.g. a folder switch or a search: the tree stays, and the kit GridLoadingSkeleton covers the grid after 400 ms without replacing its data or clearing selection. The kit renders its default text bars in both desktop and compact views.',
       },
     },
   },

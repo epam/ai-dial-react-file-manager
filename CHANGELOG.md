@@ -44,6 +44,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Skeleton loading — shared UI kit APIs** — the grid uses the kit's default
+  `GridLoadingSkeleton` overlay without replacing real rows, column definitions,
+  or selection. The folders tree, file metadata, and grid placeholders use the
+  kit's skeleton tones and sizing constants. Tree loading is controlled
+  independently by `treeOptions.loading`;
+  grid reloads leave a loaded empty tree alone. Root placeholders stay under
+  their expanded roots, and hidden children are excluded from keyboard
+  navigation. The metadata popup body is statically imported.
+
 - **`DialFileManager` — `destinationPanelOptions`** — text and behavior of the built-in Copy/Move panel (`copyTitle`, `moveTitle`, `copyLabel`, `moveLabel`, `rootLabel`, `getSourceItemsLabel`, `disabledPathTooltip`, `movedIntoItselfTooltip`, `excludedPaths`, `labels`, `panelLabels`). `DialDestinationRequest.confirm` takes an optional second argument, the destination folder's existing items, so name conflicts are detected for a folder the user never opened in the grid. The hidden-name notice of `FolderDestinationTree` / `FolderDestinationPanel` is passed as plain text; the `warning__` prefix is added internally.
 
 - **`FolderDestinationTree` and `FolderDestinationPanelBody` — `getDisabledReason`** — a destination folder with a non-empty reason is disabled (muted, `aria-disabled`, tooltip, not selectable, still expandable) and gets no folder creation under it; the panel body forwards it and announces the reason of the committed destination. `FolderDestinationPanelBody`, `FolderDestinationView` and the folder helpers (`collectFolderKeys`, `fromDialFileTree`, `getSiblingFolderNames`, `mergeFolderPaths`, `sortFolderTree`, `toDialFileTree`) are exported too.

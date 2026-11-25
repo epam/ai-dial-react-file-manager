@@ -64,7 +64,8 @@ export const Default: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Default file metadata popup with all information displayed.',
+        story:
+          'File metadata popup with all supplied information displayed immediately. Skeleton placeholders appear only while metadata is loading.',
       },
     },
   },

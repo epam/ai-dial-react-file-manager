@@ -400,7 +400,38 @@ export const RootLoading: Story = {
     docs: {
       description: {
         story:
-          'First load with the root folder already known (as DIAL Chat passes it): the root row stays and a skeleton stands in for its children.',
+          'The tree’s own loading signal is set while its first level loads: the root row stays and a decorative skeleton stands in for its children directly underneath it.',
+      },
+    },
+  },
+};
+
+export const MultipleRootsLoading: Story = {
+  args: {
+    items: [
+      {
+        name: 'Personal',
+        path: '/personal',
+        folderId: 'personal',
+        nodeType: DialFileNodeType.FOLDER,
+        items: [],
+      },
+      {
+        name: 'Shared',
+        path: '/shared',
+        folderId: 'shared',
+        nodeType: DialFileNodeType.FOLDER,
+        items: [],
+      },
+    ],
+    expandedPaths: new Set(['/personal', '/shared']),
+    loading: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Each expanded root keeps its own loading placeholder directly beneath its row. One live region announces the first-level load.',
       },
     },
   },

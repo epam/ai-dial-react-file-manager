@@ -6,12 +6,13 @@ export const LABEL_CLASS = 'text-secondary';
 export const VALUE_CLASS = 'text-primary min-w-0';
 export const PATH_CLASS = 'text-primary break-words min-w-0';
 
-export type FileMetadataFieldId =
-  | 'name'
-  | 'modified'
-  | 'size'
-  | 'author'
-  | 'path';
+export enum FileMetadataFieldId {
+  Name = 'name',
+  Modified = 'modified',
+  Size = 'size',
+  Author = 'author',
+  Path = 'path',
+}
 
 export interface FileMetadataRow {
   id: FileMetadataFieldId;
@@ -34,12 +35,12 @@ export const SKELETON_COLUMN_CLASS = 'col-start-2 row-start-1 row-span-5';
 
 /**
  * Skeleton bar width per field: fixed, varied so the placeholder reads as
- * text. The tone alternates by row (`getSkeletonBarClass`).
+ * text. The tone alternates by row (`getSkeletonTone`).
  */
 export const SKELETON_BAR_WIDTHS: Record<FileMetadataFieldId, string> = {
-  name: '70%',
-  modified: '55%',
-  size: '40%',
-  author: '60%',
-  path: '100%',
+  [FileMetadataFieldId.Name]: '70%',
+  [FileMetadataFieldId.Modified]: '55%',
+  [FileMetadataFieldId.Size]: '40%',
+  [FileMetadataFieldId.Author]: '60%',
+  [FileMetadataFieldId.Path]: '100%',
 };

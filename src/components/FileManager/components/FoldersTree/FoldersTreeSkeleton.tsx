@@ -1,16 +1,16 @@
 import {
   Skeleton,
   SkeletonShimmer,
+  LiveRegion,
+  SkeletonTone,
   SkeletonVariant,
+  SKELETON_BAR_CLASS_NAME,
+  SKELETON_BAR_HEIGHT,
   mergeClasses,
   useSkeletonTiming,
 } from '@epam/ai-dial-ui-kit';
 import type { FC, ReactNode } from 'react';
-import {
-  SKELETON_BAR_HEIGHT,
-  SKELETON_CIRCLE_CLASS,
-  getSkeletonBarClass,
-} from '@/constants/skeleton';
+import { getSkeletonTone } from '@/constants/skeleton';
 
 /*
  * Sidebar list recipe of the kit skeleton guide: bars only, 20 px high, 16 px
@@ -47,7 +47,8 @@ export const FoldersTreeSkeleton: FC<FoldersTreeSkeletonProps> = ({
         variant={SkeletonVariant.Text}
         width={width}
         height={SKELETON_BAR_HEIGHT}
-        className={mergeClasses('shrink-0', getSkeletonBarClass(index))}
+        tone={getSkeletonTone(index)}
+        className={mergeClasses('shrink-0', SKELETON_BAR_CLASS_NAME)}
       />
     ))}
   </SkeletonShimmer>
@@ -71,12 +72,16 @@ export const FolderChildrenSkeleton: FC<FolderChildrenSkeletonProps> = ({
 }) => {
   // Mounted only while loading, so loading is always true here.
   const { showSkeleton } = useSkeletonTiming(true);
-  if (!showSkeleton) return null;
 
   return (
-    <div style={{ paddingLeft: `${inset}px` }}>
-      <FoldersTreeSkeleton label={label} rows={FOLDER_CHILDREN_ROW_COUNT} />
-    </div>
+    <>
+      <LiveRegion visuallyHidden>{showSkeleton ? label : ''}</LiveRegion>
+      {showSkeleton && (
+        <div style={{ paddingLeft: `${inset}px` }}>
+          <FoldersTreeSkeleton rows={FOLDER_CHILDREN_ROW_COUNT} />
+        </div>
+      )}
+    </>
   );
 };
 
@@ -127,13 +132,15 @@ export const FolderNameSkeleton: FC<FolderNameSkeletonProps> = ({
         variant={SkeletonVariant.Circular}
         width={iconSize}
         height={iconSize}
-        className={mergeClasses('shrink-0', SKELETON_CIRCLE_CLASS)}
+        tone={SkeletonTone.Dark}
+        className="shrink-0"
       />
       <Skeleton
         variant={SkeletonVariant.Text}
         width={`${nameWidthCh}ch`}
         height={SKELETON_BAR_HEIGHT}
-        className={mergeClasses('shrink-0', getSkeletonBarClass(index))}
+        tone={getSkeletonTone(index)}
+        className={mergeClasses('shrink-0', SKELETON_BAR_CLASS_NAME)}
       />
     </span>
   );
