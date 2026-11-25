@@ -65,6 +65,7 @@ export interface FileManagerContextValue {
   allowedFileTypes?: DialFileAcceptType[];
   maxSelectableFileSize?: number;
   filesLoading?: boolean;
+  filesLoadingLabel?: string;
   treeOptions?: FileTreeOptions;
   showNavigationPanel?: boolean;
   navigationPanelOptions?: NavigationPanelOptions;
@@ -214,6 +215,8 @@ export interface FileManagerContextValue {
   ) => void;
 
   isMetadataPopupOpen: boolean;
+  /** True while the promise returned by `onGetInfo` is pending. */
+  isMetadataLoading?: boolean;
   selectedFileForMetadata?: DialFile;
   openMetadataPopup: (file: DialFile) => void;
   closeMetadataPopup: () => void;

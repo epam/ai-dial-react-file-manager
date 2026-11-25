@@ -364,6 +364,86 @@ export const WithLoaders: Story = {
   },
 };
 
+export const Loading: Story = {
+  args: {
+    items: [],
+    loading: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'First load: a skeleton replaces the empty state until the items arrive. It appears after a 400 ms delay, so a fast load never flashes it.',
+      },
+    },
+  },
+};
+
+const LOADING_ROOT = '/My files';
+const LOADING_LONG_NAME_PATH = `${LOADING_ROOT}/Quarterly reports and presentations for the board`;
+
+export const RootLoading: Story = {
+  args: {
+    items: [
+      {
+        name: 'My files',
+        path: LOADING_ROOT,
+        nodeType: DialFileNodeType.FOLDER,
+        folderId: 'bucket',
+        items: [],
+      },
+    ],
+    expandedPaths: new Set([LOADING_ROOT]),
+    loading: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'First load with the root folder already known (as DIAL Chat passes it): the root row stays and a skeleton stands in for its children.',
+      },
+    },
+  },
+};
+
+export const FolderLoading: Story = {
+  args: {
+    items: [
+      {
+        name: 'My files',
+        path: LOADING_ROOT,
+        nodeType: DialFileNodeType.FOLDER,
+        folderId: 'bucket',
+        items: [
+          {
+            name: 'Quarterly reports and presentations for the board',
+            path: LOADING_LONG_NAME_PATH,
+            nodeType: DialFileNodeType.FOLDER,
+            folderId: 'bucket',
+            items: [],
+          },
+          {
+            name: 'Images',
+            path: `${LOADING_ROOT}/Images`,
+            nodeType: DialFileNodeType.FOLDER,
+            folderId: 'bucket',
+          },
+        ],
+      },
+    ],
+    expandedPaths: new Set([LOADING_ROOT, LOADING_LONG_NAME_PATH]),
+    loadingPaths: new Set([LOADING_LONG_NAME_PATH]),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'An expanded folder loading its children (long name): after the 400 ms delay its icon and name become a circle and a bar, and placeholder rows stand in for its children.',
+      },
+    },
+  },
+};
+
 export const EmptyState: Story = {
   args: {
     items: [],

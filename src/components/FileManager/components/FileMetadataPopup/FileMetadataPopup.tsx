@@ -1,21 +1,46 @@
+import { LiveRegion, Popup, PopupSize } from '@epam/ai-dial-ui-kit';
 import {
-  Popup,
-  PopupSize,
-  Skeleton,
-  SkeletonVariant,
-  EllipsisTooltip,
-} from '@epam/ai-dial-ui-kit';
-import { type FC, type ReactNode } from 'react';
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type FC,
+  type ReactNode,
+} from 'react';
 import type { DialFile } from '@/models/file';
-import { formatBytes, formatDate } from '@/components/FileManager/utils';
-import {
-  LABEL_COLUMN_WIDTH,
-  SKELETON_HEIGHT,
-  LABEL_CLASS,
-  VALUE_CLASS,
-  PATH_CLASS,
-  SKELETON_CLASS,
-} from './constants';
+import type { FileMetadataRow } from './constants';
+import { FileMetadataSkeleton } from './FileMetadataSkeleton';
+
+/*
+ * The body is code-split: it downloads the first time the popup opens (the
+ * kit `Popup` renders nothing while closed). Until then the popup shows the
+ * same skeleton the body uses while metadata loads.
+ */
+const FileMetadataContent = lazy(() =>
+  import('./FileMetadataContent').then((module) => ({
+    default: module.FileMetadataContent,
+  })),
+);
+
+/**
+ * The popup's loading announcement. The kit `Popup` unmounts its content while
+ * closed, so this region mounts on every open; a region that mounts with its
+ * text already in it is often not announced, so the text is set one commit
+ * after the region is in the DOM.
+ */
+const LoadingAnnouncement: FC<{ busy: boolean; label: string }> = ({
+  busy,
+  label,
+}) => {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => setIsMounted(true), []);
+
+  return (
+    <LiveRegion visuallyHidden>{isMounted && busy ? label : ''}</LiveRegion>
+  );
+};
 
 export interface FileMetadataPopupProps {
   open: boolean;
@@ -28,6 +53,7 @@ export interface FileMetadataPopupProps {
   modifiedDateLabel?: string;
   sizeLabel?: string;
   authorLabel?: string;
+  loadingLabel?: string;
   dateLocale?: Intl.LocalesArgument;
   dateOptions?: Intl.DateTimeFormatOptions;
 }
@@ -37,7 +63,9 @@ export interface FileMetadataPopupProps {
  *
  * A popup dialog for displaying file metadata information.
  * Shows file details like name, path, modified date, size, and author.
- * Displays a loading skeleton while metadata is being fetched.
+ * While the body's code or the metadata is loading, the values are replaced by
+ * a kit skeleton (`SkeletonShimmer` + `useSkeletonTiming`); the labels stay
+ * visible.
  *
  * @example
  * ```tsx
@@ -62,6 +90,7 @@ export interface FileMetadataPopupProps {
  * @param [modifiedDateLabel="Modified Date:"] - Label for the modified date field
  * @param [sizeLabel="Size:"] - Label for the size field
  * @param [authorLabel="Author:"] - Label for the author field
+ * @param [loadingLabel="Loading file information"] - Text announced to assistive technology while loading
  * @param [dateLocale="en-US"] - Locale for date formatting
  * @param [dateOptions] - Options for date formatting
  */
@@ -76,9 +105,28 @@ export const FileMetadataPopup: FC<FileMetadataPopupProps> = ({
   modifiedDateLabel = 'Modified Date:',
   sizeLabel = 'Size:',
   authorLabel = 'Author:',
+  loadingLabel = 'Loading file information',
   dateLocale = 'en-US',
   dateOptions,
 }) => {
+  const rows = useMemo<FileMetadataRow[]>(
+    () => [
+      { id: 'name', label: nameLabel },
+      { id: 'modified', label: modifiedDateLabel },
+      { id: 'size', label: sizeLabel },
+      { id: 'author', label: authorLabel },
+      { id: 'path', label: pathLabel },
+    ],
+    [nameLabel, modifiedDateLabel, sizeLabel, authorLabel, pathLabel],
+  );
+
+  /*
+   * The lazy body's code has loaded once it mounts, and stays loaded. Until
+   * then the popup is waiting for it, the same as it waits for `loading`.
+   */
+  const [isBodyLoaded, setIsBodyLoaded] = useState(false);
+  const handleBodyMount = useCallback(() => setIsBodyLoaded(true), []);
+
   return (
     <Popup
       open={open}
@@ -88,89 +136,25 @@ export const FileMetadataPopup: FC<FileMetadataPopupProps> = ({
       ariaLabel="File information"
     >
       <div className="px-6 py-4">
-        <div
-          className="grid gap-4 items-center dial-small-text"
-          style={{ gridTemplateColumns: `${LABEL_COLUMN_WIDTH}px 1fr` }}
-        >
-          {loading ? (
-            <>
-              <div className={LABEL_CLASS}>{nameLabel}</div>
-              <Skeleton
-                variant={SkeletonVariant.Text}
-                width="100%"
-                height={SKELETON_HEIGHT}
-                className={SKELETON_CLASS}
-              />
-
-              <div className={LABEL_CLASS}>{modifiedDateLabel}</div>
-              <Skeleton
-                variant={SkeletonVariant.Text}
-                width="90%"
-                height={SKELETON_HEIGHT}
-                className={SKELETON_CLASS}
-              />
-
-              <div className={LABEL_CLASS}>{sizeLabel}</div>
-              <Skeleton
-                variant={SkeletonVariant.Text}
-                width="60%"
-                height={SKELETON_HEIGHT}
-                className={SKELETON_CLASS}
-              />
-
-              <div className={LABEL_CLASS}>{authorLabel}</div>
-              <Skeleton
-                variant={SkeletonVariant.Text}
-                width="80%"
-                height={SKELETON_HEIGHT}
-                className={SKELETON_CLASS}
-              />
-
-              <div className={LABEL_CLASS}>{pathLabel}</div>
-              <Skeleton
-                variant={SkeletonVariant.Text}
-                width="70%"
-                height={SKELETON_HEIGHT}
-                className={SKELETON_CLASS}
-              />
-            </>
-          ) : fileMetadata ? (
-            <>
-              <div className={LABEL_CLASS}>{nameLabel}</div>
-              <div className={VALUE_CLASS}>
-                <EllipsisTooltip text={fileMetadata.name} />
-              </div>
-
-              <div className={LABEL_CLASS}>{modifiedDateLabel}</div>
-              <div className={VALUE_CLASS}>
-                <EllipsisTooltip
-                  text={formatDate(
-                    fileMetadata.updatedAt,
-                    dateLocale,
-                    dateOptions,
-                  )}
-                />
-              </div>
-
-              <div className={LABEL_CLASS}>{sizeLabel}</div>
-              <div className={VALUE_CLASS}>
-                <EllipsisTooltip
-                  text={formatBytes(fileMetadata.contentLength)}
-                />
-              </div>
-
-              <div className={LABEL_CLASS}>{authorLabel}</div>
-              <div className={VALUE_CLASS}>
-                <EllipsisTooltip text={fileMetadata.author || '—'} />
-              </div>
-
-              <div className={LABEL_CLASS}>{pathLabel}</div>
-              <div className={PATH_CLASS}>
-                {decodeURIComponent(fileMetadata.path)}
-              </div>
-            </>
-          ) : null}
-        </div>
+        {/*
+         * One live region for both waits (the body's code, then the
+         * metadata), mounted for as long as the popup is open, so the load is
+         * announced once rather than by each skeleton as it mounts.
+         */}
+        <LoadingAnnouncement
+          busy={loading || !isBodyLoaded}
+          label={loadingLabel}
+        />
+        <Suspense fallback={<FileMetadataSkeleton rows={rows} />}>
+          <FileMetadataContent
+            rows={rows}
+            fileMetadata={fileMetadata}
+            loading={loading}
+            dateLocale={dateLocale}
+            dateOptions={dateOptions}
+            onMount={handleBodyMount}
+          />
+        </Suspense>
       </div>
     </Popup>
   );

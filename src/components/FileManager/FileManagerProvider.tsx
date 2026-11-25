@@ -78,6 +78,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
   path,
   defaultPath,
   filesLoading,
+  filesLoadingLabel,
   selectedPaths,
   defaultSelectedPaths,
   onSelectedPathsChange,
@@ -875,6 +876,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
 
   const {
     isMetadataPopupOpen,
+    isMetadataLoading,
     selectedFileForMetadata,
     openMetadataPopup,
     closeMetadataPopup,
@@ -898,6 +900,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
     maxSelectableFileSize,
     rootItem,
     filesLoading,
+    filesLoadingLabel,
     treeOptions: {
       ...treeOptions,
       expandedPaths,
@@ -1033,6 +1036,7 @@ export const FileManagerProvider: FC<FileManagerProviderProps> = ({
 
     fileMetadataPopupOptions,
     isMetadataPopupOpen,
+    isMetadataLoading,
     selectedFileForMetadata,
     openMetadataPopup,
     closeMetadataPopup: handleCloseMetadataPopup,

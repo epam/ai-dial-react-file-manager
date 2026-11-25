@@ -735,11 +735,27 @@ export const Loading: Story = {
     filesLoading: true,
     items: [],
   },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'First load: the folders tree and the grid rows show kit skeletons (after a 400 ms delay) instead of their empty states.',
+      },
+    },
+  },
 };
 
 export const LoadingWithData: Story = {
   args: {
     filesLoading: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Loading with rows already on screen, e.g. a folder switch or a search: the tree stays, and the grid rows are covered by the skeleton once the 400 ms delay passes.',
+      },
+    },
   },
 };
 

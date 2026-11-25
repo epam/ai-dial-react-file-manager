@@ -22,6 +22,7 @@ import {
   TooltipContent,
   TooltipPlacement,
   TooltipTrigger,
+  useSkeletonTiming,
 } from '@epam/ai-dial-ui-kit';
 import { FILE_MANAGER_ICON_PROPS } from '@/constants/icon';
 import type { DropdownItem } from '@epam/ai-dial-ui-kit';
@@ -40,6 +41,11 @@ import {
 import { DialFileManagerItemName } from '@/components/FileManager/components/FileManagerItemName/FileManagerItemName';
 import { BASE_FILE_MANAGER_ICON_SIZE } from '@/components/FileManager/constants';
 import { useExpandedPaths } from './hooks/use-expanded-paths';
+import {
+  FolderChildrenSkeleton,
+  FolderNameSkeleton,
+  FoldersTreeSkeleton,
+} from './FoldersTreeSkeleton';
 
 export interface DialFoldersTreeProps {
   items: DialFile[];
@@ -56,6 +62,13 @@ export interface DialFoldersTreeProps {
   emptyStateTitle?: string;
   emptyStateDescription?: string;
   emptyStateIcon?: ReactNode;
+  /**
+   * Whether the tree's items are still loading. With no `items` yet it shows a
+   * skeleton instead of the empty state, which appears only once loading ends.
+   */
+  loading?: boolean;
+  /** Text announced to assistive technology while the skeleton shows. Defaults to `'Loading folders'`. */
+  loadingLabel?: string;
   onItemClick?: (item: DialFile) => void;
   onRenameSave?: (value: string) => void;
   onRenameCancel?: () => void;
@@ -216,6 +229,8 @@ const collectVisibleRows = (
  * @param [emptyStateTitle='No Folders'] - Title text displayed when there are no items.
  * @param [emptyStateDescription] - Optional description text for the empty state.
  * @param [emptyStateIcon] - Optional icon to display in the empty state.
+ * @param [loading=false] - Whether the items are still loading; with no items yet, a skeleton replaces the empty state.
+ * @param [loadingLabel='Loading folders'] - Text announced to assistive technology while the skeleton shows.
  * @param [onItemClick] - Callback fired when a folder or file is clicked (receives the corresponding `DialFile` node).
  * @param [onRenameSave] - Callback fired when editing is confirmed with a valid name (receives the new name).
  * @param [onRenameCancel] - Callback fired when editing is cancelled.
@@ -262,6 +277,8 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   emptyStateTitle = 'No Folders',
   emptyStateDescription,
   emptyStateIcon,
+  loading = false,
+  loadingLabel = 'Loading folders',
   areHiddenFilesVisible = false,
   renamedPath,
   createdFolderPath,
@@ -298,6 +315,28 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   const isNodeVisible = (node: DialFile) =>
     (areHiddenFilesVisible || !isHiddenDotFile(node)) &&
     (showFiles || node.nodeType === DialFileNodeType.FOLDER);
+
+  /*
+   * First-load skeleton. It covers the tree's first level while that level
+   * loads, in one of two shapes:
+   * - no items at all: the skeleton replaces the whole tree;
+   * - only the top-level folder(s), expanded but with no children yet (a host
+   *   such as DIAL Chat passes its root folder before listing it): the real
+   *   root row stays and the skeleton stands in for its children.
+   * Once any top-level folder has children, expanding a folder shows the row
+   * spinner (`loadingPaths`) instead. Loading is checked before emptiness, so
+   * the empty state never shows while the items are still on their way.
+   */
+  const isAwaitingFirstLevel =
+    items.length === 0 ||
+    (items.some((node) => expandedPaths.has(node.path)) &&
+      !items.some((node) => (node.items?.length ?? 0) > 0));
+  const {
+    showPlaceholder,
+    showSkeleton,
+    placeholderClassName,
+    contentClassName,
+  } = useSkeletonTiming(loading && isAwaitingFirstLevel);
 
   const rows = useMemo(
     () => collectVisibleRows(items, expandedPaths, isNodeVisible),
@@ -495,6 +534,36 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
         />
       );
 
+      const itemName = (
+        <DialFileManagerItemName
+          elementId={`${path}-tree-item`}
+          name={isRootFolder ? rootItemLabel : name}
+          type={isFolder ? DialItemType.Folder : DialItemType.File}
+          loading={isRenaming && isLoading}
+          muted={isDisabled}
+          hideTooltip={isDisabled}
+          shared={isSharedByMe}
+          icon={getItemIcon?.(node)}
+          sharedIndicatorClassName={mergeClasses(
+            'group-hover/item:bg-control-accent-alpha-hover-subtle',
+            isSelected && 'bg-control-accent-alpha-active-subtle',
+          )}
+          iconSize={BASE_FILE_MANAGER_ICON_SIZE}
+          forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
+          forbiddenSymbolsTooltip={tooltipContent}
+          {...(!isRootFolder && {
+            searchQuery,
+            editing: isRenaming,
+            creating: path === `${createdFolderPath}/${NEW_FOLDER_TEMP_NAME}`,
+            onSave: guardSave(onRenameSave),
+            onCancel: onRenameCancel,
+            validate: validateHandler,
+            onCreateFolderSave: guardSave(onCreateFolderSave),
+            onCreateFolderCancel: onCreateFolderCancel,
+          })}
+        />
+      );
+
       const row = (
         <div
           ref={(element) => {
@@ -568,34 +637,24 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
                   style={{ width: CARET_ICON_PROPS.size }}
                 />
               )}
-              <DialFileManagerItemName
-                elementId={`${path}-tree-item`}
-                name={isRootFolder ? rootItemLabel : name}
-                type={isFolder ? DialItemType.Folder : DialItemType.File}
-                loading={isLoading}
-                muted={isDisabled}
-                hideTooltip={isDisabled}
-                shared={isSharedByMe}
-                icon={getItemIcon?.(node)}
-                sharedIndicatorClassName={mergeClasses(
-                  'group-hover/item:bg-control-accent-alpha-hover-subtle',
-                  isSelected && 'bg-control-accent-alpha-active-subtle',
-                )}
-                iconSize={BASE_FILE_MANAGER_ICON_SIZE}
-                forbiddenSymbolsRegExp={forbiddenSymbolsRegExp}
-                forbiddenSymbolsTooltip={tooltipContent}
-                {...(!isRootFolder && {
-                  searchQuery,
-                  editing: isRenaming,
-                  creating:
-                    path === `${createdFolderPath}/${NEW_FOLDER_TEMP_NAME}`,
-                  onSave: guardSave(onRenameSave),
-                  onCancel: onRenameCancel,
-                  validate: validateHandler,
-                  onCreateFolderSave: guardSave(onCreateFolderSave),
-                  onCreateFolderCancel: onCreateFolderCancel,
-                })}
-              />
+              {/*
+               * A loading folder shows a skeleton circle and name bar instead
+               * of its icon (or the kit spinner) and name, until its children
+               * arrive. The row's `aria-label` keeps the name for assistive
+               * technology. A row being renamed keeps its editor, which uses
+               * `loading` to lock the input while the rename saves.
+               */}
+              {isLoading && !isRenaming ? (
+                <FolderNameSkeleton
+                  iconSize={BASE_FILE_MANAGER_ICON_SIZE}
+                  name={(isRootFolder ? rootItemLabel : name) ?? ''}
+                  index={index}
+                >
+                  {itemName}
+                </FolderNameSkeleton>
+              ) : (
+                itemName
+              )}
             </>
           </div>
 
@@ -659,7 +718,34 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
 
             {isExpanded &&
               (items || node?.path === createdFolderPath) &&
-              renderTree(items || [], level + 1, node)}
+              (level === 0
+                ? /*
+                   * While the first-load skeleton stands in for the top level's
+                   * children (it stays for its minimum time even when they
+                   * arrive sooner), they are held back, then fade in.
+                   */
+                  !showPlaceholder && (
+                    <div className={contentClassName}>
+                      {renderTree(items || [], level + 1, node)}
+                    </div>
+                  )
+                : renderTree(items || [], level + 1, node))}
+
+            {/*
+             * An expanded folder loading its children shows placeholder rows
+             * in their place, unless the first-load skeleton already covers
+             * the top level.
+             */}
+            {isFolder &&
+              isExpanded &&
+              isLoading &&
+              !(Array.isArray(items) && items.some(isNodeVisible)) &&
+              !(level === 0 && showPlaceholder) && (
+                <FolderChildrenSkeleton
+                  inset={(level + 1) * FOLDER_LEVEL_PADDING}
+                  label={loadingLabel}
+                />
+              )}
           </div>
         </div>
       );
@@ -669,10 +755,29 @@ export const DialFoldersTree: FC<DialFoldersTreeProps> = ({
   return (
     <div className="flex-1 size-full overflow-y-auto pb-6">
       {items.length > 0 ? (
-        // Focus lives on the roving-tabIndex rows; the root only routes their keys.
-        <div role="tree" aria-label={ariaLabel} onKeyDown={handleKeyDown}>
-          {renderTree(items, 0)}
-        </div>
+        <>
+          {/* Focus lives on the roving-tabIndex rows; the root only routes their keys. */}
+          <div role="tree" aria-label={ariaLabel} onKeyDown={handleKeyDown}>
+            {renderTree(items, 0)}
+          </div>
+          {/*
+           * Stands in for the root's children, one level in. Kept outside the
+           * `role="tree"` element: a placeholder is not a tree item.
+           */}
+          {showPlaceholder && (
+            <div style={{ paddingLeft: `${FOLDER_LEVEL_PADDING}px` }}>
+              <FoldersTreeSkeleton
+                label={showSkeleton ? loadingLabel : undefined}
+                className={placeholderClassName}
+              />
+            </div>
+          )}
+        </>
+      ) : showPlaceholder ? (
+        <FoldersTreeSkeleton
+          label={showSkeleton ? loadingLabel : undefined}
+          className={placeholderClassName}
+        />
       ) : (
         <NoDataContent
           title={emptyStateTitle}

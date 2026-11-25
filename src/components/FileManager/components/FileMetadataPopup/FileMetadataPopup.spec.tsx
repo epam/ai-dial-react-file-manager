@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { act, render, screen, type RenderResult } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { beforeAll, describe, it, expect, vi } from 'vitest';
 import { FileMetadataPopup } from './FileMetadataPopup';
 import { DialFileNodeType, type DialFile } from '@/models/file';
 import userEvent from '@testing-library/user-event';
@@ -16,9 +17,22 @@ const mockFile: DialFile = {
   folderId: 'folder-1',
 };
 
+/** Renders the popup and waits for its lazily loaded body. */
+const renderPopup = async (ui: ReactElement): Promise<RenderResult> => {
+  let result!: RenderResult;
+  await act(async () => {
+    result = render(ui);
+  });
+  return result;
+};
+
 describe('Dial UI Kit :: FileMetadataPopup', () => {
-  it('renders popup when open', () => {
-    render(
+  beforeAll(async () => {
+    await import('./FileMetadataContent');
+  });
+
+  it('renders popup when open', async () => {
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -30,8 +44,8 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('test-file.svg')).toBeInTheDocument();
   });
 
-  it('does not render when closed', () => {
-    const { container } = render(
+  it('does not render when closed', async () => {
+    const { container } = await renderPopup(
       <FileMetadataPopup
         open={false}
         onClose={vi.fn()}
@@ -42,8 +56,8 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument();
   });
 
-  it('displays all file metadata fields', () => {
-    render(
+  it('displays all file metadata fields', async () => {
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -69,13 +83,13 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('decodes URI encoded path', () => {
+  it('decodes URI encoded path', async () => {
     const fileWithEncodedPath: DialFile = {
       ...mockFile,
       path: 'files/folder/Screenshot%202025-12-10%20at%2009.44.24.png',
     };
 
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -88,13 +102,13 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('decodes URI encoded path with special characters', () => {
+  it('decodes URI encoded path with special characters', async () => {
     const fileWithSpecialChars: DialFile = {
       ...mockFile,
       path: 'files/folder/file%20with%20%26%20special%20%23%20chars.txt',
     };
 
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -107,13 +121,13 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('decodes complex URI encoded path', () => {
+  it('decodes complex URI encoded path', async () => {
     const fileWithComplexPath: DialFile = {
       ...mockFile,
       path: 'files/akWB1YBFr8MR1nshJgXHKUWfPCLZf8x6nMKGsa9WMxmggzPWW42NdcfpPRiPjRHT5/13/Screenshot%202025-12-10%20at%2009.44.24.png',
     };
 
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -128,13 +142,13 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('handles path with multiple encoded spaces', () => {
+  it('handles path with multiple encoded spaces', async () => {
     const fileWithSpaces: DialFile = {
       ...mockFile,
       path: 'My%20Files/My%20Folder/My%20Document.pdf',
     };
 
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -147,13 +161,13 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('handles path with plus signs', () => {
+  it('handles path with plus signs', async () => {
     const fileWithPlus: DialFile = {
       ...mockFile,
       path: 'files/folder/file+with+plus.txt',
     };
 
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -166,13 +180,13 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     ).toBeInTheDocument();
   });
 
-  it('handles already decoded path', () => {
+  it('handles already decoded path', async () => {
     const fileWithDecodedPath: DialFile = {
       ...mockFile,
       path: 'files/folder/normal file name.txt',
     };
 
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -189,7 +203,7 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     const onClose = vi.fn();
     const user = userEvent.setup();
 
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={onClose}
@@ -203,8 +217,8 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('displays custom title', () => {
-    render(
+  it('displays custom title', async () => {
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -216,8 +230,8 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('File Details')).toBeInTheDocument();
   });
 
-  it('displays custom labels', () => {
-    render(
+  it('displays custom labels', async () => {
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -237,9 +251,9 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('Created By:')).toBeInTheDocument();
   });
 
-  it('displays "—" when author is missing', () => {
+  it('displays "—" when author is missing', async () => {
     const fileWithoutAuthor = { ...mockFile, author: undefined };
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -250,9 +264,9 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('formats file size correctly for bytes', () => {
+  it('formats file size correctly for bytes', async () => {
     const smallFile = { ...mockFile, contentLength: 512 };
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -263,9 +277,9 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('512 bytes')).toBeInTheDocument();
   });
 
-  it('formats file size correctly for KB', () => {
+  it('formats file size correctly for KB', async () => {
     const mediumFile = { ...mockFile, contentLength: 153600 };
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -276,9 +290,9 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('150 KB')).toBeInTheDocument();
   });
 
-  it('formats file size correctly for MB', () => {
+  it('formats file size correctly for MB', async () => {
     const largeFile = { ...mockFile, contentLength: 15728640 };
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -289,8 +303,8 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('15.0 MB')).toBeInTheDocument();
   });
 
-  it('shows labels in loading state', () => {
-    render(
+  it('shows labels in loading state', async () => {
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -306,8 +320,95 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('Path:')).toBeInTheDocument();
   });
 
-  it('formats date correctly', () => {
-    render(
+  it('replaces only the values with a busy skeleton while loading', async () => {
+    await renderPopup(
+      <FileMetadataPopup
+        open={true}
+        onClose={vi.fn()}
+        fileMetadata={mockFile}
+        loading={true}
+      />,
+    );
+
+    const dialog = screen.getByRole('dialog');
+    const busy = dialog.querySelector('[aria-busy="true"]');
+    expect(busy).toBeInTheDocument();
+    expect(busy).not.toHaveTextContent('Name:');
+    expect(screen.queryByText('test-file.svg')).not.toBeInTheDocument();
+    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+  });
+
+  it('announces the loading label once, and clears it when loading ends', async () => {
+    const { rerender } = await renderPopup(
+      <FileMetadataPopup
+        open={true}
+        onClose={vi.fn()}
+        loading={true}
+        loadingLabel="Loading info"
+      />,
+    );
+
+    expect(await screen.findAllByText('Loading info')).toHaveLength(1);
+
+    rerender(
+      <FileMetadataPopup
+        open={true}
+        onClose={vi.fn()}
+        fileMetadata={mockFile}
+        loading={false}
+        loadingLabel="Loading info"
+      />,
+    );
+
+    expect(screen.queryByText('Loading info')).not.toBeInTheDocument();
+  });
+
+  it('announces the loading label again when the popup is reopened', async () => {
+    const popup = (open: boolean) => (
+      <FileMetadataPopup
+        open={open}
+        onClose={vi.fn()}
+        loading={true}
+        loadingLabel="Loading info"
+      />
+    );
+    const { rerender } = await renderPopup(popup(true));
+    expect(await screen.findAllByText('Loading info')).toHaveLength(1);
+
+    await act(async () => rerender(popup(false)));
+    expect(screen.queryByText('Loading info')).not.toBeInTheDocument();
+
+    await act(async () => rerender(popup(true)));
+    expect(await screen.findAllByText('Loading info')).toHaveLength(1);
+  });
+
+  it('shows the values once loading finishes', async () => {
+    const { rerender } = await renderPopup(
+      <FileMetadataPopup
+        open={true}
+        onClose={vi.fn()}
+        fileMetadata={mockFile}
+        loading={true}
+      />,
+    );
+
+    rerender(
+      <FileMetadataPopup
+        open={true}
+        onClose={vi.fn()}
+        fileMetadata={mockFile}
+        loading={false}
+      />,
+    );
+
+    expect(await screen.findByText('test-file.svg')).toBeInTheDocument();
+    expect(
+      screen.getByRole('dialog').querySelector('[aria-busy="true"]'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('formats date correctly', async () => {
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
@@ -318,9 +419,9 @@ describe('Dial UI Kit :: FileMetadataPopup', () => {
     expect(screen.getByText('Sep 05, 2025')).toBeInTheDocument();
   });
 
-  it('handles invalid date gracefully', () => {
+  it('handles invalid date gracefully', async () => {
     const fileWithInvalidDate = { ...mockFile, updatedAt: 'invalid-date' };
-    render(
+    await renderPopup(
       <FileMetadataPopup
         open={true}
         onClose={vi.fn()}
