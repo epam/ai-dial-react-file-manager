@@ -3,6 +3,12 @@
  * guide (`getEntityDetails("skeleton")` on the ui-kit MCP server): 20 px bars
  * with a 12 px radius, in a dark tone for primary lines and a light tone for
  * secondary ones, and 24 px circles for icons.
+ *
+ * TODO: move these to ui-kit. Once a ui-kit release ships `Skeleton`'s `tone`
+ * prop (`SkeletonTone`) and its skeleton constants (`SKELETON_BAR_HEIGHT`,
+ * `SKELETON_BAR_CLASS_NAME`, `SKELETON_CIRCLE_SIZE_LIST`), use them instead:
+ * pass `tone` and `SKELETON_BAR_CLASS_NAME` rather than the class constants
+ * here, and keep only an index-to-tone helper (dark, light, …).
  */
 
 const DARK_TONE_CLASS = 'bg-layer-sunken';

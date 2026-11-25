@@ -12,6 +12,16 @@ import {
   SKELETON_LIGHT_BAR_CLASS as LIGHT_BAR_CLASS,
 } from '@/constants/skeleton';
 
+/*
+ * TODO: move the grid skeleton to ui-kit. Once a ui-kit release ships
+ * `Grid`'s `loadingAppearance={GridLoadingAppearance.Skeleton}` and
+ * `loadingLabel`, pass `loading` to the kit `Grid` with them and delete this
+ * module. That also removes the placeholder-row handling in `FileManager.tsx`:
+ * the swapped `rowData` / `columnDefs`, `disabledRowIds`, context-menu and
+ * click filters, `hideDisabledCheckboxes`, the suppressed no-rows overlays and
+ * the grid `LiveRegion`. Raise the ui-kit dev and peer ranges to that release.
+ */
+
 /** Placeholder rows shown while the grid loads: enough to read as a list. */
 export const GRID_SKELETON_ROW_COUNT = 6;
 
