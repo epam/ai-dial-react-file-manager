@@ -8,6 +8,7 @@ import {
   Dropdown,
   type DropdownItem,
   ElementSize,
+  GhostIconButton,
   IconButton,
   DropdownItemType,
   MenuItemMark,
@@ -52,6 +53,8 @@ export interface DialFileManagerSortDropdownProps {
   className?: string;
   /** Renders a round icon-only trigger (the compact view's action row); `label` becomes its accessible name. */
   iconOnly?: boolean;
+  /** Renders the labelled "Sort" button instead of the default ghost icon button; ignored with `iconOnly`. */
+  showLabel?: boolean;
 }
 
 const DEFAULT_FIELD_LABELS: Record<FileManagerSortField, string> = {
@@ -71,8 +74,8 @@ const DIRECTIONS = Object.values(FileManagerSortDirection);
 /**
  * DialFileManagerSortDropdown
  *
- * The "Sort" menu at the trailing edge of the search row. It lists the sort
- * fields, a divider, then the directions, and marks the chosen field and the
+ * The "Sort" menu at the trailing edge of the search row, opened from a ghost
+ * icon button that `label` names and tooltips. It lists the sort fields, a divider, then the directions, and marks the chosen field and the
  * chosen direction with a trailing check. The component holds no sort state of
  * its own: it shows `sort` and reports picks through `onSortChange`.
  *
@@ -92,6 +95,7 @@ const DIRECTIONS = Object.values(FileManagerSortDirection);
  * @param [disabled] - Whether the trigger is disabled
  * @param [className] - Additional classes for the trigger button
  * @param [iconOnly=false] - Renders a round icon-only trigger; `label` becomes its accessible name
+ * @param [showLabel=false] - Renders the labelled "Sort" button instead of the default ghost icon button
  */
 export const DialFileManagerSortDropdown: FC<
   DialFileManagerSortDropdownProps
@@ -104,6 +108,7 @@ export const DialFileManagerSortDropdown: FC<
   disabled,
   className,
   iconOnly = false,
+  showLabel = false,
 }) => {
   const items = useMemo<DropdownItem[]>(
     () => [
@@ -143,6 +148,21 @@ export const DialFileManagerSortDropdown: FC<
           aria-label={label}
           disabled={disabled}
           className={mergeClasses(ICON_ONLY_TRIGGER_CLASS_NAME, className)}
+        />
+      </Dropdown>
+    );
+  }
+
+  if (!showLabel) {
+    return (
+      <Dropdown items={items} {...SORT_DROPDOWN_PROPS}>
+        <GhostIconButton
+          size={ElementSize.Standard}
+          icon={<IconArrowsSort {...FILE_MANAGER_ICON_PROPS} aria-hidden />}
+          aria-label={label}
+          tooltipProps={{ tooltip: label }}
+          disabled={disabled}
+          className={className}
         />
       </Dropdown>
     );
