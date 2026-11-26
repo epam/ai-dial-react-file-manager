@@ -212,6 +212,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **`DialFileManagerSortDropdown` — the sort trigger is an icon button** —
+  outside the compact view the "Sort" trigger is a ghost icon button
+  (`IconArrowsSort`) named and tooltipped by `label`, instead of a labelled
+  button. The menu is unchanged. The compact view keeps its round tinted
+  trigger. Pass `showLabel` (or `sortOptions.showLabel` on `DialFileManager`)
+  to keep the labelled button.
+
 - **`@epam/ai-dial-ui-kit` peer is `^0.17.0`** (was `^0.16.0-dev.72`).
 
 - **`DialFoldersTree` — `loadingPaths` shows a skeleton, not a spinner** — a
