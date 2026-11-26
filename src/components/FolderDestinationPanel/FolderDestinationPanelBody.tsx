@@ -78,6 +78,10 @@ export const FolderDestinationPanelBody: FC<
   const [searchQuery, setSearchQuery] = useState('');
   const destinationReasonId = useId();
   const destinationDisabledReason = getDisabledReason?.(destination);
+  /* The tree stays fully selectable; an unavailable pick only shows its reason and disables the confirming button. */
+  const pendingDisabledReason = pendingDestination
+    ? getDisabledReason?.(pendingDestination)
+    : undefined;
 
   const destinationSegments = useMemo(() => {
     const root = roots.find(
@@ -113,6 +117,9 @@ export const FolderDestinationPanelBody: FC<
         />
       </div>
       <LiveRegion politeness={LiveRegionPoliteness.Assertive}>
+        {!isInline && pendingDisabledReason && (
+          <ErrorText text={pendingDisabledReason} />
+        )}
         {foldersError && (
           <div className="flex flex-wrap items-center gap-2">
             <ErrorText text={foldersError} />
@@ -134,7 +141,6 @@ export const FolderDestinationPanelBody: FC<
         onCreateDestinationFolder={onCreateFolder}
         onCreateFolderError={onCreateFolderError}
         searchQuery={searchQuery}
-        getDisabledReason={getDisabledReason}
         canCreateFolderIn={canCreateFolderIn}
         collapsibleRoots={collapsibleRoots}
         disabled={isSubmitting}

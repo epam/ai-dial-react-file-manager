@@ -183,7 +183,10 @@ export const FolderDestinationPanel: FC<FolderDestinationPanelProps> = ({
           <NeutralButton
             label={selectLabel}
             className="mobile:flex-1"
-            disabled={pendingDestination == null}
+            disabled={
+              pendingDestination == null ||
+              bodyProps.getDisabledReason?.(pendingDestination) != null
+            }
             onClick={handleSelect}
           />
         ) : (
