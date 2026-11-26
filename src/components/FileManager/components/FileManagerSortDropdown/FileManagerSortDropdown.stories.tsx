@@ -26,6 +26,7 @@ const meta = {
     label: { control: { type: 'text' } },
     disabled: { control: { type: 'boolean' } },
     iconOnly: { control: { type: 'boolean' } },
+    showLabel: { control: { type: 'boolean' } },
     onSortChange: { action: 'onSortChange' },
   },
   args: {
@@ -68,6 +69,21 @@ export const CustomLabels: Story = {
     directionLabels: {
       [FileManagerSortDirection.Asc]: 'A → Z',
       [FileManagerSortDirection.Desc]: 'Z → A',
+    },
+  },
+};
+
+export const Labelled: Story = {
+  render: ControlledComponent,
+  args: {
+    showLabel: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The labelled "Sort" button, kept for hosts that pass `showLabel`; by default the trigger is a ghost icon button named and tooltipped by `label`.',
+      },
     },
   },
 };

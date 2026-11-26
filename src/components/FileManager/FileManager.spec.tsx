@@ -959,12 +959,12 @@ describe('Dial UI Kit :: FileManager', () => {
         ).toBeInTheDocument();
       });
 
-      test('lets sortOptions.iconOnly override the compact default', async () => {
+      test('lets sortOptions override the compact default', async () => {
         renderWithinSizedShell(
           <DialFileManager
             items={itemsMock}
             path="/All files"
-            sortOptions={{ iconOnly: false }}
+            sortOptions={{ iconOnly: false, showLabel: true }}
           />,
         );
 
@@ -1221,7 +1221,7 @@ describe('Dial UI Kit :: FileManager', () => {
         ).toBeTruthy();
       });
 
-      test('keeps the labelled sort beside the toolbar outside the compact view', async () => {
+      test('keeps the icon-only sort beside the toolbar outside the compact view', async () => {
         widthBreakpoint.isBelowBreakpoint = false;
 
         renderWithinSizedShell(
@@ -1243,9 +1243,9 @@ describe('Dial UI Kit :: FileManager', () => {
         expect(
           within(toolbar).queryByRole('button', { name: 'Sort' }),
         ).not.toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /sort/i })).toHaveTextContent(
-          'Sort',
-        );
+        expect(
+          screen.getByRole('button', { name: 'Sort' }),
+        ).not.toHaveTextContent('Sort');
       });
 
       test('renders host additionalButtons before the sort in the compact toolbar', async () => {
