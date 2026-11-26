@@ -111,6 +111,29 @@ describe('Dial UI Kit :: DialFileManagerSortDropdown', () => {
     ).toBeInTheDocument();
   });
 
+  test('renders a ghost icon trigger named by the label by default', async () => {
+    render(<DialFileManagerSortDropdown sort={NAME_ASC} label="Sort" />);
+
+    const trigger = screen.getByRole('button', { name: 'Sort' });
+    expect(trigger).not.toHaveTextContent('Sort');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(trigger);
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(await screen.findAllByRole('menuitemradio')).toHaveLength(5);
+  });
+
+  test('renders the labelled trigger with showLabel', () => {
+    render(
+      <DialFileManagerSortDropdown sort={NAME_ASC} label="Sort" showLabel />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Sort' })).toHaveTextContent(
+      'Sort',
+    );
+  });
+
   test('renders an icon-only trigger named by the label that opens the same menu', async () => {
     render(
       <DialFileManagerSortDropdown sort={NAME_ASC} iconOnly label="Sort" />,
