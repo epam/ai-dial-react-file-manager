@@ -409,6 +409,47 @@ describe('FolderDestinationTree', () => {
       ).toHaveProperty('disabled', false);
     });
 
+    it('renders no "Create new folder" button when every folder is refused', () => {
+      renderTree({ canCreateFolderIn: () => false });
+
+      expect(
+        screen.queryByRole('button', { name: 'Create new folder' }),
+      ).toBeNull();
+    });
+
+    it('keeps the button while a nested folder accepts one, whatever is selected', () => {
+      renderTree({
+        canCreateFolderIn: ({ path }) =>
+          path.join('/') === 'Shared/Data Science',
+        selectedPath: ['My workspace'],
+      });
+
+      expect(
+        screen.getByRole('button', { name: 'Create new folder' }),
+      ).toHaveProperty('disabled', true);
+    });
+
+    it('keeps the button in multi-root mode for the root that accepts one', () => {
+      const roots: FolderDestinationRoot[] = [
+        { key: 'personal', label: 'Personal', items },
+        { key: 'org', label: 'Organization', items },
+      ];
+      render(
+        <FolderDestinationTree
+          roots={roots}
+          searchQuery=""
+          destination={{ rootKey: 'org', path: ['Shared'] }}
+          onDestinationChange={vi.fn()}
+          onCreateDestinationFolder={vi.fn()}
+          canCreateFolderIn={({ rootKey }) => rootKey === 'personal'}
+        />,
+      );
+
+      expect(
+        screen.getByRole('button', { name: 'Create new folder' }),
+      ).toHaveProperty('disabled', false);
+    });
+
     it('keeps a refused folder selectable', async () => {
       const onSelectedPathChange = vi.fn();
       renderTree({ canCreateFolderIn, onSelectedPathChange });
@@ -1238,13 +1279,13 @@ describe('FolderDestinationTree', () => {
       ).toHaveProperty('disabled', false);
     });
 
-    it('disables the trailing create button when no root accepts folders', () => {
+    it('renders no trailing create button when no root accepts folders', () => {
       renderMultiRoot({
         roots: roots.map((root) => ({ ...root, canCreateFolders: false })),
       });
       expect(
-        screen.getByRole('button', { name: 'Create new folder' }),
-      ).toHaveProperty('disabled', true);
+        screen.queryByRole('button', { name: 'Create new folder' }),
+      ).toBeNull();
     });
 
     describe('canCreateFolderIn', () => {
@@ -1309,12 +1350,12 @@ describe('FolderDestinationTree', () => {
         );
       });
 
-      it('disables the trailing create button when the predicate refuses every root', () => {
+      it('renders no trailing create button when the predicate refuses every root', () => {
         renderMultiRoot({ canCreateFolderIn: () => false });
 
         expect(
-          screen.getByRole('button', { name: 'Create new folder' }),
-        ).toHaveProperty('disabled', true);
+          screen.queryByRole('button', { name: 'Create new folder' }),
+        ).toBeNull();
       });
     });
 
