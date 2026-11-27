@@ -212,6 +212,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **`FolderDestinationTree` — no "Create new folder" button where nothing
+  accepts a new folder** — when no root and no loaded folder accepts a new
+  folder (`canCreateFolderIn`, `getDisabledReason` and
+  `roots[].canCreateFolders` refuse them all), the trailing button and the
+  separator above it are not rendered, instead of a button that stays
+  disabled. Where some folder accepts one, the button is shown as before and
+  is disabled only while the selection refuses it. `FolderDestinationPanel`
+  and `FolderDestinationPanelBody` inherit it.
+
 - **`DialFileManagerSortDropdown` — the sort trigger is an icon button** —
   outside the compact view the "Sort" trigger is a ghost icon button
   (`IconArrowsSort`) named and tooltipped by `label`, instead of a labelled
