@@ -278,16 +278,18 @@ describe('FolderDestinationPanelBody — inline layout', () => {
 describe('FolderDestinationPanelBody disabled destinations', () => {
   const REASON = 'No access to this folder.';
 
-  it('forwards getDisabledReason to the folder tree', async () => {
-    const getDisabledReason = vi.fn();
+  it('keeps the folder tree active and shows the reason of an unavailable pick', () => {
+    const getDisabledReason = vi.fn(() => REASON);
     renderPanel({
       view: FolderDestinationView.ChangeFolder,
+      pendingDestination: { rootKey: 'personal', path: ['a'] },
       getDisabledReason,
     });
 
-    expect(treeProps).toHaveBeenLastCalledWith(
+    expect(treeProps).not.toHaveBeenLastCalledWith(
       expect.objectContaining({ getDisabledReason }),
     );
+    expect(screen.getByText(REASON)).toBeTruthy();
   });
 
   it('forwards canCreateFolderIn to the folder tree', () => {
