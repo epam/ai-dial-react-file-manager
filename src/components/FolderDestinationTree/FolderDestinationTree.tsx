@@ -391,6 +391,22 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
   const trailingCreateParent = resolveTrailingCreateParent();
 
   /*
+   * Whether any root or loaded folder accepts a new folder. When none does,
+   * the trailing button is not rendered at all instead of sitting disabled;
+   * it does not depend on the selection, so it does not appear and vanish as
+   * the user picks folders.
+   */
+  const hasCreatableNode = (nodes: FolderNode[]): boolean =>
+    nodes.some(
+      (node) =>
+        canCreateUnder(node.path) || hasCreatableNode(node.children ?? []),
+    );
+  const isCreateFolderOffered =
+    trailingCreateParent != null ||
+    (!roots && canCreateUnder([])) ||
+    hasCreatableNode(treeItems);
+
+  /*
    * A query that matched no folder reads as "the folder I want doesn't exist
    * yet", so creating from that state pre-fills the editor with the query —
    * which also keeps the confirmed folder visible once the filter resumes.
@@ -661,7 +677,9 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
         />
       </div>
 
-      <div className="my-2 border-t border-tertiary" aria-hidden />
+      {(isCreateFolderOffered || isCreatingFolder) && (
+        <div className="my-2 border-t border-tertiary" aria-hidden />
+      )}
 
       {/*
        * Plain `GhostButton` stands in for a tertiary button: the installed
@@ -672,28 +690,32 @@ export const FolderDestinationTree: FC<FolderDestinationTreeProps> = ({
        * TODO(ui-kit): `ButtonVariant.Tertiary` has an empty style map in the
        * kit's `Button/constants.ts`; the style needs to ship there first.
        */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <GhostButton
-          onClick={handleStartCreatingFolder}
-          label={createFolderLabel}
-          iconBefore={
-            <IconPlus
-              size={DIAL_ICON_SIZE.SM}
-              aria-hidden
-              stroke={DIAL_KIT_ICON_STROKE}
+      {(isCreateFolderOffered || isCreatingFolder) && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {isCreateFolderOffered && (
+            <GhostButton
+              onClick={handleStartCreatingFolder}
+              label={createFolderLabel}
+              iconBefore={
+                <IconPlus
+                  size={DIAL_ICON_SIZE.SM}
+                  aria-hidden
+                  stroke={DIAL_KIT_ICON_STROKE}
+                />
+              }
+              disabled={disabled || isCreatingFolder || !trailingCreateParent}
             />
-          }
-          disabled={disabled || isCreatingFolder || !trailingCreateParent}
-        />
-        {isCreatingFolder && (
-          <GhostButton
-            label={cancelCreatingFolderLabel}
-            onClick={handleCancelCreatingFolder}
-            disabled={disabled}
-            {...{ [CANCEL_CREATING_FOLDER_ATTRIBUTE]: '' }}
-          />
-        )}
-      </div>
+          )}
+          {isCreatingFolder && (
+            <GhostButton
+              label={cancelCreatingFolderLabel}
+              onClick={handleCancelCreatingFolder}
+              disabled={disabled}
+              {...{ [CANCEL_CREATING_FOLDER_ATTRIBUTE]: '' }}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };
